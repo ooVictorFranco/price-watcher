@@ -6,7 +6,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/victorfranco/price-watcher.git"
+    "url": "https://github.com/ooVictorFranco/price-watcher.git"
   },
   "keywords": [
     "price-tracker",
@@ -20,9 +20,9 @@
     "typescript"
   ],
   "bugs": {
-    "url": "https://github.com/victorfranco/price-watcher/issues"
+    "url": "https://github.com/ooVictorFranco/price-watcher/issues"
   },
-  "homepage": "https://github.com/victorfranco/price-watcher#readme",
+  "homepage": "https://github.com/ooVictorFranco/price-watcher#readme",
   "engines": {
     "node": ">=20.0.0",
     "npm": ">=10.0.0"

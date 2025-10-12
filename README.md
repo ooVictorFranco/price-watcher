@@ -52,7 +52,7 @@ Este projeto foi desenvolvido com:
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/seu-usuario/price-watcher.git
+   git clone https://github.com/ooVictorFranco/price-watcher.git
    cd price-watcher
    ```
 
@@ -198,7 +198,7 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🐛 Bugs e Sugestões
 
-Encontrou um bug ou tem uma sugestão? Abra uma [issue](https://github.com/seu-usuario/price-watcher/issues) no GitHub!
+Encontrou um bug ou tem uma sugestão? Abra uma [issue](https://github.com/ooVictorFranco/price-watcher/issues) no GitHub!
 
 ---
 
