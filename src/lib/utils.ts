@@ -6,6 +6,10 @@ export function brl(n?: number | null) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+/** Limites globais */
+export const FAV_LIMIT = 25;
+export const HISTORY_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 90; // 90 dias (~3 meses)
+
 export const HISTORY_PREFIX = 'kabum_history:';
 export function getHistoryKey(idOrUrl: string) {
   return `${HISTORY_PREFIX}${idOrUrl}`;
@@ -51,6 +55,11 @@ export function upsertHistory(prev: Snapshot[], snap: Snapshot, limit = 500): Sn
   return [...prev, snap].slice(-limit);
 }
 
+/** Remove pontos com mais de HISTORY_MAX_AGE_MS (padrão 90 dias) */
+export function pruneHistoryByAge(arr: Snapshot[], now = Date.now(), maxAgeMs = HISTORY_MAX_AGE_MS): Snapshot[] {
+  return arr.filter(s => typeof s?.timestamp === 'number' && (now - s.timestamp) <= maxAgeMs);
+}
+
 /** Emite um evento global de mudança de dados para integrações (ex.: arquivo “vivo”). */
 export function emitDataChanged(ids?: string[]) {
   if (typeof window === 'undefined') return;
@@ -75,8 +84,15 @@ export function loadFavorites(): Favorite[] {
   }
 }
 
+/** Garante no máximo FAV_LIMIT favoritos, priorizando os com maior addedAt */
+function clampFavorites(list: Favorite[]): Favorite[] {
+  const sorted = [...list].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0));
+  return sorted.slice(0, FAV_LIMIT);
+}
+
 export function saveFavorites(list: Favorite[]) {
-  localStorage.setItem(FAV_KEY, JSON.stringify(list));
+  const clamped = clampFavorites(list);
+  localStorage.setItem(FAV_KEY, JSON.stringify(clamped));
   emitDataChanged(); // notifica alterações
 }
 
@@ -86,10 +102,13 @@ export function isFavorite(id: string) {
 
 export function addFavorite(fav: Favorite) {
   const list = loadFavorites();
-  if (!list.some(f => f.id === fav.id)) {
-    list.unshift(fav);
-    saveFavorites(list.slice(0, 200));
+  const existingIdx = list.findIndex(f => f.id === fav.id);
+  if (existingIdx >= 0) {
+    // atualiza dados e traz para o topo
+    list.splice(existingIdx, 1);
   }
+  list.unshift({ ...fav, addedAt: fav.addedAt ?? Date.now() });
+  saveFavorites(list); // saveFavorites já clamp
 }
 
 export function removeFavorite(id: string) {
@@ -97,8 +116,9 @@ export function removeFavorite(id: string) {
   saveFavorites(list);
 }
 
-/** Salva um histórico completo de um produto + emite evento. */
+/** Salva um histórico completo de um produto, aplicando retenção de 3 meses + evento. */
 export function saveHistory(idOrUrl: string, data: Snapshot[]) {
-  localStorage.setItem(getHistoryKey(idOrUrl), JSON.stringify(data));
+  const pruned = pruneHistoryByAge(data);
+  localStorage.setItem(getHistoryKey(idOrUrl), JSON.stringify(pruned));
   emitDataChanged([idOrUrl]);
 }

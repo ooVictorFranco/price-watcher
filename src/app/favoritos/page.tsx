@@ -29,6 +29,11 @@ export default function FavoritosPage() {
   const [latestById, setLatestById] = useState<Record<string, Snapshot | undefined>>({});
   const [prevById, setPrevById] = useState<Record<string, Snapshot | undefined>>({});
 
+  // Força o título correto desta rota (como é Client Component)
+  useEffect(() => {
+    document.title = 'Favoritos — Monitor de preço';
+  }, []);
+
   useEffect(() => {
     setFavorites(loadFavorites());
   }, []);
@@ -122,7 +127,7 @@ export default function FavoritosPage() {
     };
 
     const next = upsertHistory(prev, snap);
-    saveHistory(id, next); // <— centralizado + evento
+    saveHistory(id, next); // centralizado + evento
   }
 
   function syncSnapshots(ids: string[]) {

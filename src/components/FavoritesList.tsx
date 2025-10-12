@@ -2,7 +2,7 @@
 'use client';
 
 import { Favorite, Snapshot } from '@/types';
-import { brl, kabumUrlForId } from '@/lib/utils';
+import { brl, kabumUrlForId, FAV_LIMIT } from '@/lib/utils';
 import { useState } from 'react';
 
 type Props = {
@@ -25,8 +25,8 @@ type Props = {
 
 function DiffArrow({ curr, prev }: { curr?: number | null; prev?: number | null }) {
   if (curr == null || prev == null) return <span className="text-gray-400">—</span>;
-  if (curr > prev) return <span className="text-red-600" title="Subiu">▼</span>;   // preço maior = pior (seta para baixo vermelha)
-  if (curr < prev) return <span className="text-green-600" title="Caiu">▲</span>;  // preço menor = melhor (seta para cima verde)
+  if (curr > prev) return <span className="text-red-600" title="Subiu">▼</span>;   // preço maior = pior
+  if (curr < prev) return <span className="text-green-600" title="Caiu">▲</span>;  // preço menor = melhor
   return <span className="text-gray-400">—</span>;
 }
 
@@ -46,12 +46,33 @@ export default function FavoritesList({
   const isSelected = (id: string) => compareSelected.includes(id);
   const isShimmering = (id: string) => shimmeringIds.includes(id);
 
+  const total = favorites.length;
+  const remaining = Math.max(FAV_LIMIT - total, 0);
+  const atLimit = remaining === 0;
+
   return (
     <div className="rounded-2xl border bg-white shadow-md p-5">
-      <div className="flex items-center justify-between mb-3">
-        <div className="flex items-center gap-2">
-          <h3 className="text-sm font-medium">Favoritos</h3>
-          <span className="text-xs text-gray-500">{favorites.length} itens</span>
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+        <div className="flex items-center gap-3">
+          <div className="flex flex-col">
+            <h3 className="text-sm font-medium">Favoritos</h3>
+            <div className="text-xs text-gray-500">
+              <span className={atLimit ? 'text-red-600 font-medium' : ''}>
+                {total}/{FAV_LIMIT}
+              </span>
+              {' '}•{' '}
+              <span className={atLimit ? 'text-red-600 font-medium' : ''}>
+                {atLimit ? 'limite atingido' : `restam ${remaining}`}
+              </span>
+            </div>
+          </div>
+
+          {/* badge opcional mais chamativo quando no limite */}
+          {atLimit && (
+            <span className="text-[11px] rounded-full px-2 py-0.5 border border-red-200 bg-red-50 text-red-700">
+              Você atingiu o limite de {FAV_LIMIT} itens
+            </span>
+          )}
         </div>
 
         {onRefreshAll && (
@@ -68,7 +89,7 @@ export default function FavoritesList({
 
       {favorites.length === 0 ? (
         <p className="text-sm text-gray-600">
-          Nenhum favorito ainda. Use “Favoritar” no produto monitorado.
+          Nenhum favorito ainda. Use “Favoritar” no produto monitorado. Limite: {FAV_LIMIT} itens.
         </p>
       ) : (
         <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">

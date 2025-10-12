@@ -11,7 +11,7 @@ import CompatLivePill from '@/components/CompatLivePill';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'KaBuM! – Monitor de Preços',
+  title: 'Monitor de preço',
   description: 'Monitoramento, favoritos e comparativo de preços no KaBuM!',
 };
 
@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <header className="bg-white border-b">
           <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-3">
-            <Link href="/" className="font-semibold">KaBuM! – Monitor</Link>
+            <Link href="/" className="font-semibold">Monitor de preço</Link>
 
             <div className="ml-auto flex items-center gap-1 text-sm">
               <Link href="/" className="px-3 py-1 rounded-lg hover:bg-gray-100">Monitorar</Link>
@@ -47,11 +47,12 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
               enquanto ao menos uma aba desta aplicação estiver aberta (mesmo em segundo plano).
             </p>
             <p>
-              Os dados (favoritos e histórico de preços) são armazenados <strong>no seu navegador</strong>. 
-              Ao limpar histórico/cache do navegador, você pode perder essas informações.  
+              Os dados (favoritos e histórico de preços) são armazenados <strong>no seu navegador</strong>.
+              Ao limpar histórico/cache do navegador, você pode perder essas informações.
               Use <strong>Backup → Exportar JSON</strong> ou ative o <strong>Arquivo vivo</strong>.
-              <br />
-              <em>No Firefox/Safari, use o modo compatível: o app avisará quando houver alterações e você poderá “Salvar agora”.</em>
+            </p>
+            <p>
+              <strong>Retenção do histórico:</strong> o histórico exibido e o arquivo vivo mantêm apenas os últimos <strong>90 dias</strong> de dados para manter o arquivo leve.
             </p>
           </div>
         </footer>
