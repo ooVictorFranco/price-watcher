@@ -24,7 +24,7 @@ export default function FavoritosPage() {
   const [loadingSelected, setLoadingSelected] = useState(false);
   const [loadingAll, setLoadingAll] = useState(false);
 
-  // IDs que estão com shimmer ativo
+  // IDs com shimmer (durante atualização)
   const [shimmeringIds, setShimmeringIds] = useState<string[]>([]);
 
   // snapshots para cards
@@ -35,43 +35,43 @@ export default function FavoritosPage() {
     setFavorites(loadFavorites());
   }, []);
 
-  // recarrega últimos e penúltimos snapshots sempre que favoritos mudarem
+  // sempre que favoritos mudarem, carrega último e penúltimo snapshots
   useEffect(() => {
-    const latest: Record<string, Snapshot | undefined> = {};
-    const prev: Record<string, Snapshot | undefined> = {};
-    for (const f of favorites) {
-      try {
-        const raw = localStorage.getItem(getHistoryKey(f.id));
-        const arr = raw ? (JSON.parse(raw) as Snapshot[]) : [];
-        latest[f.id] = arr.at(-1);
-        prev[f.id] = arr.length >= 2 ? arr[arr.length - 2] : undefined;
-      } catch {
-        latest[f.id] = undefined;
-        prev[f.id] = undefined;
-      }
-    }
-    setLatestById(latest);
-    setPrevById(prev);
+    syncSnapshots(favorites.map(f => f.id));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favorites]);
 
-  // handlers favoritos
+  // também sincroniza quando o agendador em segundo plano terminar uma rodada
+  useEffect(() => {
+    const onAuto = (e: Event) => {
+      const detail = (e as CustomEvent).detail as { ids?: string[]; ranAt?: number } | undefined;
+      const ids = detail?.ids ?? favorites.map(f => f.id);
+      syncSnapshots(ids);
+    };
+    window.addEventListener('kabum:auto-refresh', onAuto as EventListener);
+    return () => window.removeEventListener('kabum:auto-refresh', onAuto as EventListener);
+  }, [favorites]);
+
   const monitorOnMain = (id: string) => router.push(`/?id=${id}`);
+
   const deleteFavorite = (id: string) => {
     removeFavorite(id);
-    setFavorites(prev => prev.filter(f => f.id !== id));
+    const nextFavs = favorites.filter(f => f.id !== id);
+    setFavorites(nextFavs);
+    saveFavorites(nextFavs);
     setCompareSelected(prev => prev.filter(x => x !== id));
     setLatestById(prev => { const { [id]: _, ...rest } = prev; return rest; });
     setPrevById(prev => { const { [id]: _, ...rest } = prev; return rest; });
   };
 
-  // seleção para comparar (click no card)
+  // seleção para comparar (clique no card)
   const toggleCompare = (id: string) => {
     setCompareSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
   const removeFromCompare = (id: string) => setCompareSelected(prev => prev.filter(x => x !== id));
   const clearCompare = () => setCompareSelected([]);
 
-  // atualizar selecionados (ativa shimmer só nos selecionados)
+  // atualizar selecionados
   const refreshSelected = async () => {
     if (!compareSelected.length) return;
     setLoadingSelected(true);
@@ -90,7 +90,7 @@ export default function FavoritosPage() {
     }
   };
 
-  // atualizar TODOS (ativa shimmer em todos os cards)
+  // atualizar TODOS
   const refreshAllFavorites = async () => {
     if (!favorites.length) return;
     setLoadingAll(true);
@@ -116,24 +116,20 @@ export default function FavoritosPage() {
     const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) return;
     const json = await res.json();
-    const now = Date.now();
-
-    const key = getHistoryKey(id);
-    const prevRaw = localStorage.getItem(key);
-    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
-
     const snap: Snapshot = {
-      timestamp: now,
+      timestamp: Date.now(),
       priceVista: json.priceVista ?? null,
       priceParcelado: json.priceParcelado ?? null,
       priceOriginal: json.priceOriginal ?? null,
     };
-
+    const key = getHistoryKey(id);
+    const prevRaw = localStorage.getItem(key);
+    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
     const next = upsertHistory(prev, snap);
     localStorage.setItem(key, JSON.stringify(next));
   }
 
-  // sincroniza latest e prev após atualização
+  // recarrega latest e prev do localStorage para os IDs informados
   function syncSnapshots(ids: string[]) {
     setLatestById(prevMap => {
       const next = { ...prevMap };
@@ -189,7 +185,8 @@ export default function FavoritosPage() {
         <header className="space-y-2">
           <h1 className="text-2xl font-bold">Favoritos</h1>
           <p className="text-sm text-gray-600">
-            Clique no card para <strong>selecionar para comparar</strong>. Use o menu “⋯” para <strong>Ver no KaBuM!</strong> ou <strong>Remover</strong>.
+            O app verifica seus favoritos automaticamente a cada <strong>3 horas</strong>.
+            Você pode forçar uma atualização manual aqui quando quiser.
           </p>
         </header>
 
@@ -198,9 +195,7 @@ export default function FavoritosPage() {
             favorites={favorites}
             onMonitor={(id) => router.push(`/?id=${id}`)}
             onRemove={(id) => {
-              removeFavorite(id);
-              setFavorites(favorites.filter(f => f.id !== id));
-              saveFavorites(favorites.filter(f => f.id !== id));
+              deleteFavorite(id);
             }}
             latestById={latestById}
             prevById={prevById}
@@ -216,7 +211,7 @@ export default function FavoritosPage() {
             nameById={nameById}
             metric={compareMetric}
             onMetric={setCompareMetric}
-            onRemove={removeFromCompare}
+            onRemove={(id) => removeFromCompare(id)}
             onClear={clearCompare}
             onCompare={() => {
               if (compareSelected.length < 2) return;

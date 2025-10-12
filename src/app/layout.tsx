@@ -3,6 +3,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import Link from 'next/link';
 import './globals.css';
+import BackgroundRefresher from '@/components/BackgroundRefresher';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -15,6 +16,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className={`${inter.variable} font-sans bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900`}>
+        {/* Inicializa o auto-refresh em segundo plano */}
+        <BackgroundRefresher />
+
         <header className="bg-white border-b">
           <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-4">
             <Link href="/" className="font-semibold">KaBuM! – Monitor</Link>
@@ -24,7 +28,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             </div>
           </nav>
         </header>
+
         {children}
+
+        <footer className="mt-10 border-t bg-white">
+          <div className="mx-auto max-w-6xl px-6 py-4 text-xs text-gray-500 space-y-1">
+            <p>
+              <strong>Aviso:</strong> este site realiza uma consulta automática a cada <strong>3 horas</strong>{' '}
+              para todos os produtos salvos em <Link href="/favoritos" className="underline">Favoritos</Link>,{' '}
+              enquanto ao menos uma aba desta aplicação estiver aberta (mesmo em segundo plano).
+            </p>
+            <p>
+              Os dados (favoritos e histórico de preços) são armazenados <strong>no seu navegador</strong>.
+              Ao limpar histórico/cache do navegador, você pode perder essas informações.
+            </p>
+          </div>
+        </footer>
       </body>
     </html>
   );
