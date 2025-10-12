@@ -1,7 +1,7 @@
 // src/app/page.tsx
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { ApiResponse, Favorite, ProductInfo, Snapshot } from '@/types';
 import {
@@ -25,7 +25,9 @@ import EmptyState from '@/components/EmptyState';
 import SkeletonCards from '@/components/SkeletonCards';
 import { toast } from '@/lib/toast';
 
-export default function Page() {
+export const dynamic = 'force-dynamic';
+
+function PageContent() {
   const params = useSearchParams();
 
   const [input, setInput] = useState('');
@@ -34,7 +36,7 @@ export default function Page() {
   const [favorites, setFavorites] = useState<Favorite[]>([]);
   const [product, setProduct] = useState<ProductInfo | null>(null);
   const [history, setHistory] = useState<Snapshot[]>([]);
-  const intervalRef = useRef<any>(null);
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   const last = history.at(-1);
   const discount = useMemo(() => discountPctFrom(last), [last]);
@@ -218,5 +220,13 @@ export default function Page() {
         )}
       </div>
     </main>
+  );
+}
+
+export default function Page() {
+  return (
+    <Suspense fallback={<SkeletonCards />}>
+      <PageContent />
+    </Suspense>
   );
 }

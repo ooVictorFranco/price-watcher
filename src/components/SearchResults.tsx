@@ -43,6 +43,7 @@ export default function SearchResults({ query, results, onPick, onFav }: Props) 
           {results.map((r) => (
             <li key={r.id} className="rounded-xl border p-3 flex gap-3">
               {r.image ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img src={r.image} alt={r.name} className="h-16 w-16 rounded-lg object-contain bg-gray-50" />
               ) : (
                 <div className="h-16 w-16 rounded-lg bg-gray-100 grid place-items-center text-lg">📦</div>

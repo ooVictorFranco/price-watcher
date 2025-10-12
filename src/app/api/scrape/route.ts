@@ -35,7 +35,8 @@ export async function GET(req: NextRequest) {
     const parsed = parseKabumHtml(html);
 
     return NextResponse.json({ resolvedUrl: target, ...parsed });
-  } catch (e: any) {
-    return NextResponse.json({ error: e?.message ?? 'Erro inesperado' }, { status: 400 });
+  } catch (e: unknown) {
+    const message = e instanceof Error ? e.message : 'Erro inesperado';
+    return NextResponse.json({ error: message }, { status: 400 });
   }
 }

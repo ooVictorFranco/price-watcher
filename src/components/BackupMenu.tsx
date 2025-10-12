@@ -1,7 +1,7 @@
 // src/components/BackupMenu.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { BackupBlob, exportLocalData, importDataMerge } from '@/lib/backup';
 import {
   clearHandle,
@@ -25,12 +25,34 @@ export default function BackupMenu() {
   const [nativeLinked, setNativeLinked] = useState<boolean>(false);
   const [compatEnabled, setCompatEnabled] = useState<boolean>(false);
   const prefersReduced = useReducedMotion();
+  const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     initLiveFileSync();
     hasLiveFile().then(setNativeLinked).catch(() => setNativeLinked(false));
     setCompatEnabled(isCompatLiveEnabled());
   }, []);
+
+  // Fechar ao clicar fora
+  useEffect(() => {
+    if (!open) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setOpen(false);
+      }
+    };
+
+    // Pequeno delay para evitar fechar imediatamente após abrir
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [open]);
 
   async function doExport() {
     setBusy('export');
@@ -45,8 +67,9 @@ export default function BackupMenu() {
       a.remove();
       URL.revokeObjectURL(url);
       toast.success('Backup exportado (.json).');
-    } catch (e: any) {
-      toast.error(e?.message || 'Falha ao exportar o backup.');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Falha ao exportar o backup.';
+      toast.error(message);
     } finally {
       setBusy(null);
       setOpen(false);
@@ -86,8 +109,9 @@ export default function BackupMenu() {
           toast.info('Modo compatível ativado. Use “Salvar agora” quando aparecer o lembrete.');
         }
       }
-    } catch (e: any) {
-      toast.error(e?.message || 'Falha ao importar o backup.');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Falha ao importar o backup.';
+      toast.error(message);
     } finally {
       setBusy(null);
       setOpen(false);
@@ -102,10 +126,11 @@ export default function BackupMenu() {
         setNativeLinked(true);
         setCompatEnabled(false);
         await flushLiveFile();
-        toast.success(`Arquivo “vivo” configurado: ${info.name}.`);
+        toast.success(`Arquivo "vivo" configurado: ${info.name}.`);
       }
-    } catch (e: any) {
-      toast.error(e?.message || 'Não foi possível configurar o arquivo vivo.');
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : 'Não foi possível configurar o arquivo vivo.';
+      toast.error(message);
     } finally {
       setBusy(null);
       setOpen(false);
@@ -136,7 +161,7 @@ export default function BackupMenu() {
   }
 
   return (
-    <div className="relative">
+    <div className="relative" ref={menuRef}>
       <motion.button
         whileHover={{ scale: prefersReduced ? 1 : 1.03 }}
         whileTap={{ scale: prefersReduced ? 1 : 0.97 }}
@@ -156,7 +181,7 @@ export default function BackupMenu() {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: prefersReduced ? 1 : 0.98, y: -4 }}
             transition={{ type: 'spring', stiffness: 420, damping: 26 }}
-            className="absolute right-0 mt-2 w-96 rounded-lg border bg-white shadow-lg overflow-hidden z-50"
+            className="absolute right-0 mt-2 w-96 rounded-lg border bg-white shadow-lg overflow-hidden z-[300]"
           >
             <div className="p-3 space-y-3 text-sm">
               <div className="font-medium">Salvar / Recuperar</div>

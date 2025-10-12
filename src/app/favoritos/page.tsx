@@ -35,14 +35,28 @@ export default function FavoritosPage() {
   }, []);
 
   useEffect(() => {
-    const favs = loadFavorites();
-    setFavorites(favs);
-    void hydrateMissingMeta(favs);
+    async function hydrateMeta(list: Favorite[]) {
+      const toFix = list.filter(f => !f.name || !f.image).map(f => f.id);
+      if (!toFix.length) return;
+      setShimmeringIds(prev => [...new Set([...prev, ...toFix])]);
+      try {
+        for (const id of toFix) await fetchAndUpsert(id, { silent: true });
+        syncSnapshots(toFix);
+      } finally {
+        setShimmeringIds(prev => prev.filter(id => !toFix.includes(id)));
+      }
+    }
+
+    async function init() {
+      const favs = loadFavorites();
+      setFavorites(favs);
+      await hydrateMeta(favs);
+    }
+    void init();
   }, []);
 
   useEffect(() => {
     syncSnapshots(favorites.map(f => f.id));
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favorites]);
 
   useEffect(() => {
@@ -61,8 +75,16 @@ export default function FavoritosPage() {
     setFavorites(nextFavs);
     saveFavorites(nextFavs);
     setCompareSelected(prev => prev.filter(x => x !== id));
-    setLatestById(prev => { const { [id]: _, ...rest } = prev; return rest; });
-    setPrevById(prev => { const { [id]: _, ...rest } = prev; return rest; });
+    setLatestById(prev => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _removed1, ...rest } = prev;
+      return rest;
+    });
+    setPrevById(prev => {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { [id]: _removed2, ...rest } = prev;
+      return rest;
+    });
     toast.success('Removido dos favoritos.');
   };
 
@@ -126,19 +148,6 @@ export default function FavoritosPage() {
         saveFavorites(nextFavs);
         return nextFavs;
       });
-    }
-  }
-
-  /** Preenche name/image ausentes em silêncio. */
-  async function hydrateMissingMeta(list: Favorite[]) {
-    const toFix = list.filter(f => !f.name || !f.image).map(f => f.id);
-    if (!toFix.length) return;
-    setShimmeringIds(prev => [...new Set([...prev, ...toFix])]);
-    try {
-      for (const id of toFix) await fetchAndUpsert(id, { silent: true });
-      syncSnapshots(toFix);
-    } finally {
-      setShimmeringIds(prev => prev.filter(id => !toFix.includes(id)));
     }
   }
 

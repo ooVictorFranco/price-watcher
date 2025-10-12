@@ -11,7 +11,12 @@ const COMPAT_ENABLED = 'kabum:compat_live_enabled';
 const COMPAT_DIRTY = 'kabum:compat_live_dirty';
 const COMPAT_NAME = 'kabum:compat_live_name';
 
-type FileHandle = FileSystemFileHandle | any;
+type FileHandle = FileSystemFileHandle & {
+  queryPermission?: (options: { mode: string }) => Promise<string>;
+  requestPermission?: (options: { mode: string }) => Promise<string>;
+  createWritable: () => Promise<FileSystemWritableFileStream>;
+  name?: string;
+};
 
 function supportsNative() {
   return typeof window !== 'undefined' && ('showSaveFilePicker' in window || 'showOpenFilePicker' in window);
@@ -36,10 +41,8 @@ export async function clearHandle() {
 }
 
 async function hasWritePermission(h: FileHandle) {
-  // @ts-ignore
   const q = await h.queryPermission?.({ mode: 'readwrite' }) ?? 'granted';
   if (q === 'granted') return true;
-  // @ts-ignore
   const r = await h.requestPermission?.({ mode: 'readwrite' }) ?? 'denied';
   return r === 'granted';
 }
@@ -54,8 +57,8 @@ async function writeFullSnapshot(h: FileHandle) {
 /** Cria novo arquivo e mantém sincronizado (nativo – Chrome/Edge). */
 export async function pickLiveFile(): Promise<{ name: string } | null> {
   if (!supportsNative()) throw new Error('Recurso nativo disponível apenas em navegadores Chromium.');
-  // @ts-ignore
-  const handle: FileHandle = await (window as any).showSaveFilePicker({
+  // @ts-expect-error - showSaveFilePicker is part of File System Access API
+  const handle: FileHandle = await window.showSaveFilePicker({
     suggestedName: 'kabum-backup.json',
     types: [{ description: 'Backup JSON', accept: { 'application/json': ['.json'] } }],
   });
@@ -65,14 +68,14 @@ export async function pickLiveFile(): Promise<{ name: string } | null> {
   await writeFullSnapshot(handle);
   // desativa modo compatível se estava ativo
   localStorage.removeItem(COMPAT_ENABLED);
-  return { name: (handle as any).name || 'kabum-backup.json' };
+  return { name: handle.name || 'kabum-backup.json' };
 }
 
 /** Vincula arquivo EXISTENTE como “vivo” (nativo – Chrome/Edge). */
 export async function pickExistingLiveFile(): Promise<{ name: string } | null> {
   if (!supportsNative()) throw new Error('Recurso nativo indisponível neste navegador.');
-  // @ts-ignore
-  const handles: FileHandle[] = await (window as any).showOpenFilePicker({
+  // @ts-expect-error - showOpenFilePicker is part of File System Access API
+  const handles: FileHandle[] = await window.showOpenFilePicker({
     multiple: false,
     types: [{ description: 'Backup JSON', accept: { 'application/json': ['.json'] } }],
   });
@@ -84,7 +87,7 @@ export async function pickExistingLiveFile(): Promise<{ name: string } | null> {
   await setHandle(handle);
   await writeFullSnapshot(handle);
   localStorage.removeItem(COMPAT_ENABLED);
-  return { name: (handle as any).name || 'kabum-backup.json' };
+  return { name: handle.name || 'kabum-backup.json' };
 }
 
 /** Existe um arquivo vivo nativo vinculado? */

@@ -1,7 +1,7 @@
 // src/lib/idb.ts
 'use client';
 
-export async function idbSet<T = any>(store: string, key: string, val: T): Promise<void> {
+export async function idbSet<T = unknown>(store: string, key: string, val: T): Promise<void> {
   const db = await open(store);
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, 'readwrite');
@@ -11,7 +11,7 @@ export async function idbSet<T = any>(store: string, key: string, val: T): Promi
   });
 }
 
-export async function idbGet<T = any>(store: string, key: string): Promise<T | undefined> {
+export async function idbGet<T = unknown>(store: string, key: string): Promise<T | undefined> {
   const db = await open(store);
   return new Promise((resolve, reject) => {
     const tx = db.transaction(store, 'readonly');

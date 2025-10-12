@@ -24,11 +24,10 @@ function uuid4() {
 }
 
 async function becomeLeader(onAcquire: () => void, onRelease: () => void) {
-  const hasLocks = typeof (navigator as any).locks?.request === 'function';
+  const hasLocks = typeof (navigator as { locks?: { request: unknown } }).locks?.request === 'function';
   if (hasLocks) {
     try {
-      // @ts-ignore
-      await navigator.locks.request('kabum-auto-refresh', { mode: 'exclusive' }, async () => {
+      await (navigator as { locks: { request: (name: string, opts: unknown, callback: () => Promise<void>) => Promise<void> } }).locks.request('kabum-auto-refresh', { mode: 'exclusive' }, async () => {
         onAcquire();
         await new Promise<void>(() => {});
       });
@@ -38,8 +37,8 @@ async function becomeLeader(onAcquire: () => void, onRelease: () => void) {
   }
 
   const id = uuid4();
-  let heartbeatTimer: any = null;
-  let checkTimer: any = null;
+  let heartbeatTimer: NodeJS.Timeout | null = null;
+  let checkTimer: NodeJS.Timeout | null = null;
 
   const heartbeat = () => {
     try { localStorage.setItem(LEADER_KEY, JSON.stringify({ id, ts: now() })); } catch {}
@@ -114,7 +113,7 @@ export function startBackgroundRefresh(opts?: Opts) {
   const interval = opts?.intervalMs ?? 3 * 60 * 60 * 1000;
   const tick = opts?.tickMs ?? 60_000;
 
-  let runnerTimer: any = null;
+  let runnerTimer: NodeJS.Timeout | null = null;
 
   const runIfDue = async () => {
     try {
@@ -132,7 +131,7 @@ export function startBackgroundRefresh(opts?: Opts) {
     document.addEventListener('visibilitychange', onVisible);
     const onOnline = () => runIfDue();
     window.addEventListener('online', onOnline);
-    (window as any).__kabum_bg_cleanup__ = () => {
+    (window as Window & { __kabum_bg_cleanup__?: () => void }).__kabum_bg_cleanup__ = () => {
       if (runnerTimer) clearInterval(runnerTimer);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('online', onOnline);
@@ -140,7 +139,7 @@ export function startBackgroundRefresh(opts?: Opts) {
   };
 
   const onRelease = () => {
-    const cleanup: (() => void) | undefined = (window as any).__kabum_bg_cleanup__;
+    const cleanup: (() => void) | undefined = (window as Window & { __kabum_bg_cleanup__?: () => void }).__kabum_bg_cleanup__;
     if (cleanup) cleanup();
   };
 

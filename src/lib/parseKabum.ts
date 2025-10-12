@@ -1,15 +1,6 @@
 // src/lib/parseKabum.ts
 import * as cheerio from 'cheerio';
-
-export type Parsed = {
-  name?: string | null;
-  image?: string | null;
-  priceVista?: number | null;
-  priceParcelado?: number | null;
-  priceOriginal?: number | null;
-  installmentsCount?: number | null;
-  installmentsValue?: number | null;
-};
+import type { ApiResponse } from '@/types';
 
 function toNumberBRL(text?: string | null): number | null {
   if (!text) return null;
@@ -18,9 +9,9 @@ function toNumberBRL(text?: string | null): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function firstString(x: any): string | null {
+function firstString(x: unknown): string | null {
   if (typeof x === 'string') return x;
-  if (Array.isArray(x) && x.length) return String(x[0]);
+  if (Array.isArray(x) && x.length > 0) return String(x[0]);
   return null;
 }
 
@@ -75,7 +66,7 @@ function findFirstIndexByRegex(text: string, res: RegExp[]): number {
   return best;
 }
 
-export function parseKabumHtml(html: string) {
+export function parseKabumHtml(html: string): ApiResponse {
   const $ = cheerio.load(html);
 
   let name: string | null = null;

@@ -6,17 +6,18 @@ export type Provider = 'kabum' | 'amazon';
 /** Chave canônica de produto: ex. "kabum:922662" ou "amazon:B0FMYR9C72" */
 export type ProductKey = `${Provider}:${string}`;
 
-/** Informações básicas do produto (dados “estáticos”) */
+/** Informações básicas do produto (dados "estáticos") */
 export interface ProductInfo {
-  provider: Provider;
-  /** KaBuM!: id numérico; Amazon: ASIN (10 chars) */
-  id?: string | null;     // usado para KaBuM!
-  asin?: string | null;   // usado para Amazon
-  url: string;
+  /** ID ou URL do produto (KaBuM: número, Amazon: ASIN) */
+  idOrUrl: string;
   name: string | null;
   image: string | null;
   /** Última checagem (epoch ms) — útil para UI */
-  lastCheckedAt?: number | null;
+  lastCheck?: number | null;
+  /** Quantidade de parcelas */
+  installmentsCount?: number | null;
+  /** Valor de cada parcela */
+  installmentsValue?: number | null;
 }
 
 /** Ponto do histórico de preços (amostragem) */
@@ -27,7 +28,7 @@ export interface PriceSnapshot {
   priceVista: number | null;
   /** Total parcelado (ex.: 10x de 100 = 1000), quando detectado */
   priceParcelado: number | null;
-  /** Preço “De:”/original (riscado), quando detectado */
+  /** Preço "De:"/original (riscado), quando detectado */
   priceOriginal: number | null;
   /** Parcelas anunciadas (ex.: 10) */
   installmentsCount: number | null;
@@ -35,6 +36,25 @@ export interface PriceSnapshot {
   installmentsValue: number | null;
   /** Origem da coleta: manual, agendada (bg) ou automática */
   source: 'manual' | 'scheduled' | 'auto';
+}
+
+/** Snapshot simplificado usado na implementação atual (compatível com localStorage) */
+export interface Snapshot {
+  timestamp: number;
+  priceVista: number | null;
+  priceParcelado: number | null;
+  priceOriginal: number | null;
+}
+
+/** Resposta da API de scraping */
+export interface ApiResponse {
+  name?: string | null;
+  image?: string | null;
+  priceVista?: number | null;
+  priceParcelado?: number | null;
+  priceOriginal?: number | null;
+  installmentsCount?: number | null;
+  installmentsValue?: number | null;
 }
 
 /** Item monitorado (informação + histórico local) */
@@ -48,10 +68,18 @@ export interface MonitoredItem {
 
 /** Card/favorito salvo pelo usuário */
 export interface Favorite {
-  key: ProductKey;
-  info: ProductInfo;
+  id: string;                 // ID ou ASIN do produto
+  name: string;               // Nome do produto
+  image: string | null;       // URL da imagem
   addedAt: number;            // epoch ms
-  lastCheckedAt: number | null;
+  lastCheckedAt?: number | null;
+}
+
+/** Resultado de busca do KaBuM */
+export interface SearchResult {
+  id: string;                 // ID do produto
+  name: string;               // Nome do produto
+  image: string | null;       // URL da imagem
 }
 
 /* ──────────────────────────────────────────────────────────────────────────
@@ -173,16 +201,15 @@ export interface AppToast {
 export function isAmazonDisabled(
   r: ScrapeResult
 ): r is ScrapeAmazonDisabled {
-  /* @ts-expect-error: propriedade existe apenas quando Amazon está desligada */
-  return r && (r as any).disabled === true && r.provider === 'amazon';
+  return r && 'disabled' in r && r.disabled === true && r.provider === 'amazon';
 }
 
 export function isKabumResult(r: ScrapeResult): r is ScrapeKabumResult {
-  return r.provider === 'kabum' && (r as any).disabled !== true;
+  return r.provider === 'kabum' && !('disabled' in r);
 }
 
 export function isAmazonResult(r: ScrapeResult): r is ScrapeAmazonResult {
-  return r.provider === 'amazon' && (r as any).disabled !== true;
+  return r.provider === 'amazon' && !('disabled' in r);
 }
 
 /* ──────────────────────────────────────────────────────────────────────────

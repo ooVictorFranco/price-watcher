@@ -6,6 +6,27 @@ export function brl(n?: number | null) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+/**
+ * Formata timestamp como tempo relativo (ex: "há 5 minutos")
+ */
+export function timeAgo(timestamp?: number | null): string {
+  if (!timestamp) return 'nunca';
+
+  const now = Date.now();
+  const diff = now - timestamp;
+
+  const seconds = Math.floor(diff / 1000);
+  const minutes = Math.floor(seconds / 60);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (seconds < 60) return 'agora mesmo';
+  if (minutes < 60) return `há ${minutes} min`;
+  if (hours < 24) return `há ${hours}h`;
+  if (days < 7) return `há ${days}d`;
+  return `há ${Math.floor(days / 7)} sem`;
+}
+
 /** Limites globais */
 export const FAV_LIMIT = 25;
 export const HISTORY_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 90; // 90 dias
@@ -20,6 +41,9 @@ export function kabumUrlForId(id: string) {
 }
 export function amazonUrlForAsin(asin: string) {
   return `https://www.amazon.com.br/dp/${asin.toUpperCase()}`;
+}
+export function kabumSearchUrl(query: string) {
+  return `https://www.kabum.com.br/busca/${encodeURIComponent(query)}`;
 }
 
 /** Detecta KaBuM (id/URL) ou Amazon (ASIN/URL, inclusive a.co e amzn.to) */

@@ -27,7 +27,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LiveFileSync />
         <CompatLivePill />
 
-        <header className="bg-white/80 backdrop-blur border-b">
+        <header className="bg-white/80 backdrop-blur border-b sticky top-0 z-[200]">
           <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-3">
             <Link href="/" className="font-semibold transition-transform hover:scale-[1.02]">
               Monitor de preço

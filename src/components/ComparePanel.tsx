@@ -68,7 +68,7 @@ export default function ComparePanel({
               <span>métrica:</span>
               <select
                 value={metric}
-                onChange={(e) => onMetric(e.target.value as any)}
+                onChange={(e) => onMetric(e.target.value as 'vista' | 'parcelado' | 'original')}
                 className="rounded-lg border px-2 py-1 text-sm"
                 disabled={disabled}
               >

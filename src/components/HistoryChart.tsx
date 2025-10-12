@@ -31,7 +31,18 @@ export default function HistoryChart({ history }: Props) {
   const parce = history.map(h => h.priceParcelado ?? null);
   const orig = history.map(h => h.priceOriginal ?? null);
 
-  const datasets: any[] = [
+  const datasets: Array<{
+    label: string;
+    data: (number | null)[];
+    borderWidth: number;
+    tension: number;
+    borderColor: string;
+    pointBackgroundColor: string;
+    pointBorderColor: string;
+    pointRadius: number;
+    pointHoverRadius: number;
+    borderDash?: number[];
+  }> = [
     { label: 'À vista (PIX)', data: vista, borderWidth: 2, tension: 0.25, borderColor: COLOR_VISTA, pointBackgroundColor: COLOR_VISTA, pointBorderColor: COLOR_VISTA, pointRadius: 3, pointHoverRadius: 5 },
     { label: 'Parcelado (total)', data: parce, borderWidth: 2, tension: 0.25, borderColor: COLOR_PARC, pointBackgroundColor: COLOR_PARC, pointBorderColor: COLOR_PARC, pointRadius: 3, pointHoverRadius: 5 },
   ];

@@ -28,6 +28,7 @@ export default function ProductHeader({
     <div className="rounded-2xl border bg-white shadow-md p-5">
       <div className="flex items-center gap-4">
         {product.image ? (
+          // eslint-disable-next-line @next/next/no-img-element
           <img
             src={product.image}
             alt={product.name ?? 'Produto KaBuM'}

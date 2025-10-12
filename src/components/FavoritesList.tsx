@@ -2,8 +2,8 @@
 'use client';
 
 import { Favorite, Snapshot } from '@/types';
-import { brl, externalUrlFromId, FAV_LIMIT } from '@/lib/utils';
-import { useState } from 'react';
+import { brl, externalUrlFromId, FAV_LIMIT, timeAgo } from '@/lib/utils';
+import { useState, useEffect, useRef } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 type Props = {
@@ -34,9 +34,32 @@ export default function FavoritesList({
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const prefersReduced = useReducedMotion();
+  const menuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isSelected = (id: string) => compareSelected.includes(id);
   const isShimmering = (id: string) => shimmeringIds.includes(id);
+
+  // Fechar menu ao clicar fora
+  useEffect(() => {
+    if (!openMenuId) return;
+
+    const handleClickOutside = (event: MouseEvent) => {
+      const menuElement = menuRefs.current[openMenuId];
+      if (menuElement && !menuElement.contains(event.target as Node)) {
+        setOpenMenuId(null);
+      }
+    };
+
+    // Pequeno delay para evitar fechar imediatamente após abrir
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleClickOutside);
+    }, 100);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [openMenuId]);
 
   const total = favorites.length;
   const remaining = Math.max(FAV_LIMIT - total, 0);
@@ -153,7 +176,11 @@ export default function FavoritesList({
                     )}
 
                     {/* menu suspenso */}
-                    <div className="ml-auto relative" onClick={(e) => e.stopPropagation()}>
+                    <div
+                      className="ml-auto relative"
+                      onClick={(e) => e.stopPropagation()}
+                      ref={(el) => { menuRefs.current[f.id] = el; }}
+                    >
                       <motion.button
                         whileHover={{ scale: prefersReduced ? 1 : 1.05 }}
                         whileTap={{ scale: prefersReduced ? 1 : 0.95 }}
@@ -175,7 +202,7 @@ export default function FavoritesList({
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             exit={{ opacity: 0, scale: prefersReduced ? 1 : 0.98, y: -4 }}
                             transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-                            className="absolute right-0 z-10 mt-1 w-48 rounded-lg border bg-white shadow-lg overflow-hidden"
+                            className="absolute right-0 z-[100] mt-1 w-48 rounded-lg border bg-white shadow-lg overflow-hidden"
                             role="menu"
                             onMouseLeave={() => setOpenMenuId(null)}
                           >
@@ -209,6 +236,12 @@ export default function FavoritesList({
                       </AnimatePresence>
                     </div>
                   </div>
+
+                  {!shimmering && last?.timestamp && (
+                    <div className="mt-1 text-[10px] text-gray-400">
+                      Atualizado {timeAgo(last.timestamp)}
+                    </div>
+                  )}
 
                   <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] leading-4 select-none">
                     {[0,1,2].map((i) => (
