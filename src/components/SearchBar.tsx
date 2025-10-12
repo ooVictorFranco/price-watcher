@@ -1,64 +1,58 @@
 // src/components/SearchBar.tsx
 'use client';
 
+import { useId } from 'react';
+
 type Props = {
   value: string;
-  loadingMonitor?: boolean;
   onChange: (v: string) => void;
   onMonitor: () => void;
   onClear: () => void;
+  loadingMonitor?: boolean;
   placeholder?: string;
 };
 
 export default function SearchBar({
-  value,
-  loadingMonitor,
-  onChange,
-  onMonitor,
-  onClear,
-  placeholder,
+  value, onChange, onMonitor, onClear, loadingMonitor, placeholder,
 }: Props) {
-  const hasText = value.trim().length > 0;
-
+  const id = useId();
   return (
-    <section className="rounded-2xl border bg-white shadow-md p-5">
+    <section className="rounded-2xl border bg-white shadow-md p-4">
       <form
-        className="flex flex-col gap-3 md:flex-row"
-        onSubmit={(e) => { e.preventDefault(); if (hasText && !loadingMonitor) onMonitor(); }}
+        className="flex flex-col sm:flex-row items-stretch gap-3"
+        onSubmit={(e) => { e.preventDefault(); onMonitor(); }}
       >
-        <label htmlFor="prod" className="sr-only">Código ou URL do produto</label>
+        <label htmlFor={id} className="sr-only">Buscar produto</label>
         <input
-          id="prod"
+          id={id}
           className="rounded-xl border p-3 outline-none focus:ring-2 focus:ring-blue-500 flex-1"
-          placeholder={placeholder ?? 'Cole um ID ou a URL do produto (ex.: 922662)'}
+          placeholder={placeholder ?? 'Cole: ID KaBuM (ex.: 922662), ASIN Amazon (ex.: B0F7Z9F9SD) ou URL completa'}
           value={value}
           onChange={(e) => onChange(e.target.value)}
-          autoCapitalize="none"
+          autoCapitalize="off"
           autoCorrect="off"
           spellCheck={false}
         />
         <div className="flex gap-2">
           <button
             type="submit"
-            disabled={!hasText || !!loadingMonitor}
-            className="inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
-            aria-label="Começar a monitorar"
+            className="rounded-xl px-4 py-3 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50"
+            disabled={loadingMonitor}
+            title="Iniciar monitoramento"
           >
-            {loadingMonitor ? 'Monitorando...' : 'Monitorar'}
+            {loadingMonitor ? 'Monitorando…' : 'Monitorar'}
           </button>
           <button
             type="button"
             onClick={onClear}
-            className="inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium border hover:bg-gray-50"
-            aria-label="Limpar"
+            className="rounded-xl px-4 py-3 border hover:bg-gray-50"
+            disabled={loadingMonitor}
+            title="Limpar atual"
           >
             Limpar
           </button>
         </div>
       </form>
-      <p className="text-xs text-gray-500 mt-3">
-        Digite um <strong>ID</strong> (número) ou cole a <strong>URL</strong> do produto para iniciar o monitoramento.
-      </p>
     </section>
   );
 }

@@ -1,8 +1,9 @@
 .
+├── .env.local
 ├── .gitignore
 ├── README.md
 ├── eslint.config.mjs
-├── estrutura.txt
+├── estrutura.tree
 ├── next-env.d.ts
 ├── next.config.ts
 ├── package-lock.json
@@ -18,22 +19,39 @@
 │   ├── app
 │   │   ├── api
 │   │   ├── favicon.ico
+│   │   ├── favoritos
 │   │   ├── globals.css
 │   │   ├── layout.tsx
 │   │   └── page.tsx
 │   ├── components
+│   │   ├── BackgroundRefresher.tsx
+│   │   ├── BackupMenu.tsx
+│   │   ├── CompareChart.tsx
+│   │   ├── ComparePanel.tsx
+│   │   ├── CompatLivePill.tsx
 │   │   ├── EmptyState.tsx
+│   │   ├── FavoritesList.tsx
 │   │   ├── HistoryChart.tsx
 │   │   ├── HistoryTable.tsx
+│   │   ├── LiveFileSync.tsx
 │   │   ├── PriceCards.tsx
 │   │   ├── ProductHeader.tsx
+│   │   ├── RouteTransitions.tsx
 │   │   ├── SearchBar.tsx
-│   │   └── SkeletonCards.tsx
+│   │   ├── SearchResults.tsx
+│   │   ├── SkeletonCards.tsx
+│   │   └── ToastHost.tsx
 │   ├── lib
+│   │   ├── background.ts
+│   │   ├── backup.ts
+│   │   ├── idb.ts
+│   │   ├── livefile.ts
 │   │   ├── parseKabum.ts
+│   │   ├── parseKabumSearch.ts
+│   │   ├── toast.ts
 │   │   └── utils.ts
 │   └── types.ts
 ├── tailwind.config.ts
 └── tsconfig.json
 
-7 directories, 30 files
+8 directories, 47 files

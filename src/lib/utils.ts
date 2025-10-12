@@ -8,23 +8,59 @@ export function brl(n?: number | null) {
 
 /** Limites globais */
 export const FAV_LIMIT = 25;
-export const HISTORY_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 90; // 90 dias (~3 meses)
+export const HISTORY_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 90; // 90 dias
 
 export const HISTORY_PREFIX = 'kabum_history:';
 export function getHistoryKey(idOrUrl: string) {
   return `${HISTORY_PREFIX}${idOrUrl}`;
 }
 
-export function parseIdOrUrl(input: string) {
-  const trimmed = input.trim();
-  if (/^\d+$/.test(trimmed)) return { idOrUrl: trimmed, mode: 'id' as const };
-  const m = trimmed.match(/\/produto\/(\d+)/);
-  if (m) return { idOrUrl: m[1], mode: 'id' as const };
-  return { idOrUrl: trimmed, mode: 'url' as const };
-}
-
 export function kabumUrlForId(id: string) {
   return `https://www.kabum.com.br/produto/${id}`;
+}
+export function amazonUrlForAsin(asin: string) {
+  return `https://www.amazon.com.br/dp/${asin.toUpperCase()}`;
+}
+
+/** Detecta KaBuM (id/URL) ou Amazon (ASIN/URL, inclusive a.co e amzn.to) */
+export function parseIdOrUrl(input: string):
+  | { mode: 'id'; idOrUrl: string; provider: 'kabum' }
+  | { mode: 'url'; idOrUrl: string; provider: 'kabum' }
+  | { mode: 'asin'; idOrUrl: string; provider: 'amazon' }
+  | { mode: 'url'; idOrUrl: string; provider: 'amazon' } {
+  const trimmed = input.trim();
+
+  // KaBuM numérico
+  if (/^\d+$/.test(trimmed)) return { mode: 'id', idOrUrl: trimmed, provider: 'kabum' as const };
+
+  // KaBuM url
+  if (/kabum\.com\.br/i.test(trimmed)) {
+    const km = trimmed.match(/kabum\.com\.br\/produto\/(\d+)/i);
+    if (km) return { mode: 'id', idOrUrl: km[1], provider: 'kabum' as const };
+    return { mode: 'url', idOrUrl: trimmed, provider: 'kabum' as const };
+  }
+
+  // Amazon ASIN
+  if (/^[A-Z0-9]{10}$/i.test(trimmed)) {
+    return { mode: 'asin', idOrUrl: trimmed.toUpperCase(), provider: 'amazon' as const };
+  }
+
+  // Amazon urls (inclui encurtadores a.co e amzn.to)
+  if (/^https?:\/\/(?:[^/]*\.)?(?:amazon\.[^/]+|a\.co|amzn\.to)\//i.test(trimmed)) {
+    const am = trimmed.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
+    if (am) return { mode: 'asin', idOrUrl: am[1].toUpperCase(), provider: 'amazon' as const };
+    return { mode: 'url', idOrUrl: trimmed, provider: 'amazon' as const };
+  }
+
+  // fallback
+  return { mode: 'url', idOrUrl: trimmed, provider: 'kabum' as const };
+}
+
+export function externalUrlFromId(id: string) {
+  if (/^\d+$/.test(id)) return kabumUrlForId(id);
+  if (/^[A-Z0-9]{10}$/i.test(id)) return amazonUrlForAsin(id);
+  if (/^https?:\/\//i.test(id)) return id;
+  return kabumUrlForId(id);
 }
 
 export function discountPctFrom(snapshot?: Snapshot | null) {
@@ -34,7 +70,6 @@ export function discountPctFrom(snapshot?: Snapshot | null) {
   return Number.isFinite(pct) ? pct : null;
 }
 
-/** Compara apenas os valores de preço (ignora timestamp). */
 export function isSamePrices(a: Snapshot | undefined, b: Snapshot | undefined) {
   if (!a || !b) return false;
   return (
@@ -44,7 +79,6 @@ export function isSamePrices(a: Snapshot | undefined, b: Snapshot | undefined) {
   );
 }
 
-/** Deduplicação: se preços iguais ao último → substitui timestamp do último, senão adiciona. */
 export function upsertHistory(prev: Snapshot[], snap: Snapshot, limit = 500): Snapshot[] {
   const last = prev.at(-1);
   if (isSamePrices(last, snap)) {
@@ -55,19 +89,17 @@ export function upsertHistory(prev: Snapshot[], snap: Snapshot, limit = 500): Sn
   return [...prev, snap].slice(-limit);
 }
 
-/** Remove pontos com mais de HISTORY_MAX_AGE_MS (padrão 90 dias) */
 export function pruneHistoryByAge(arr: Snapshot[], now = Date.now(), maxAgeMs = HISTORY_MAX_AGE_MS): Snapshot[] {
   return arr.filter(s => typeof s?.timestamp === 'number' && (now - s.timestamp) <= maxAgeMs);
 }
 
-/** Emite um evento global de mudança de dados para integrações (ex.: arquivo “vivo”). */
 export function emitDataChanged(ids?: string[]) {
   if (typeof window === 'undefined') return;
   try {
     window.dispatchEvent(new CustomEvent('kabum:data-changed', {
       detail: { ids: ids ?? null, at: Date.now() },
     }));
-  } catch { }
+  } catch {}
 }
 
 // ---------- Favoritos (localStorage)
@@ -84,7 +116,6 @@ export function loadFavorites(): Favorite[] {
   }
 }
 
-/** Garante no máximo FAV_LIMIT favoritos, priorizando os com maior addedAt */
 function clampFavorites(list: Favorite[]): Favorite[] {
   const sorted = [...list].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0));
   return sorted.slice(0, FAV_LIMIT);
@@ -93,7 +124,7 @@ function clampFavorites(list: Favorite[]): Favorite[] {
 export function saveFavorites(list: Favorite[]) {
   const clamped = clampFavorites(list);
   localStorage.setItem(FAV_KEY, JSON.stringify(clamped));
-  emitDataChanged(); // notifica alterações
+  emitDataChanged();
 }
 
 export function isFavorite(id: string) {
@@ -103,12 +134,9 @@ export function isFavorite(id: string) {
 export function addFavorite(fav: Favorite) {
   const list = loadFavorites();
   const existingIdx = list.findIndex(f => f.id === fav.id);
-  if (existingIdx >= 0) {
-    // atualiza dados e traz para o topo
-    list.splice(existingIdx, 1);
-  }
+  if (existingIdx >= 0) list.splice(existingIdx, 1);
   list.unshift({ ...fav, addedAt: fav.addedAt ?? Date.now() });
-  saveFavorites(list); // saveFavorites já clamp
+  saveFavorites(list);
 }
 
 export function removeFavorite(id: string) {
@@ -116,7 +144,6 @@ export function removeFavorite(id: string) {
   saveFavorites(list);
 }
 
-/** Salva um histórico completo de um produto, aplicando retenção de 3 meses + evento. */
 export function saveHistory(idOrUrl: string, data: Snapshot[]) {
   const pruned = pruneHistoryByAge(data);
   localStorage.setItem(getHistoryKey(idOrUrl), JSON.stringify(pruned));

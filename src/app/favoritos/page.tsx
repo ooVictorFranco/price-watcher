@@ -35,7 +35,9 @@ export default function FavoritosPage() {
   }, []);
 
   useEffect(() => {
-    setFavorites(loadFavorites());
+    const favs = loadFavorites();
+    setFavorites(favs);
+    void hydrateMissingMeta(favs);
   }, []);
 
   useEffect(() => {
@@ -70,14 +72,97 @@ export default function FavoritosPage() {
   const removeFromCompare = (id: string) => setCompareSelected(prev => prev.filter(x => x !== id));
   const clearCompare = () => setCompareSelected([]);
 
+  /** Busca dados (KaBuM/Amazon), atualiza histórico e também name/image do favorito. */
+  async function fetchAndUpsert(id: string, { silent = false }: { silent?: boolean } = {}) {
+    let res: Response;
+    if (/^\d+$/.test(id)) {
+      const u = new URL(window.location.origin + '/api/scrape');
+      u.searchParams.set('id', id);
+      res = await fetch(u.toString(), { cache: 'no-store' });
+    } else if (/^[A-Z0-9]{10}$/i.test(id) || /^https?:\/\//i.test(id)) {
+      const u = new URL(window.location.origin + '/api/scrape-amazon');
+      if (/^[A-Z0-9]{10}$/i.test(id)) u.searchParams.set('asin', id);
+      else u.searchParams.set('url', id);
+      res = await fetch(u.toString(), { cache: 'no-store' });
+    } else {
+      const u = new URL(window.location.origin + '/api/scrape');
+      u.searchParams.set('url', id);
+      res = await fetch(u.toString(), { cache: 'no-store' });
+    }
+
+    if (!res.ok) {
+      if (!silent) toast.error('Falha ao atualizar um favorito.');
+      return;
+    }
+    const json = await res.json();
+
+    const now = Date.now();
+    const key = getHistoryKey(id);
+    const prevRaw = localStorage.getItem(key);
+    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
+
+    const snap: Snapshot = {
+      timestamp: now,
+      priceVista: json.priceVista ?? null,
+      priceParcelado: json.priceParcelado ?? null,
+      priceOriginal: json.priceOriginal ?? null,
+    };
+    const next = upsertHistory(prev, snap);
+    saveHistory(id, next);
+
+    if (json?.name || json?.image) {
+      setFavorites(curr => {
+        const ix = curr.findIndex(f => f.id === id);
+        if (ix === -1) return curr;
+        const current = curr[ix];
+        const updated: Favorite = {
+          ...current,
+          name: json.name ?? current.name,
+          image: json.image ?? current.image,
+        };
+        if (updated.name === current.name && updated.image === current.image) return curr;
+        const nextFavs = [...curr];
+        nextFavs[ix] = updated;
+        saveFavorites(nextFavs);
+        return nextFavs;
+      });
+    }
+  }
+
+  /** Preenche name/image ausentes em silêncio. */
+  async function hydrateMissingMeta(list: Favorite[]) {
+    const toFix = list.filter(f => !f.name || !f.image).map(f => f.id);
+    if (!toFix.length) return;
+    setShimmeringIds(prev => [...new Set([...prev, ...toFix])]);
+    try {
+      for (const id of toFix) await fetchAndUpsert(id, { silent: true });
+      syncSnapshots(toFix);
+    } finally {
+      setShimmeringIds(prev => prev.filter(id => !toFix.includes(id)));
+    }
+  }
+
+  /** Atualização individual (menu suspenso do card). */
+  const refreshOneFavorite = async (id: string) => {
+    setShimmeringIds(prev => [...new Set([...prev, id])]);
+    try {
+      await fetchAndUpsert(id);
+      syncSnapshots([id]);
+      toast.info('Favorito atualizado.');
+    } catch (e) {
+      console.error(e);
+      toast.error('Não consegui atualizar este item agora.');
+    } finally {
+      setShimmeringIds(prev => prev.filter(x => x !== id));
+    }
+  };
+
   const refreshSelected = async () => {
     if (!compareSelected.length) return;
     setLoadingSelected(true);
     setShimmeringIds(compareSelected);
     try {
-      for (const id of compareSelected) {
-        await fetchAndUpsert(id);
-      }
+      for (const id of compareSelected) await fetchAndUpsert(id);
       syncSnapshots(compareSelected);
       toast.info(`Atualizados ${compareSelected.length} selecionados.`);
     } catch (e) {
@@ -94,9 +179,7 @@ export default function FavoritosPage() {
     setLoadingAll(true);
     setShimmeringIds(favorites.map(f => f.id));
     try {
-      for (const f of favorites) {
-        await fetchAndUpsert(f.id);
-      }
+      for (const f of favorites) await fetchAndUpsert(f.id);
       syncSnapshots(favorites.map(f => f.id));
       toast.info('Todos os favoritos foram atualizados.');
     } catch (e) {
@@ -107,29 +190,6 @@ export default function FavoritosPage() {
       setShimmeringIds([]);
     }
   };
-
-  async function fetchAndUpsert(id: string) {
-    const url = new URL(window.location.origin + '/api/scrape');
-    url.searchParams.set('id', id);
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('fetch failed');
-    const json = await res.json();
-    const now = Date.now();
-
-    const key = getHistoryKey(id);
-    const prevRaw = localStorage.getItem(key);
-    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
-
-    const snap: Snapshot = {
-      timestamp: now,
-      priceVista: json.priceVista ?? null,
-      priceParcelado: json.priceParcelado ?? null,
-      priceOriginal: json.priceOriginal ?? null,
-    };
-
-    const next = upsertHistory(prev, snap);
-    saveHistory(id, next);
-  }
 
   function syncSnapshots(ids: string[]) {
     setLatestById(prevMap => {
@@ -185,8 +245,7 @@ export default function FavoritosPage() {
         <header className="space-y-2">
           <h1 className="text-2xl font-bold">Favoritos</h1>
           <p className="text-sm text-gray-600">
-            O app verifica seus favoritos automaticamente a cada <strong>3 horas</strong>.
-            Use o <strong>Backup</strong> para exportar/importar ou vincular um arquivo “vivo”.
+            Agora também aceitamos Amazon (ASIN/URL). O app verifica automaticamente a cada <strong>3 horas</strong>.
           </p>
         </header>
 
@@ -198,6 +257,7 @@ export default function FavoritosPage() {
             latestById={latestById}
             prevById={prevById}
             onRefreshAll={refreshAllFavorites}
+            onRefreshOne={refreshOneFavorite}
             loadingAll={loadingAll}
             compareSelected={compareSelected}
             onToggleCompare={toggleCompare}

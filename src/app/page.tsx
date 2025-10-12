@@ -8,7 +8,7 @@ import {
   addFavorite,
   discountPctFrom,
   saveHistory,
-  kabumUrlForId,
+  externalUrlFromId,
   loadFavorites,
   parseIdOrUrl,
   removeFavorite,
@@ -63,19 +63,40 @@ export default function Page() {
     }
   };
 
-  const doFetch = async (idOrUrl: string) => {
+  async function fetchKabum(idOrUrl: string) {
+    const url = new URL(window.location.origin + '/api/scrape');
+    if (/^\d+$/.test(idOrUrl)) url.searchParams.set('id', idOrUrl);
+    else url.searchParams.set('url', idOrUrl);
+    const res = await fetch(url.toString(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('kabum_fetch_failed');
+    return (await res.json()) as ApiResponse;
+  }
+
+  async function fetchAmazon(asinOrUrl: string) {
+    const url = new URL(window.location.origin + '/api/scrape-amazon');
+    // aceita ASIN puro ou URL
+    if (/^[A-Z0-9]{10}$/i.test(asinOrUrl)) url.searchParams.set('asin', asinOrUrl);
+    else url.searchParams.set('url', asinOrUrl);
+    const res = await fetch(url.toString(), { cache: 'no-store' });
+    if (!res.ok) throw new Error('amazon_fetch_failed');
+    return (await res.json()) as ApiResponse;
+  }
+
+  const doFetch = async (raw: string) => {
     setLoadingMonitor(true);
     try {
-      const url = new URL(window.location.origin + '/api/scrape');
-      url.searchParams.set(/^\d+$/.test(idOrUrl) ? 'id' : 'url', idOrUrl);
+      const parsed = parseIdOrUrl(raw);
 
-      const res = await fetch(url.toString(), { cache: 'no-store' });
-      if (!res.ok) throw new Error('Falha ao buscar o produto');
-      const json = (await res.json()) as ApiResponse;
+      const json =
+        parsed.provider === 'amazon'
+          ? await fetchAmazon(parsed.idOrUrl)
+          : await fetchKabum(parsed.idOrUrl);
 
       const now = Date.now();
+
+      const idKey = parsed.idOrUrl; // usamos o identificador “como digitado”: KaBuM (número) ou Amazon (ASIN)
       setProduct({
-        idOrUrl,
+        idOrUrl: idKey,
         name: json.name ?? null,
         image: json.image ?? null,
         lastCheck: now,
@@ -83,7 +104,7 @@ export default function Page() {
         installmentsValue: json.installmentsValue ?? null,
       });
 
-      const prev = loadHistoryLS(idOrUrl);
+      const prev = loadHistoryLS(idKey);
       const current: Snapshot = {
         timestamp: now,
         priceVista: json.priceVista ?? null,
@@ -91,7 +112,7 @@ export default function Page() {
         priceOriginal: json.priceOriginal ?? null,
       };
       const next = upsertHistory(prev, current);
-      saveHistory(idOrUrl, next);
+      saveHistory(idKey, next);
       setHistory(next);
     } catch (e) {
       console.error(e);
@@ -103,12 +124,12 @@ export default function Page() {
 
   const startMonitoring = async (pre?: string) => {
     const raw = pre ?? input;
-    const { idOrUrl } = parseIdOrUrl(raw);
-    setHistory(loadHistoryLS(idOrUrl));
-    await doFetch(idOrUrl);
+    const parsed = parseIdOrUrl(raw);
+    setHistory(loadHistoryLS(parsed.idOrUrl));
+    await doFetch(raw);
 
     if (intervalRef.current) clearInterval(intervalRef.current);
-    intervalRef.current = setInterval(() => { doFetch(idOrUrl); }, 3 * 60 * 60 * 1000);
+    intervalRef.current = setInterval(() => { doFetch(raw); }, 3 * 60 * 60 * 1000);
   };
 
   const handleToggleFavorite = () => {
@@ -123,7 +144,6 @@ export default function Page() {
       return;
     }
 
-    // se for novo e já estiver no limite, bloqueia
     if (favorites.length >= FAV_LIMIT) {
       toast.warning(`Limite de ${FAV_LIMIT} favoritos atingido.`);
       return;
@@ -132,6 +152,7 @@ export default function Page() {
     const name = product.name ?? `Produto ${id}`;
     const image = product.image ?? null;
     const fav: Favorite = { id, name, image, addedAt: Date.now() };
+    // id pode ser número (KaBuM) ou ASIN (Amazon)
     addFavorite(fav);
     setFavorites(prev => [fav, ...prev.filter(f => f.id !== id)]);
     toast.success('Adicionado aos favoritos!');
@@ -147,10 +168,12 @@ export default function Page() {
 
   return (
     <main className="min-h-screen py-8">
-      <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
+      <div className="mx-auto w/full max-w-6xl px-6 space-y-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-bold">Monitoramento</h1>
-          <p className="text-sm text-gray-600">Cole o ID/URL do KaBuM! e acompanhe o produto.</p>
+          <p className="text-sm text-gray-600">
+            Cole o ID/URL do KaBuM! (<code>922662</code>) ou o ASIN/URL da Amazon (<code>B0F7Z9F9SD</code>).
+          </p>
         </header>
 
         <SearchBar
@@ -159,7 +182,7 @@ export default function Page() {
           onChange={setInput}
           onMonitor={() => startMonitoring()}
           onClear={clearCurrent}
-          placeholder="Cole um ID (ex.: 922662) ou a URL completa do produto"
+          placeholder="Cole: ID KaBuM (ex.: 922662), ASIN Amazon (ex.: B0F7Z9F9SD) ou uma URL completa"
         />
 
         {!product && !loadingMonitor && <EmptyState />}
@@ -181,14 +204,14 @@ export default function Page() {
             <HistoryChart history={history} />
             <HistoryTable history={history} />
             <div className="text-xs text-gray-500">
-              Abrir no KaBuM!:{" "}
+              Abrir na loja:{' '}
               <a
                 className="underline"
-                href={product.idOrUrl.match(/^\d+$/) ? kabumUrlForId(product.idOrUrl) : product.idOrUrl}
+                href={externalUrlFromId(product.idOrUrl)}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                {product.idOrUrl.match(/^\d+$/) ? kabumUrlForId(product.idOrUrl) : product.idOrUrl}
+                {externalUrlFromId(product.idOrUrl)}
               </a>
             </div>
           </section>

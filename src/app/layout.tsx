@@ -8,6 +8,7 @@ import BackupMenu from '@/components/BackupMenu';
 import LiveFileSync from '@/components/LiveFileSync';
 import CompatLivePill from '@/components/CompatLivePill';
 import ToastHost from '@/components/ToastHost';
+import RouteTransitions from '@/components/RouteTransitions';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -26,19 +27,22 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <LiveFileSync />
         <CompatLivePill />
 
-        <header className="bg-white border-b">
+        <header className="bg-white/80 backdrop-blur border-b">
           <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-3">
-            <Link href="/" className="font-semibold">Monitor de preço</Link>
+            <Link href="/" className="font-semibold transition-transform hover:scale-[1.02]">
+              Monitor de preço
+            </Link>
 
             <div className="ml-auto flex items-center gap-1 text-sm">
-              <Link href="/" className="px-3 py-1 rounded-lg hover:bg-gray-100">Monitorar</Link>
-              <Link href="/favoritos" className="px-3 py-1 rounded-lg hover:bg-gray-100">Favoritos & Comparar</Link>
+              <Link href="/" className="px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors">Monitorar</Link>
+              <Link href="/favoritos" className="px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors">Favoritos & Comparar</Link>
               <BackupMenu />
             </div>
           </nav>
         </header>
 
-        {children}
+        {/* Transições entre páginas */}
+        <RouteTransitions>{children}</RouteTransitions>
 
         <footer className="mt-10 border-t bg-white">
           <div className="mx-auto max-w-6xl px-6 py-4 text-xs text-gray-500 space-y-1">
