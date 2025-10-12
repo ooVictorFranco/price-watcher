@@ -7,12 +7,13 @@ import { ApiResponse, Favorite, ProductInfo, Snapshot } from '@/types';
 import {
   addFavorite,
   discountPctFrom,
-  getHistoryKey,
+  saveHistory,
   kabumUrlForId,
   loadFavorites,
   parseIdOrUrl,
   removeFavorite,
   upsertHistory,
+  getHistoryKey,
 } from '@/lib/utils';
 import SearchBar from '@/components/SearchBar';
 import ProductHeader from '@/components/ProductHeader';
@@ -41,7 +42,6 @@ export default function Page() {
     setFavorites(loadFavorites());
   }, []);
 
-  // deep-link: /?id=123456 inicia monitoramento
   useEffect(() => {
     const id = params.get('id');
     if (id && !product) {
@@ -51,7 +51,6 @@ export default function Page() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [params]);
 
-  // ---------- histórico helpers
   const loadHistoryLS = (key: string) => {
     try {
       const raw = localStorage.getItem(getHistoryKey(key));
@@ -61,11 +60,7 @@ export default function Page() {
       return [];
     }
   };
-  const saveHistoryLS = (key: string, data: Snapshot[]) => {
-    localStorage.setItem(getHistoryKey(key), JSON.stringify(data));
-  };
 
-  // ---------- monitorar
   const doFetch = async (idOrUrl: string) => {
     setLoadingMonitor(true);
     try {
@@ -93,13 +88,12 @@ export default function Page() {
         priceParcelado: json.priceParcelado ?? null,
         priceOriginal: json.priceOriginal ?? null,
       };
-
       const next = upsertHistory(prev, current);
-      saveHistoryLS(idOrUrl, next);
+      saveHistory(idOrUrl, next); // <— agora centralizado + evento
       setHistory(next);
     } catch (e) {
       console.error(e);
-      alert('Não consegui ler este produto no momento. Tenta novamente mais tarde.');
+      alert('Não consegui ler este produto no momento. Tente novamente mais tarde.');
     } finally {
       setLoadingMonitor(false);
     }
@@ -115,7 +109,6 @@ export default function Page() {
     intervalRef.current = setInterval(() => { doFetch(idOrUrl); }, 3 * 60 * 60 * 1000);
   };
 
-  // ---------- favoritos (marcar/desmarcar)
   const handleToggleFavorite = () => {
     if (!product) return;
     const id = product.idOrUrl;
@@ -132,7 +125,6 @@ export default function Page() {
     }
   };
 
-  // ---------- limpar
   const clearCurrent = () => {
     if (intervalRef.current) clearInterval(intervalRef.current);
     setProduct(null);
@@ -169,7 +161,7 @@ export default function Page() {
               onRefresh={() => doFetch(product.idOrUrl)}
               onFavorite={handleToggleFavorite}
               onClear={clearCurrent}
-              isFav={isFav}
+              isFav={!!isFav}
               loading={loadingMonitor}
             />
             <PriceCards product={product} last={last} />

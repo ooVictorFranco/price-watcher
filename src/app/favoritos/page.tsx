@@ -9,6 +9,7 @@ import {
   saveFavorites,
   getHistoryKey,
   upsertHistory,
+  saveHistory,
 } from '@/lib/utils';
 import FavoritesList from '@/components/FavoritesList';
 import ComparePanel from '@/components/ComparePanel';
@@ -23,11 +24,8 @@ export default function FavoritosPage() {
 
   const [loadingSelected, setLoadingSelected] = useState(false);
   const [loadingAll, setLoadingAll] = useState(false);
-
-  // IDs com shimmer (durante atualização)
   const [shimmeringIds, setShimmeringIds] = useState<string[]>([]);
 
-  // snapshots para cards
   const [latestById, setLatestById] = useState<Record<string, Snapshot | undefined>>({});
   const [prevById, setPrevById] = useState<Record<string, Snapshot | undefined>>({});
 
@@ -35,16 +33,14 @@ export default function FavoritosPage() {
     setFavorites(loadFavorites());
   }, []);
 
-  // sempre que favoritos mudarem, carrega último e penúltimo snapshots
   useEffect(() => {
     syncSnapshots(favorites.map(f => f.id));
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [favorites]);
 
-  // também sincroniza quando o agendador em segundo plano terminar uma rodada
   useEffect(() => {
     const onAuto = (e: Event) => {
-      const detail = (e as CustomEvent).detail as { ids?: string[]; ranAt?: number } | undefined;
+      const detail = (e as CustomEvent).detail as { ids?: string[] } | undefined;
       const ids = detail?.ids ?? favorites.map(f => f.id);
       syncSnapshots(ids);
     };
@@ -64,14 +60,12 @@ export default function FavoritosPage() {
     setPrevById(prev => { const { [id]: _, ...rest } = prev; return rest; });
   };
 
-  // seleção para comparar (clique no card)
   const toggleCompare = (id: string) => {
     setCompareSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
   };
   const removeFromCompare = (id: string) => setCompareSelected(prev => prev.filter(x => x !== id));
   const clearCompare = () => setCompareSelected([]);
 
-  // atualizar selecionados
   const refreshSelected = async () => {
     if (!compareSelected.length) return;
     setLoadingSelected(true);
@@ -90,7 +84,6 @@ export default function FavoritosPage() {
     }
   };
 
-  // atualizar TODOS
   const refreshAllFavorites = async () => {
     if (!favorites.length) return;
     setLoadingAll(true);
@@ -109,27 +102,29 @@ export default function FavoritosPage() {
     }
   };
 
-  // fetch + upsert (deduplicação)
   async function fetchAndUpsert(id: string) {
     const url = new URL(window.location.origin + '/api/scrape');
     url.searchParams.set('id', id);
     const res = await fetch(url.toString(), { cache: 'no-store' });
     if (!res.ok) return;
     const json = await res.json();
+    const now = Date.now();
+
+    const key = getHistoryKey(id);
+    const prevRaw = localStorage.getItem(key);
+    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
+
     const snap: Snapshot = {
-      timestamp: Date.now(),
+      timestamp: now,
       priceVista: json.priceVista ?? null,
       priceParcelado: json.priceParcelado ?? null,
       priceOriginal: json.priceOriginal ?? null,
     };
-    const key = getHistoryKey(id);
-    const prevRaw = localStorage.getItem(key);
-    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
+
     const next = upsertHistory(prev, snap);
-    localStorage.setItem(key, JSON.stringify(next));
+    saveHistory(id, next); // <— centralizado + evento
   }
 
-  // recarrega latest e prev do localStorage para os IDs informados
   function syncSnapshots(ids: string[]) {
     setLatestById(prevMap => {
       const next = { ...prevMap };
@@ -159,7 +154,6 @@ export default function FavoritosPage() {
     });
   }
 
-  // dados para o comparativo
   const nameById: Record<string, string> = useMemo(() => {
     const map: Record<string, string> = {};
     favorites.forEach(f => { map[f.id] = f.name; });
@@ -186,7 +180,7 @@ export default function FavoritosPage() {
           <h1 className="text-2xl font-bold">Favoritos</h1>
           <p className="text-sm text-gray-600">
             O app verifica seus favoritos automaticamente a cada <strong>3 horas</strong>.
-            Você pode forçar uma atualização manual aqui quando quiser.
+            Use o <strong>Backup</strong> para exportar/importar ou vincular um arquivo “vivo”.
           </p>
         </header>
 
@@ -195,14 +189,19 @@ export default function FavoritosPage() {
             favorites={favorites}
             onMonitor={(id) => router.push(`/?id=${id}`)}
             onRemove={(id) => {
-              deleteFavorite(id);
+              removeFavorite(id);
+              const nextFavs = favorites.filter(f => f.id !== id);
+              setFavorites(nextFavs);
+              saveFavorites(nextFavs);
             }}
             latestById={latestById}
             prevById={prevById}
             onRefreshAll={refreshAllFavorites}
             loadingAll={loadingAll}
             compareSelected={compareSelected}
-            onToggleCompare={toggleCompare}
+            onToggleCompare={(id) => {
+              setCompareSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
+            }}
             shimmeringIds={shimmeringIds}
           />
 
@@ -211,8 +210,8 @@ export default function FavoritosPage() {
             nameById={nameById}
             metric={compareMetric}
             onMetric={setCompareMetric}
-            onRemove={(id) => removeFromCompare(id)}
-            onClear={clearCompare}
+            onRemove={(id) => setCompareSelected(prev => prev.filter(x => x !== id))}
+            onClear={() => setCompareSelected([])}
             onCompare={() => {
               if (compareSelected.length < 2) return;
               const el = document.getElementById('compare-anchor');

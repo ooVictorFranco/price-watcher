@@ -6,8 +6,9 @@ export function brl(n?: number | null) {
   return n.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
 }
 
+export const HISTORY_PREFIX = 'kabum_history:';
 export function getHistoryKey(idOrUrl: string) {
-  return `kabum_history:${idOrUrl}`;
+  return `${HISTORY_PREFIX}${idOrUrl}`;
 }
 
 export function parseIdOrUrl(input: string) {
@@ -39,23 +40,29 @@ export function isSamePrices(a: Snapshot | undefined, b: Snapshot | undefined) {
   );
 }
 
-/**
- * Insere snapshot no histórico com deduplicação:
- * - Se os preços forem iguais ao último, substitui o último (atualiza o timestamp).
- * - Se algum preço mudou, adiciona uma nova entrada.
- */
+/** Deduplicação: se preços iguais ao último → substitui timestamp do último, senão adiciona. */
 export function upsertHistory(prev: Snapshot[], snap: Snapshot, limit = 500): Snapshot[] {
   const last = prev.at(-1);
   if (isSamePrices(last, snap)) {
     const next = prev.slice();
-    next[next.length - 1] = { ...snap }; // mantém preços iguais, atualiza timestamp
+    next[next.length - 1] = { ...snap };
     return next.slice(-limit);
   }
   return [...prev, snap].slice(-limit);
 }
 
+/** Emite um evento global de mudança de dados para integrações (ex.: arquivo “vivo”). */
+export function emitDataChanged(ids?: string[]) {
+  if (typeof window === 'undefined') return;
+  try {
+    window.dispatchEvent(new CustomEvent('kabum:data-changed', {
+      detail: { ids: ids ?? null, at: Date.now() },
+    }));
+  } catch { }
+}
+
 // ---------- Favoritos (localStorage)
-const FAV_KEY = 'kabum_favorites';
+export const FAV_KEY = 'kabum_favorites';
 
 export function loadFavorites(): Favorite[] {
   try {
@@ -70,6 +77,7 @@ export function loadFavorites(): Favorite[] {
 
 export function saveFavorites(list: Favorite[]) {
   localStorage.setItem(FAV_KEY, JSON.stringify(list));
+  emitDataChanged(); // notifica alterações
 }
 
 export function isFavorite(id: string) {
@@ -87,4 +95,10 @@ export function addFavorite(fav: Favorite) {
 export function removeFavorite(id: string) {
   const list = loadFavorites().filter(f => f.id !== id);
   saveFavorites(list);
+}
+
+/** Salva um histórico completo de um produto + emite evento. */
+export function saveHistory(idOrUrl: string, data: Snapshot[]) {
+  localStorage.setItem(getHistoryKey(idOrUrl), JSON.stringify(data));
+  emitDataChanged([idOrUrl]);
 }
