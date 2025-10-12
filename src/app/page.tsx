@@ -80,7 +80,14 @@ function PageContent() {
     if (/^[A-Z0-9]{10}$/i.test(asinOrUrl)) url.searchParams.set('asin', asinOrUrl);
     else url.searchParams.set('url', asinOrUrl);
     const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('amazon_fetch_failed');
+    if (!res.ok) {
+      const errorData = await res.json();
+      // Mostra mensagem específica se disponível
+      if (errorData.hint) {
+        throw new Error(`${errorData.error}: ${errorData.hint}`);
+      }
+      throw new Error(errorData.error || 'amazon_fetch_failed');
+    }
     return (await res.json()) as ApiResponse;
   }
 
@@ -118,7 +125,8 @@ function PageContent() {
       setHistory(next);
     } catch (e) {
       console.error(e);
-      toast.error('Não consegui ler este produto agora. Tente novamente em instantes.');
+      const message = e instanceof Error ? e.message : 'Não consegui ler este produto agora.';
+      toast.error(message);
     } finally {
       setLoadingMonitor(false);
     }
@@ -170,7 +178,7 @@ function PageContent() {
 
   return (
     <main className="min-h-screen py-8">
-      <div className="mx-auto w/full max-w-6xl px-6 space-y-6">
+      <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
         <header className="space-y-2">
           <h1 className="text-2xl font-bold">Monitoramento</h1>
           <p className="text-sm text-gray-600">

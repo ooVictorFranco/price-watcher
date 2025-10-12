@@ -45,6 +45,9 @@ export function amazonUrlForAsin(asin: string) {
 export function kabumSearchUrl(query: string) {
   return `https://www.kabum.com.br/busca/${encodeURIComponent(query)}`;
 }
+export function amazonSearchUrl(query: string) {
+  return `https://www.amazon.com.br/s?k=${encodeURIComponent(query)}`;
+}
 
 /** Detecta KaBuM (id/URL) ou Amazon (ASIN/URL, inclusive a.co e amzn.to) */
 export function parseIdOrUrl(input: string):
@@ -54,19 +57,11 @@ export function parseIdOrUrl(input: string):
   | { mode: 'url'; idOrUrl: string; provider: 'amazon' } {
   const trimmed = input.trim();
 
-  // KaBuM numérico
-  if (/^\d+$/.test(trimmed)) return { mode: 'id', idOrUrl: trimmed, provider: 'kabum' as const };
-
-  // KaBuM url
+  // KaBuM url (verifica antes do ID numérico)
   if (/kabum\.com\.br/i.test(trimmed)) {
     const km = trimmed.match(/kabum\.com\.br\/produto\/(\d+)/i);
     if (km) return { mode: 'id', idOrUrl: km[1], provider: 'kabum' as const };
     return { mode: 'url', idOrUrl: trimmed, provider: 'kabum' as const };
-  }
-
-  // Amazon ASIN
-  if (/^[A-Z0-9]{10}$/i.test(trimmed)) {
-    return { mode: 'asin', idOrUrl: trimmed.toUpperCase(), provider: 'amazon' as const };
   }
 
   // Amazon urls (inclui encurtadores a.co e amzn.to)
@@ -74,6 +69,14 @@ export function parseIdOrUrl(input: string):
     const am = trimmed.match(/\/(?:dp|gp\/product)\/([A-Z0-9]{10})/i);
     if (am) return { mode: 'asin', idOrUrl: am[1].toUpperCase(), provider: 'amazon' as const };
     return { mode: 'url', idOrUrl: trimmed, provider: 'amazon' as const };
+  }
+
+  // KaBuM ID numérico puro (apenas dígitos)
+  if (/^\d+$/.test(trimmed)) return { mode: 'id', idOrUrl: trimmed, provider: 'kabum' as const };
+
+  // Amazon ASIN (10 caracteres alfanuméricos, DEVE conter pelo menos uma letra)
+  if (/^[A-Z0-9]{10}$/i.test(trimmed) && /[A-Z]/i.test(trimmed)) {
+    return { mode: 'asin', idOrUrl: trimmed.toUpperCase(), provider: 'amazon' as const };
   }
 
   // fallback
