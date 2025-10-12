@@ -1,26 +1,91 @@
-@import "tailwindcss";
+/* src/app/globals.css */
+@import 'tailwindcss';
+@reference "tailwindcss";
 
+html,
+body,
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  height: 100%;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@layer base {
+  * {
+    @apply antialiased;
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer components {
+  .card {
+    @apply rounded-2xl border bg-white shadow-md;
+  }
+  .stat {
+    @apply rounded-xl bg-gray-50 p-4;
+  }
+  .muted {
+    @apply text-sm text-gray-600;
+  }
+  .label-xs {
+    @apply text-xs text-gray-500;
+  }
+  .btn {
+    @apply inline-flex items-center justify-center rounded-xl px-4 py-3 font-medium;
+  }
+  .btn-primary {
+    @apply bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply border hover:bg-gray-50;
+  }
+  .field {
+    @apply rounded-xl border p-3 outline-none focus:ring-2 focus:ring-blue-500;
+  }
+  .container-narrow {
+    @apply mx-auto w-full max-w-4xl px-6;
+  }
+}
+
+/* ---------- Shimmer (skeleton) ---------- */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+.skeleton {
+  position: relative;
+  overflow: hidden;
+  background-color: rgb(243 244 246); /* gray-100 */
+}
+.skeleton::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.65), transparent);
+  animation: shimmer 1.25s infinite;
+}
+
+/* Barra fina para painéis (ex.: ComparePanel) */
+.skeleton-bar {
+  position: relative;
+  height: 4px;
+  overflow: hidden;
+  background-color: rgb(229 231 235); /* gray-200 */
+  border-radius: 9999px;
+}
+.skeleton-bar::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 35%;
+  background-image: linear-gradient(90deg, transparent, rgba(0, 0, 0, 0.12), transparent);
+  animation: shimmer 1.25s infinite;
+}
+
+/* Utilitário: desabilitar clique quando ocupado */
+[data-busy='true'] {
+  pointer-events: none;
+  opacity: 0.8;
 }

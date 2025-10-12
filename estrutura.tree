@@ -1,0 +1,39 @@
+.
+├── .gitignore
+├── README.md
+├── eslint.config.mjs
+├── estrutura.txt
+├── next-env.d.ts
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.js
+├── public
+│   ├── file.svg
+│   ├── globe.svg
+│   ├── next.svg
+│   ├── vercel.svg
+│   └── window.svg
+├── src
+│   ├── app
+│   │   ├── api
+│   │   ├── favicon.ico
+│   │   ├── globals.css
+│   │   ├── layout.tsx
+│   │   └── page.tsx
+│   ├── components
+│   │   ├── EmptyState.tsx
+│   │   ├── HistoryChart.tsx
+│   │   ├── HistoryTable.tsx
+│   │   ├── PriceCards.tsx
+│   │   ├── ProductHeader.tsx
+│   │   ├── SearchBar.tsx
+│   │   └── SkeletonCards.tsx
+│   ├── lib
+│   │   ├── parseKabum.ts
+│   │   └── utils.ts
+│   └── types.ts
+├── tailwind.config.ts
+└── tsconfig.json
+
+7 directories, 30 files
