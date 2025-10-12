@@ -15,6 +15,7 @@ import FavoritesList from '@/components/FavoritesList';
 import ComparePanel from '@/components/ComparePanel';
 import CompareChart, { makeCompareSeries } from '@/components/CompareChart';
 import { useRouter } from 'next/navigation';
+import { toast } from '@/lib/toast';
 
 export default function FavoritosPage() {
   const router = useRouter();
@@ -29,7 +30,6 @@ export default function FavoritosPage() {
   const [latestById, setLatestById] = useState<Record<string, Snapshot | undefined>>({});
   const [prevById, setPrevById] = useState<Record<string, Snapshot | undefined>>({});
 
-  // Força o título correto desta rota (como é Client Component)
   useEffect(() => {
     document.title = 'Favoritos — Monitor de preço';
   }, []);
@@ -53,8 +53,6 @@ export default function FavoritosPage() {
     return () => window.removeEventListener('kabum:auto-refresh', onAuto as EventListener);
   }, [favorites]);
 
-  const monitorOnMain = (id: string) => router.push(`/?id=${id}`);
-
   const deleteFavorite = (id: string) => {
     removeFavorite(id);
     const nextFavs = favorites.filter(f => f.id !== id);
@@ -63,6 +61,7 @@ export default function FavoritosPage() {
     setCompareSelected(prev => prev.filter(x => x !== id));
     setLatestById(prev => { const { [id]: _, ...rest } = prev; return rest; });
     setPrevById(prev => { const { [id]: _, ...rest } = prev; return rest; });
+    toast.success('Removido dos favoritos.');
   };
 
   const toggleCompare = (id: string) => {
@@ -80,9 +79,10 @@ export default function FavoritosPage() {
         await fetchAndUpsert(id);
       }
       syncSnapshots(compareSelected);
+      toast.info(`Atualizados ${compareSelected.length} selecionados.`);
     } catch (e) {
       console.error(e);
-      alert('Não consegui atualizar agora.');
+      toast.error('Não consegui atualizar agora.');
     } finally {
       setLoadingSelected(false);
       setShimmeringIds([]);
@@ -98,9 +98,10 @@ export default function FavoritosPage() {
         await fetchAndUpsert(f.id);
       }
       syncSnapshots(favorites.map(f => f.id));
+      toast.info('Todos os favoritos foram atualizados.');
     } catch (e) {
       console.error(e);
-      alert('Não consegui atualizar todos agora.');
+      toast.error('Não consegui atualizar todos agora.');
     } finally {
       setLoadingAll(false);
       setShimmeringIds([]);
@@ -111,7 +112,7 @@ export default function FavoritosPage() {
     const url = new URL(window.location.origin + '/api/scrape');
     url.searchParams.set('id', id);
     const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) return;
+    if (!res.ok) throw new Error('fetch failed');
     const json = await res.json();
     const now = Date.now();
 
@@ -127,7 +128,7 @@ export default function FavoritosPage() {
     };
 
     const next = upsertHistory(prev, snap);
-    saveHistory(id, next); // centralizado + evento
+    saveHistory(id, next);
   }
 
   function syncSnapshots(ids: string[]) {
@@ -193,20 +194,13 @@ export default function FavoritosPage() {
           <FavoritesList
             favorites={favorites}
             onMonitor={(id) => router.push(`/?id=${id}`)}
-            onRemove={(id) => {
-              removeFavorite(id);
-              const nextFavs = favorites.filter(f => f.id !== id);
-              setFavorites(nextFavs);
-              saveFavorites(nextFavs);
-            }}
+            onRemove={deleteFavorite}
             latestById={latestById}
             prevById={prevById}
             onRefreshAll={refreshAllFavorites}
             loadingAll={loadingAll}
             compareSelected={compareSelected}
-            onToggleCompare={(id) => {
-              setCompareSelected(prev => prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]);
-            }}
+            onToggleCompare={toggleCompare}
             shimmeringIds={shimmeringIds}
           />
 
@@ -215,8 +209,8 @@ export default function FavoritosPage() {
             nameById={nameById}
             metric={compareMetric}
             onMetric={setCompareMetric}
-            onRemove={(id) => setCompareSelected(prev => prev.filter(x => x !== id))}
-            onClear={() => setCompareSelected([])}
+            onRemove={(id) => removeFromCompare(id)}
+            onClear={() => clearCompare()}
             onCompare={() => {
               if (compareSelected.length < 2) return;
               const el = document.getElementById('compare-anchor');

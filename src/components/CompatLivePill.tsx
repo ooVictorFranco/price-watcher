@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { downloadCompatNow } from '@/lib/livefile';
+import { toast } from '@/lib/toast';
 
 export default function CompatLivePill() {
   const [visible, setVisible] = useState(false);
@@ -29,7 +30,7 @@ export default function CompatLivePill() {
           <div className="text-xs text-gray-600">Clique para baixar o JSON atualizado ({filename}).</div>
         </div>
         <button
-          onClick={downloadCompatNow}
+          onClick={() => { downloadCompatNow(); toast.success('JSON atualizado baixado.'); }}
           className="rounded-lg px-3 py-2 text-sm bg-blue-600 text-white"
         >
           Salvar agora

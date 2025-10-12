@@ -16,6 +16,7 @@ import {
   isCompatLiveEnabled,
   downloadCompatNow,
 } from '@/lib/livefile';
+import { toast } from '@/lib/toast';
 
 export default function BackupMenu() {
   const [open, setOpen] = useState(false);
@@ -36,11 +37,14 @@ export default function BackupMenu() {
       const url = URL.createObjectURL(new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' }));
       const a = document.createElement('a');
       a.href = url;
-      a.download = `kabum-backup-${new Date().toISOString().slice(0,10)}.json`;
+      a.download = `kabum-backup-${new Date().toISOString().slice(0, 10)}.json`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
+      toast.success('Backup exportado (.json).');
+    } catch (e: any) {
+      toast.error(e?.message || 'Falha ao exportar o backup.');
     } finally {
       setBusy(null);
       setOpen(false);
@@ -53,13 +57,12 @@ export default function BackupMenu() {
       const text = await file.text();
       const json = JSON.parse(text) as BackupBlob;
       const res = importDataMerge(json);
-      alert(`Importado/mesclado: ${res.favorites} favoritos, ${res.histories} pontos no histórico.`);
+      toast.success(`Importado/mesclado: ${res.favorites} favoritos, ${res.histories} pontos no histórico.`);
 
-      // Pergunta o que fazer com “arquivo vivo”
       if (isNativeLiveSupported()) {
         const wantsNative = confirm(
           'Deseja vincular ESTE MESMO arquivo como “arquivo vivo”? ' +
-          'No seletor a seguir, escolha o MESMO arquivo para escrever automaticamente (Chrome/Edge).'
+          'No seletor a seguir, escolha o MESMO arquivo (Chrome/Edge).'
         );
         if (wantsNative) {
           const info = await pickExistingLiveFile();
@@ -67,22 +70,22 @@ export default function BackupMenu() {
             setNativeLinked(true);
             setCompatEnabled(false);
             await flushLiveFile();
-            alert(`Arquivo “vivo” vinculado: ${info.name}. Atualizações serão gravadas automaticamente.`);
+            toast.success(`Arquivo “vivo” vinculado: ${info.name}.`);
           }
         }
       } else {
         const wantsCompat = confirm(
           'Você está no Firefox/Safari. Ativar modo compatível de “arquivo vivo”? ' +
-          'Isso mostrará um lembrete “Salvar agora” sempre que houver alterações e sugerirá o mesmo nome do arquivo importado.'
+          'Mostraremos um lembrete “Salvar agora” quando houver alterações.'
         );
         if (wantsCompat) {
           enableCompatLive(file.name || 'kabum-backup.json');
           setCompatEnabled(true);
-          alert('Modo compatível ativado. Use “Salvar agora” quando aparecer o lembrete para gravar seu JSON atualizado.');
+          toast.info('Modo compatível ativado. Use “Salvar agora” quando aparecer o lembrete.');
         }
       }
     } catch (e: any) {
-      alert(e?.message || 'Falha ao importar');
+      toast.error(e?.message || 'Falha ao importar o backup.');
     } finally {
       setBusy(null);
       setOpen(false);
@@ -97,8 +100,10 @@ export default function BackupMenu() {
         setNativeLinked(true);
         setCompatEnabled(false);
         await flushLiveFile();
-        alert(`Arquivo “vivo” configurado: ${info.name}. Atualizações serão gravadas automaticamente.`);
+        toast.success(`Arquivo “vivo” configurado: ${info.name}.`);
       }
+    } catch (e: any) {
+      toast.error(e?.message || 'Não foi possível configurar o arquivo vivo.');
     } finally {
       setBusy(null);
       setOpen(false);
@@ -106,22 +111,26 @@ export default function BackupMenu() {
   }
 
   async function disableNative() {
-    await clearHandle();
-    setNativeLinked(false);
-    alert('Arquivo “vivo” nativo desvinculado.');
-    setOpen(false);
+    try {
+      await clearHandle();
+      setNativeLinked(false);
+      toast.info('Arquivo “vivo” nativo desvinculado.');
+    } catch {
+      // noop
+    } finally {
+      setOpen(false);
+    }
   }
 
   function toggleCompat() {
     if (compatEnabled) {
       disableCompatLive();
       setCompatEnabled(false);
-      alert('Modo compatível desativado.');
+      toast.info('Modo compatível desativado.');
     } else {
-      // usa nome padrão ao ativar pelo menu (pode ser alterado ao importar)
       enableCompatLive('kabum-backup.json');
       setCompatEnabled(true);
-      alert('Modo compatível ativado. Quando aparecer o lembrete, clique em “Salvar agora” para baixar o JSON atualizado.');
+      toast.info('Modo compatível ativado. Usaremos “Salvar agora” quando houver alterações.');
     }
     setOpen(false);
   }
@@ -208,7 +217,10 @@ export default function BackupMenu() {
                   </button>
                   {compatEnabled && (
                     <button
-                      onClick={downloadCompatNow}
+                      onClick={() => {
+                        downloadCompatNow();
+                        toast.success('JSON atualizado baixado.');
+                      }}
                       className="w-full rounded-md border px-3 py-2 hover:bg-gray-50"
                       title="Baixar agora o JSON atualizado"
                     >
@@ -217,7 +229,7 @@ export default function BackupMenu() {
                   )}
                 </div>
                 <p className="text-xs text-gray-500">
-                  No modo compatível, o app avisa quando houver alterações e você clica em <em>Salvar agora</em> para baixar o JSON atualizado.
+                  No modo compatível, mostraremos um lembrete “Salvar agora” quando houver alterações.
                 </p>
               </>
             )}

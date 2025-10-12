@@ -14,6 +14,7 @@ import {
   removeFavorite,
   upsertHistory,
   getHistoryKey,
+  FAV_LIMIT,
 } from '@/lib/utils';
 import SearchBar from '@/components/SearchBar';
 import ProductHeader from '@/components/ProductHeader';
@@ -22,6 +23,7 @@ import HistoryChart from '@/components/HistoryChart';
 import HistoryTable from '@/components/HistoryTable';
 import EmptyState from '@/components/EmptyState';
 import SkeletonCards from '@/components/SkeletonCards';
+import { toast } from '@/lib/toast';
 
 export default function Page() {
   const params = useSearchParams();
@@ -89,11 +91,11 @@ export default function Page() {
         priceOriginal: json.priceOriginal ?? null,
       };
       const next = upsertHistory(prev, current);
-      saveHistory(idOrUrl, next); // <— agora centralizado + evento
+      saveHistory(idOrUrl, next);
       setHistory(next);
     } catch (e) {
       console.error(e);
-      alert('Não consegui ler este produto no momento. Tente novamente mais tarde.');
+      toast.error('Não consegui ler este produto agora. Tente novamente em instantes.');
     } finally {
       setLoadingMonitor(false);
     }
@@ -113,16 +115,26 @@ export default function Page() {
     if (!product) return;
     const id = product.idOrUrl;
     const exists = favorites.some(f => f.id === id);
+
     if (exists) {
       removeFavorite(id);
       setFavorites(prev => prev.filter(f => f.id !== id));
-    } else {
-      const name = product.name ?? `Produto ${id}`;
-      const image = product.image ?? null;
-      const fav: Favorite = { id, name, image, addedAt: Date.now() };
-      addFavorite(fav);
-      setFavorites(prev => [fav, ...prev.filter(f => f.id !== id)]);
+      toast.success('Removido dos favoritos.');
+      return;
     }
+
+    // se for novo e já estiver no limite, bloqueia
+    if (favorites.length >= FAV_LIMIT) {
+      toast.warning(`Limite de ${FAV_LIMIT} favoritos atingido.`);
+      return;
+    }
+
+    const name = product.name ?? `Produto ${id}`;
+    const image = product.image ?? null;
+    const fav: Favorite = { id, name, image, addedAt: Date.now() };
+    addFavorite(fav);
+    setFavorites(prev => [fav, ...prev.filter(f => f.id !== id)]);
+    toast.success('Adicionado aos favoritos!');
   };
 
   const clearCurrent = () => {
@@ -130,6 +142,7 @@ export default function Page() {
     setProduct(null);
     setHistory([]);
     setInput('');
+    toast.info('Monitoramento limpo.');
   };
 
   return (

@@ -7,7 +7,6 @@ import { exportLocalData } from './backup';
 const STORE = 'fs-handles';
 const HANDLE_KEY = 'livefile-handle';
 
-// Flags/estado do modo compatível (Firefox/Safari)
 const COMPAT_ENABLED = 'kabum:compat_live_enabled';
 const COMPAT_DIRTY = 'kabum:compat_live_dirty';
 const COMPAT_NAME = 'kabum:compat_live_name';
@@ -54,33 +53,24 @@ async function writeFullSnapshot(h: FileHandle) {
 
 /** Cria novo arquivo e mantém sincronizado (nativo – Chrome/Edge). */
 export async function pickLiveFile(): Promise<{ name: string } | null> {
-  if (!supportsNative()) {
-    alert('Este recurso nativo requer um navegador Chromium (ex.: Chrome ou Edge). Use o modo compatível no Firefox.');
-    return null;
-  }
+  if (!supportsNative()) throw new Error('Recurso nativo disponível apenas em navegadores Chromium.');
   // @ts-ignore
   const handle: FileHandle = await (window as any).showSaveFilePicker({
     suggestedName: 'kabum-backup.json',
     types: [{ description: 'Backup JSON', accept: { 'application/json': ['.json'] } }],
   });
   const ok = await hasWritePermission(handle);
-  if (!ok) {
-    alert('Permissão negada para escrever no arquivo.');
-    return null;
-  }
+  if (!ok) throw new Error('Permissão negada para escrever no arquivo.');
   await setHandle(handle);
   await writeFullSnapshot(handle);
-  // desativa modo compatível se estivesse ativo
+  // desativa modo compatível se estava ativo
   localStorage.removeItem(COMPAT_ENABLED);
   return { name: (handle as any).name || 'kabum-backup.json' };
 }
 
 /** Vincula arquivo EXISTENTE como “vivo” (nativo – Chrome/Edge). */
 export async function pickExistingLiveFile(): Promise<{ name: string } | null> {
-  if (!supportsNative()) {
-    alert('Recurso nativo indisponível. Use o modo compatível no Firefox.');
-    return null;
-  }
+  if (!supportsNative()) throw new Error('Recurso nativo indisponível neste navegador.');
   // @ts-ignore
   const handles: FileHandle[] = await (window as any).showOpenFilePicker({
     multiple: false,
@@ -90,10 +80,7 @@ export async function pickExistingLiveFile(): Promise<{ name: string } | null> {
   if (!handle) return null;
 
   const ok = await hasWritePermission(handle);
-  if (!ok) {
-    alert('Permissão negada para escrever no arquivo.');
-    return null;
-  }
+  if (!ok) throw new Error('Permissão negada para escrever no arquivo.');
   await setHandle(handle);
   await writeFullSnapshot(handle);
   localStorage.removeItem(COMPAT_ENABLED);
@@ -114,17 +101,15 @@ export async function flushLiveFile() {
   try {
     await writeFullSnapshot(h);
   } catch {
-    // pode ter sido movido/excluído
+    // ignorar
   }
 }
 
 /* ========= MODO COMPATÍVEL (Firefox/Safari) ========= */
 
-// habilita/desabilita
 export function enableCompatLive(filename?: string) {
   localStorage.setItem(COMPAT_ENABLED, '1');
   if (filename) localStorage.setItem(COMPAT_NAME, filename);
-  // limpa “sujo” inicial
   localStorage.removeItem(COMPAT_DIRTY);
   dispatchCompatStatus();
 }
@@ -158,7 +143,7 @@ function dispatchCompatStatus() {
         filename: localStorage.getItem(COMPAT_NAME) || 'kabum-backup.json',
       },
     }));
-  } catch {}
+  } catch { }
 }
 
 /** Gera download do JSON atual (Firefox/Safari). */
@@ -173,19 +158,16 @@ export function downloadCompatNow() {
   a.click();
   a.remove();
   URL.revokeObjectURL(url);
-  // após salvar, não está mais “sujo”
   setCompatDirty(false);
 }
 
-/** Inicializa listeners: escreve nativo ou marca “sujo” no compat. */
+/** Inicializa listeners: grava (nativo) ou marca “sujo” (compat). */
 export function initLiveFileSync() {
   const onChange = () => {
-    // Se existir arquivo nativo, grava. Caso contrário, marca sujo no compat.
     hasLiveFile().then((hasNative) => {
       if (hasNative) {
         flushLiveFile();
       } else if (isCompatLiveEnabled()) {
-        // debounce leve
         setCompatDirty(true);
       }
     });
@@ -194,14 +176,10 @@ export function initLiveFileSync() {
   window.addEventListener('kabum:data-changed', onChange as EventListener);
   window.addEventListener('kabum:auto-refresh', onChange as EventListener);
 
-  // Ao voltar para a aba/ficar online, tenta gravar (nativo) ou manter “sujo” no compat
   const onVisible = () => { if (document.visibilityState === 'visible') onChange(); };
   document.addEventListener('visibilitychange', onVisible);
   window.addEventListener('online', onChange);
 
-  // dispara estado inicial para o UI
   dispatchCompatStatus();
-
-  // tentativa de flush antes de fechar (só funciona no nativo)
   window.addEventListener('beforeunload', () => { flushLiveFile(); });
 }

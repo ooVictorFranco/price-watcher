@@ -7,6 +7,7 @@ import BackgroundRefresher from '@/components/BackgroundRefresher';
 import BackupMenu from '@/components/BackupMenu';
 import LiveFileSync from '@/components/LiveFileSync';
 import CompatLivePill from '@/components/CompatLivePill';
+import ToastHost from '@/components/ToastHost';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -19,10 +20,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="pt-BR">
       <body className={`${inter.variable} font-sans bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900`}>
-        {/* Inicializadores em segundo plano */}
+        {/* Hosts/Inicializadores */}
+        <ToastHost />
         <BackgroundRefresher />
         <LiveFileSync />
-        {/* Aviso/pílula para modo compatível (Firefox/Safari) */}
         <CompatLivePill />
 
         <header className="bg-white border-b">
