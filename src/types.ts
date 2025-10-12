@@ -73,6 +73,17 @@ export interface Favorite {
   image: string | null;       // URL da imagem
   addedAt: number;            // epoch ms
   lastCheckedAt?: number | null;
+  groupId?: string | null;    // ID do grupo ao qual pertence (opcional)
+}
+
+/** Grupo de produtos unificados de diferentes lojas */
+export interface ProductGroup {
+  id: string;                 // UUID único do grupo
+  name: string;               // Nome do grupo (editável pelo usuário)
+  productIds: string[];       // IDs dos produtos nas diferentes lojas
+  createdAt: number;          // Data de criação (epoch ms)
+  image: string | null;       // Imagem principal do grupo (opcional)
+  primaryProductId?: string;  // ID do produto considerado principal
 }
 
 /** Resultado de busca do KaBuM */

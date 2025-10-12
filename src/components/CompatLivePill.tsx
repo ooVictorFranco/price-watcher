@@ -8,17 +8,17 @@ import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 
 export default function CompatLivePill() {
   const [visible, setVisible] = useState(false);
-  const [filename, setFilename] = useState('kabum-backup.json');
+  const [filename, setFilename] = useState('price-watcher-backup.json');
   const prefersReduced = useReducedMotion();
 
   useEffect(() => {
     const onStatus = (e: Event) => {
       const { enabled, dirty, filename } = (e as CustomEvent).detail || {};
-      setFilename(filename || 'kabum-backup.json');
+      setFilename(filename || 'price-watcher-backup.json');
       setVisible(!!enabled && !!dirty);
     };
-    window.addEventListener('kabum:compat-live-status', onStatus as EventListener);
-    return () => window.removeEventListener('kabum:compat-live-status', onStatus as EventListener);
+    window.addEventListener('pw:compat-live-status', onStatus as EventListener);
+    return () => window.removeEventListener('pw:compat-live-status', onStatus as EventListener);
   }, []);
 
   return (

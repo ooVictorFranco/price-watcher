@@ -11,8 +11,8 @@ import {
 
 type Opts = { intervalMs?: number; tickMs?: number; };
 
-const LAST_RUN_KEY = 'kabum:bg:last_run';
-const LEADER_KEY = 'kabum:bg:leader';
+const LAST_RUN_KEY = 'pw:bg:last_run';
+const LEADER_KEY = 'pw:bg:leader';
 const LEADER_TTL = 30_000;
 const HEARTBEAT_MS = 15_000;
 
@@ -27,7 +27,7 @@ async function becomeLeader(onAcquire: () => void, onRelease: () => void) {
   const hasLocks = typeof (navigator as { locks?: { request: unknown } }).locks?.request === 'function';
   if (hasLocks) {
     try {
-      await (navigator as { locks: { request: (name: string, opts: unknown, callback: () => Promise<void>) => Promise<void> } }).locks.request('kabum-auto-refresh', { mode: 'exclusive' }, async () => {
+      await (navigator as { locks: { request: (name: string, opts: unknown, callback: () => Promise<void>) => Promise<void> } }).locks.request('pw-auto-refresh', { mode: 'exclusive' }, async () => {
         onAcquire();
         await new Promise<void>(() => {});
       });
@@ -98,13 +98,13 @@ async function refreshAllFavoritesOnce() {
       const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
       const next = upsertHistory(prev, snap);
 
-      // <— salvar centralizado (emite evento kabum:data-changed)
+      // <— salvar centralizado (emite evento pw:data-changed)
       saveHistory(f.id, next);
     } catch {}
   }
 
   localStorage.setItem(LAST_RUN_KEY, String(now()));
-  window.dispatchEvent(new CustomEvent('kabum:auto-refresh', {
+  window.dispatchEvent(new CustomEvent('pw:auto-refresh', {
     detail: { ids: favs.map(f => f.id), ranAt: now() },
   }));
 }
@@ -131,7 +131,7 @@ export function startBackgroundRefresh(opts?: Opts) {
     document.addEventListener('visibilitychange', onVisible);
     const onOnline = () => runIfDue();
     window.addEventListener('online', onOnline);
-    (window as Window & { __kabum_bg_cleanup__?: () => void }).__kabum_bg_cleanup__ = () => {
+    (window as Window & { __pw_bg_cleanup__?: () => void }).__pw_bg_cleanup__ = () => {
       if (runnerTimer) clearInterval(runnerTimer);
       document.removeEventListener('visibilitychange', onVisible);
       window.removeEventListener('online', onOnline);
@@ -139,7 +139,7 @@ export function startBackgroundRefresh(opts?: Opts) {
   };
 
   const onRelease = () => {
-    const cleanup: (() => void) | undefined = (window as Window & { __kabum_bg_cleanup__?: () => void }).__kabum_bg_cleanup__;
+    const cleanup: (() => void) | undefined = (window as Window & { __pw_bg_cleanup__?: () => void }).__pw_bg_cleanup__;
     if (cleanup) cleanup();
   };
 

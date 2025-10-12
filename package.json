@@ -1,7 +1,33 @@
 {
-  "name": "kabum-price-watcher",
-  "version": "0.1.0",
-  "private": true,
+  "name": "price-watcher",
+  "version": "0.1.0-beta.1",
+  "description": "Monitor inteligente de preços para múltiplas lojas online (KaBuM!, Amazon) com histórico, comparação e atualização automática",
+  "author": "Victor Franco",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/victorfranco/price-watcher.git"
+  },
+  "keywords": [
+    "price-tracker",
+    "price-monitor",
+    "kabum",
+    "amazon",
+    "web-scraping",
+    "price-comparison",
+    "nextjs",
+    "react",
+    "typescript"
+  ],
+  "bugs": {
+    "url": "https://github.com/victorfranco/price-watcher/issues"
+  },
+  "homepage": "https://github.com/victorfranco/price-watcher#readme",
+  "engines": {
+    "node": ">=20.0.0",
+    "npm": ">=10.0.0"
+  },
+  "private": false,
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build --turbopack",

@@ -2,20 +2,22 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { Line } from 'react-chartjs-2';
+import { useEffect, useRef } from 'react';
 import {
   Chart as ChartJS,
   LineElement,
+  LineController,
   PointElement,
   LinearScale,
   CategoryScale,
   Tooltip,
   Legend,
+  ChartConfiguration,
 } from 'chart.js';
 import { Snapshot } from '@/types';
 import { brl } from '@/lib/utils';
 
-ChartJS.register(LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
+ChartJS.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
 type Series = {
   id: string;
@@ -42,9 +44,10 @@ function unionSortedTimestamps(series: Series[]): number[] {
 }
 
 export default function CompareChart({ series }: { series: Series[] }) {
-  if (!series.length) return null;
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const chartRef = useRef<ChartJS | null>(null);
 
-  const union = unionSortedTimestamps(series);
+  const union = series.length ? unionSortedTimestamps(series) : [];
   const labels = union.map((t) => dayjs(t).format('DD/MM HH:mm'));
 
   const datasets = series.map((s) => {
@@ -72,30 +75,53 @@ export default function CompareChart({ series }: { series: Series[] }) {
     };
   });
 
+  useEffect(() => {
+    if (!canvasRef.current) return;
+
+    const config: ChartConfiguration = {
+      type: 'line',
+      data: { labels, datasets },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        interaction: { mode: 'nearest', intersect: false },
+        plugins: {
+          legend: { position: 'top', labels: { color: '#374151', usePointStyle: true, pointStyle: 'line' } },
+          tooltip: {
+            mode: 'nearest',
+            intersect: false,
+            callbacks: { label: (ctx) => `${ctx.dataset.label}: ${brl(Number(ctx.parsed.y))}` },
+          },
+        },
+        scales: {
+          x: { ticks: { color: '#6b7280' }, grid: { color: '#f3f4f6' } },
+          y: { ticks: { color: '#6b7280', callback: (v) => brl(Number(v)) }, grid: { color: '#f3f4f6' } },
+        },
+      },
+    };
+
+    if (chartRef.current) {
+      chartRef.current.data = { labels, datasets };
+      chartRef.current.update();
+    } else {
+      chartRef.current = new ChartJS(canvasRef.current, config);
+    }
+
+    return () => {
+      chartRef.current?.destroy();
+      chartRef.current = null;
+    };
+  }, [labels, datasets]);
+
+  if (!series.length) {
+    return null;
+  }
+
   return (
     <div className="rounded-2xl border bg-white shadow-md p-5">
       <h3 className="text-sm font-medium mb-3">Comparativo</h3>
       <div className="rounded-xl bg-white p-2 h-80">
-        <Line
-          data={{ labels, datasets }}
-          options={{
-            responsive: true,
-            maintainAspectRatio: false,
-            interaction: { mode: 'nearest', intersect: false },
-            plugins: {
-              legend: { position: 'top', labels: { color: '#374151', usePointStyle: true, pointStyle: 'line' } },
-              tooltip: {
-                mode: 'nearest',
-                intersect: false,
-                callbacks: { label: (ctx) => `${ctx.dataset.label}: ${brl(Number(ctx.parsed.y))}` },
-              },
-            },
-            scales: {
-              x: { ticks: { color: '#6b7280' }, grid: { color: '#f3f4f6' } },
-              y: { ticks: { color: '#6b7280', callback: (v) => brl(Number(v)) }, grid: { color: '#f3f4f6' } },
-            },
-          }}
-        />
+        <canvas ref={canvasRef} />
       </div>
     </div>
   );

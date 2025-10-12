@@ -1,10 +1,10 @@
-# 🛒 KaBum Price Watcher
+# 🛒 Price Watcher
 
-Monitor inteligente de preços para **KaBum!** e **Amazon**, com histórico, comparação e atualização automática em segundo plano.
+Monitor inteligente de preços para múltiplas lojas online (**KaBuM!**, **Amazon** e mais no futuro), com histórico, comparação e atualização automática em segundo plano.
 
 ## 📋 Sobre o Projeto
 
-**KaBum Price Watcher** é uma aplicação web que permite monitorar preços de produtos do KaBum! e Amazon, mantendo um histórico completo de variações e oferecendo recursos de comparação entre produtos.
+**Price Watcher** é uma aplicação web que permite monitorar preços de produtos em diversas lojas online, mantendo um histórico completo de variações e oferecendo recursos de comparação entre produtos e lojas.
 
 ### ✨ Principais Funcionalidades
 
@@ -52,8 +52,8 @@ Este projeto foi desenvolvido com:
 
 1. **Clone o repositório**
    ```bash
-   git clone https://github.com/seu-usuario/kabum-price-watcher.git
-   cd kabum-price-watcher
+   git clone https://github.com/seu-usuario/price-watcher.git
+   cd price-watcher
    ```
 
 2. **Instale as dependências**
@@ -141,7 +141,7 @@ Na página **Favoritos & Comparar**:
 ## 🏗️ Estrutura do Projeto
 
 ```
-kabum-price-watcher/
+price-watcher/
 ├── src/
 │   ├── app/                      # Páginas Next.js (App Router)
 │   │   ├── layout.tsx            # Layout raiz
@@ -198,8 +198,8 @@ Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para ma
 
 ## 🐛 Bugs e Sugestões
 
-Encontrou um bug ou tem uma sugestão? Abra uma [issue](https://github.com/seu-usuario/kabum-price-watcher/issues) no GitHub!
+Encontrou um bug ou tem uma sugestão? Abra uma [issue](https://github.com/seu-usuario/price-watcher/issues) no GitHub!
 
 ---
 
-Desenvolvido com ❤️ para ajudar a encontrar as melhores ofertas no KaBum! e Amazon.
+Desenvolvido com ❤️ para ajudar a encontrar as melhores ofertas online.

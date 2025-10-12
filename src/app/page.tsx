@@ -70,7 +70,7 @@ function PageContent() {
     if (/^\d+$/.test(idOrUrl)) url.searchParams.set('id', idOrUrl);
     else url.searchParams.set('url', idOrUrl);
     const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('kabum_fetch_failed');
+    if (!res.ok) throw new Error('fetch_failed');
     return (await res.json()) as ApiResponse;
   }
 

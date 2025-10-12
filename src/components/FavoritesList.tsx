@@ -1,10 +1,19 @@
 // src/components/FavoritesList.tsx
 'use client';
 
-import { Favorite, Snapshot } from '@/types';
-import { brl, externalUrlFromId, FAV_LIMIT, timeAgo } from '@/lib/utils';
+import { Favorite, Snapshot, ProductGroup } from '@/types';
+import {
+  brl,
+  FAV_LIMIT,
+  getGroupPrices,
+  getBestPriceInGroup,
+  getProviderName,
+  loadProductGroups,
+} from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
+import GroupCompareChart from './GroupCompareChart';
+import ProductCard from './ProductCard';
 
 type Props = {
   favorites: Favorite[];
@@ -21,23 +30,51 @@ type Props = {
   shimmeringIds?: string[];
 };
 
-function DiffArrow({ curr, prev }: { curr?: number | null; prev?: number | null }) {
-  if (curr == null || prev == null) return <span className="text-gray-400">—</span>;
-  if (curr > prev) return <span className="text-red-600" title="Subiu">▼</span>;
-  if (curr < prev) return <span className="text-green-600" title="Caiu">▲</span>;
-  return <span className="text-gray-400">—</span>;
-}
-
 export default function FavoritesList({
   favorites, onMonitor, onRemove, latestById, prevById,
   onRefreshAll, onRefreshOne, loadingAll, compareSelected = [], onToggleCompare, shimmeringIds = [],
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
+  const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
+  const [groupMetric, setGroupMetric] = useState<'vista' | 'parcelado' | 'original'>('vista');
   const prefersReduced = useReducedMotion();
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const isSelected = (id: string) => compareSelected.includes(id);
   const isShimmering = (id: string) => shimmeringIds.includes(id);
+
+  const toggleGroupExpansion = (groupId: string) => {
+    setExpandedGroups(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(groupId)) {
+        newSet.delete(groupId);
+      } else {
+        newSet.add(groupId);
+      }
+      return newSet;
+    });
+  };
+
+  // Agrupa favoritos
+  const groups = loadProductGroups();
+  const groupedFavorites: Array<{ type: 'group', group: ProductGroup, favorites: Favorite[] } | { type: 'single', favorite: Favorite }> = [];
+  const processedIds = new Set<string>();
+
+  // Primeiro, adiciona os grupos
+  groups.forEach(group => {
+    const groupFavs = favorites.filter(f => f.groupId === group.id);
+    if (groupFavs.length > 0) {
+      groupedFavorites.push({ type: 'group', group, favorites: groupFavs });
+      groupFavs.forEach(f => processedIds.add(f.id));
+    }
+  });
+
+  // Depois, adiciona os favoritos sem grupo
+  favorites.forEach(fav => {
+    if (!processedIds.has(fav.id)) {
+      groupedFavorites.push({ type: 'single', favorite: fav });
+    }
+  });
 
   // Fechar menu ao clicar fora
   useEffect(() => {
@@ -115,11 +152,119 @@ export default function FavoritesList({
 
       {favorites.length === 0 ? (
         <p className="text-sm text-gray-600">
-          Nenhum favorito ainda. Use “Favoritar” no produto monitorado. Limite: {FAV_LIMIT} itens.
+          Nenhum favorito ainda. Use &quot;Favoritar&quot; no produto monitorado. Limite: {FAV_LIMIT} itens.
         </p>
       ) : (
         <motion.ul layout className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {favorites.map((f, idx) => {
+          {groupedFavorites.map((item, idx) => {
+            if (item.type === 'group') {
+              const { group, favorites: groupFavs } = item;
+              const bestPrice = getBestPriceInGroup(group.id);
+              const isExpanded = expandedGroups.has(group.id);
+              const groupPrices = getGroupPrices(group.id);
+
+              return (
+                <motion.li
+                  key={`group-${group.id}`}
+                  layout
+                  initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="col-span-full"
+                >
+                  <div className="rounded-xl border-2 border-blue-200 bg-blue-50/30 p-4">
+                    <div className="flex items-start gap-3 mb-3">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-600 text-white">
+                            Produto unificado
+                          </span>
+                          <h4 className="text-sm font-bold">{group.name}</h4>
+                        </div>
+
+                        {bestPrice && (
+                          <div className="flex items-center gap-2 mb-2">
+                            <span className="text-xs text-gray-600">Melhor preço:</span>
+                            <span className="text-lg font-bold text-green-600">{brl(bestPrice.priceVista)}</span>
+                            <span className="text-xs text-gray-500">em {getProviderName(bestPrice.provider)}</span>
+                          </div>
+                        )}
+
+                        <div className="text-xs text-gray-500 mb-3">
+                          {groupFavs.length} {groupFavs.length === 1 ? 'loja' : 'lojas'} disponíveis
+                        </div>
+
+                        <button
+                          onClick={() => toggleGroupExpansion(group.id)}
+                          className="text-sm text-blue-600 hover:underline"
+                        >
+                          {isExpanded ? '▼ Ocultar detalhes' : '▶ Ver todas as lojas'}
+                        </button>
+                      </div>
+                    </div>
+
+                    {isExpanded && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                      >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-blue-200">
+                          {groupFavs.map((f) => {
+                            const last = latestById?.[f.id];
+                            const prev = prevById?.[f.id];
+                            const shimmering = isShimmering(f.id);
+                            const priceInfo = groupPrices.find(p => p.productId === f.id);
+                            const isBestPrice = bestPrice?.productId === f.id;
+
+                            return (
+                              <ProductCard
+                                key={f.id}
+                                favorite={f}
+                                latest={last}
+                                prev={prev}
+                                isShimmering={shimmering}
+                                isBestPrice={isBestPrice}
+                                provider={priceInfo?.provider}
+                                onRefresh={() => onRefreshOne?.(f.id)}
+                                menuOpen={openMenuId === f.id}
+                                onMenuToggle={() => setOpenMenuId((id) => (id === f.id ? null : f.id))}
+                                onMenuClose={() => setOpenMenuId(null)}
+                              />
+                            );
+                          })}
+                        </div>
+
+                        {/* Comparativo de histórico do grupo */}
+                        <div className="mt-4">
+                          <div className="flex items-center justify-between mb-3">
+                            <h4 className="text-sm font-medium">Histórico Comparativo</h4>
+                            <div className="flex gap-2">
+                              {(['vista', 'parcelado', 'original'] as const).map(m => (
+                                <button
+                                  key={m}
+                                  onClick={() => setGroupMetric(m)}
+                                  className={`rounded-lg px-3 py-1 text-xs font-medium transition ${
+                                    groupMetric === m
+                                      ? 'bg-blue-600 text-white'
+                                      : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                                  }`}
+                                >
+                                  {m === 'vista' ? 'À vista' : m === 'parcelado' ? 'Parcelado' : 'Original'}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                          <GroupCompareChart group={group} metric={groupMetric} />
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </motion.li>
+              );
+            }
+
+            // Produto individual (não agrupado)
+            const f = item.favorite;
             const last = latestById?.[f.id];
             const prev = prevById?.[f.id];
             const sel = isSelected(f.id);
@@ -132,162 +277,22 @@ export default function FavoritesList({
                 initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ type: 'spring', stiffness: 420, damping: 30, delay: Math.min(idx * 0.03, 0.15) }}
-                className={`group relative rounded-xl border p-3 flex gap-3 cursor-pointer transition
-                  hover:shadow-md ${sel ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/30' : 'bg-white'}`}
-                onClick={() => onToggleCompare?.(f.id)}
-                role="button"
-                aria-pressed={sel}
-                aria-busy={shimmering}
-                data-busy={shimmering ? 'true' : 'false'}
-                whileHover={{ scale: prefersReduced ? 1 : 1.01 }}
-                whileTap={{ scale: prefersReduced ? 1 : 0.99 }}
+                className="col-span-1"
               >
-                <div className="absolute left-2 top-2">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                    checked={sel}
-                    onChange={() => onToggleCompare?.(f.id)}
-                    onClick={(e) => e.stopPropagation()}
-                    aria-label="Selecionar para comparar"
-                  />
-                </div>
-
-                {shimmering ? (
-                  <div className="h-16 w-16 rounded-lg skeleton" />
-                ) : f.image ? (
-                  <motion.img
-                    src={f.image}
-                    alt={f.name}
-                    className="h-16 w-16 rounded-lg object-contain bg-gray-50"
-                    whileHover={{ rotate: prefersReduced ? 0 : 1 }}
-                    transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  />
-                ) : (
-                  <div className="h-16 w-16 rounded-lg bg-gray-100 grid place-items-center text-lg">⭐</div>
-                )}
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-start gap-2">
-                    {shimmering ? (
-                      <div className="h-4 w-3/4 rounded-md skeleton" />
-                    ) : (
-                      <p className="text-sm font-medium line-clamp-2 pr-8">{f.name}</p>
-                    )}
-
-                    {/* menu suspenso */}
-                    <div
-                      className="ml-auto relative"
-                      onClick={(e) => e.stopPropagation()}
-                      ref={(el) => { menuRefs.current[f.id] = el; }}
-                    >
-                      <motion.button
-                        whileHover={{ scale: prefersReduced ? 1 : 1.05 }}
-                        whileTap={{ scale: prefersReduced ? 1 : 0.95 }}
-                        className="rounded-md px-2 py-1 text-lg leading-none hover:bg-gray-100 disabled:opacity-50"
-                        disabled={shimmering}
-                        onClick={() => setOpenMenuId((id) => (id === f.id ? null : f.id))}
-                        aria-haspopup="menu"
-                        aria-expanded={openMenuId === f.id}
-                        aria-label="Mais opções"
-                        title="Mais opções"
-                      >
-                        ⋯
-                      </motion.button>
-
-                      <AnimatePresence>
-                        {openMenuId === f.id && !shimmering && (
-                          <motion.div
-                            initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.96, y: -4 }}
-                            animate={{ opacity: 1, scale: 1, y: 0 }}
-                            exit={{ opacity: 0, scale: prefersReduced ? 1 : 0.98, y: -4 }}
-                            transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-                            className="absolute right-0 z-[100] mt-1 w-48 rounded-lg border bg-white shadow-lg overflow-hidden"
-                            role="menu"
-                            onMouseLeave={() => setOpenMenuId(null)}
-                          >
-                            {/* NOVO: atualizar um item só */}
-                            <button
-                              onClick={() => { setOpenMenuId(null); onRefreshOne?.(f.id); }}
-                              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors disabled:opacity-50"
-                              role="menuitem"
-                              disabled={shimmering}
-                            >
-                              Atualizar agora
-                            </button>
-                            <a
-                              href={externalUrlFromId(f.id)}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                              role="menuitem"
-                            >
-                              Ver na loja
-                            </a>
-                            <button
-                              onClick={() => { setOpenMenuId(null); onRemove(f.id); }}
-                              className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
-                              role="menuitem"
-                            >
-                              Remover
-                            </button>
-                          </motion.div>
-                        )}
-                      </AnimatePresence>
-                    </div>
-                  </div>
-
-                  {!shimmering && last?.timestamp && (
-                    <div className="mt-1 text-[10px] text-gray-400">
-                      Atualizado {timeAgo(last.timestamp)}
-                    </div>
-                  )}
-
-                  <div className="mt-2 grid grid-cols-3 gap-2 text-[11px] leading-4 select-none">
-                    {[0,1,2].map((i) => (
-                      <motion.div
-                        key={i}
-                        layout
-                        className="rounded-md bg-gray-50 p-2"
-                        whileHover={{ scale: prefersReduced ? 1 : 1.01 }}
-                      >
-                        {shimmering ? (
-                          <>
-                            <div className="h-3 w-14 rounded skeleton mb-2" />
-                            <div className="h-4 w-20 rounded skeleton" />
-                          </>
-                        ) : (
-                          <>
-                            <div className="text-gray-500">
-                              {i === 0 ? 'À vista' : i === 1 ? 'Parcelado' : 'Original'}
-                            </div>
-                            <div className="font-semibold flex items-center gap-1">
-                              {i === 0 && brl(last?.priceVista ?? null)}
-                              {i === 1 && brl(last?.priceParcelado ?? null)}
-                              {i === 2 && brl(last?.priceOriginal ?? null)}
-                              {i === 0 && <DiffArrow curr={last?.priceVista} prev={prev?.priceVista} />}
-                              {i === 1 && <DiffArrow curr={last?.priceParcelado} prev={prev?.priceParcelado} />}
-                              {i === 2 && <DiffArrow curr={last?.priceOriginal} prev={prev?.priceOriginal} />}
-                            </div>
-                          </>
-                        )}
-                      </motion.div>
-                    ))}
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mt-2">
-                    <motion.button
-                      whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
-                      whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
-                      onClick={(e) => { e.stopPropagation(); onMonitor(f.id); }}
-                      className="rounded-lg px-3 py-2 text-sm border hover:bg-gray-50 disabled:opacity-50 transition"
-                      title="Abrir monitoramento deste produto"
-                      disabled={shimmering}
-                    >
-                      Monitorar
-                    </motion.button>
-                  </div>
-                </div>
+                <ProductCard
+                  favorite={f}
+                  latest={last}
+                  prev={prev}
+                  isSelected={sel}
+                  isShimmering={shimmering}
+                  onSelect={() => onToggleCompare?.(f.id)}
+                  onMonitor={() => onMonitor(f.id)}
+                  onRemove={() => onRemove(f.id)}
+                  onRefresh={() => onRefreshOne?.(f.id)}
+                  menuOpen={openMenuId === f.id}
+                  onMenuToggle={() => setOpenMenuId((id) => (id === f.id ? null : f.id))}
+                  onMenuClose={() => setOpenMenuId(null)}
+                />
               </motion.li>
             );
           })}

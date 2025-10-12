@@ -14,7 +14,7 @@ const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
   title: 'Monitor de preço',
-  description: 'Monitoramento, favoritos e comparativo de preços no KaBuM!',
+  description: 'Monitoramento, favoritos e comparativo de preços em múltiplas lojas online',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

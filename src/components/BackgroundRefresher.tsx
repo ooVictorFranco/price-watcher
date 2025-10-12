@@ -118,7 +118,7 @@ export default function BackgroundRefresher() {
       // notifica telas para atualizarem os cards/graficos
       try {
         window.dispatchEvent(
-          new CustomEvent('kabum:auto-refresh', { detail: { ids: [id], at: now } })
+          new CustomEvent('pw:auto-refresh', { detail: { ids: [id], at: now } })
         );
       } catch { }
     }

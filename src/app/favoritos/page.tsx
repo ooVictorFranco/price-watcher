@@ -10,6 +10,8 @@ import {
   getHistoryKey,
   upsertHistory,
   saveHistory,
+  createProductGroup,
+  loadProductGroups,
 } from '@/lib/utils';
 import FavoritesList from '@/components/FavoritesList';
 import ComparePanel from '@/components/ComparePanel';
@@ -49,6 +51,7 @@ export default function FavoritosPage() {
 
     async function init() {
       const favs = loadFavorites();
+      loadProductGroups(); // Carrega grupos (usado internamente por componentes)
       setFavorites(favs);
       await hydrateMeta(favs);
     }
@@ -65,8 +68,8 @@ export default function FavoritosPage() {
       const ids = detail?.ids ?? favorites.map(f => f.id);
       syncSnapshots(ids);
     };
-    window.addEventListener('kabum:auto-refresh', onAuto as EventListener);
-    return () => window.removeEventListener('kabum:auto-refresh', onAuto as EventListener);
+    window.addEventListener('pw:auto-refresh', onAuto as EventListener);
+    return () => window.removeEventListener('pw:auto-refresh', onAuto as EventListener);
   }, [favorites]);
 
   const deleteFavorite = (id: string) => {
@@ -93,6 +96,27 @@ export default function FavoritosPage() {
   };
   const removeFromCompare = (id: string) => setCompareSelected(prev => prev.filter(x => x !== id));
   const clearCompare = () => setCompareSelected([]);
+
+  const handleUnifyProducts = () => {
+    if (compareSelected.length < 2) {
+      toast.error('Selecione pelo menos 2 produtos para unificar.');
+      return;
+    }
+
+    try {
+      const newGroup = createProductGroup(compareSelected, favorites);
+
+      // Atualiza os favoritos com os groupIds
+      const updatedFavorites = loadFavorites();
+      setFavorites(updatedFavorites);
+
+      clearCompare();
+      toast.success(`Produtos unificados com sucesso! Grupo: ${newGroup.name}`);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao unificar produtos';
+      toast.error(message);
+    }
+  };
 
   /** Busca dados (KaBuM/Amazon), atualiza histórico e também name/image do favorito. */
   async function fetchAndUpsert(id: string, { silent = false }: { silent?: boolean } = {}) {
@@ -286,6 +310,7 @@ export default function FavoritosPage() {
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
             onRefreshSelected={refreshSelected}
+            onUnifyProducts={handleUnifyProducts}
             disabled={loadingSelected || loadingAll}
             loading={loadingSelected || loadingAll}
           />

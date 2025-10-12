@@ -7,9 +7,9 @@ import { exportLocalData } from './backup';
 const STORE = 'fs-handles';
 const HANDLE_KEY = 'livefile-handle';
 
-const COMPAT_ENABLED = 'kabum:compat_live_enabled';
-const COMPAT_DIRTY = 'kabum:compat_live_dirty';
-const COMPAT_NAME = 'kabum:compat_live_name';
+const COMPAT_ENABLED = 'pw:compat_live_enabled';
+const COMPAT_DIRTY = 'pw:compat_live_dirty';
+const COMPAT_NAME = 'pw:compat_live_name';
 
 type FileHandle = FileSystemFileHandle & {
   queryPermission?: (options: { mode: string }) => Promise<string>;
@@ -59,7 +59,7 @@ export async function pickLiveFile(): Promise<{ name: string } | null> {
   if (!supportsNative()) throw new Error('Recurso nativo disponível apenas em navegadores Chromium.');
   // @ts-expect-error - showSaveFilePicker is part of File System Access API
   const handle: FileHandle = await window.showSaveFilePicker({
-    suggestedName: 'kabum-backup.json',
+    suggestedName: 'price-watcher-backup.json',
     types: [{ description: 'Backup JSON', accept: { 'application/json': ['.json'] } }],
   });
   const ok = await hasWritePermission(handle);
@@ -68,10 +68,10 @@ export async function pickLiveFile(): Promise<{ name: string } | null> {
   await writeFullSnapshot(handle);
   // desativa modo compatível se estava ativo
   localStorage.removeItem(COMPAT_ENABLED);
-  return { name: handle.name || 'kabum-backup.json' };
+  return { name: handle.name || 'price-watcher-backup.json' };
 }
 
-/** Vincula arquivo EXISTENTE como “vivo” (nativo – Chrome/Edge). */
+/** Vincula arquivo EXISTENTE como "vivo" (nativo – Chrome/Edge). */
 export async function pickExistingLiveFile(): Promise<{ name: string } | null> {
   if (!supportsNative()) throw new Error('Recurso nativo indisponível neste navegador.');
   // @ts-expect-error - showOpenFilePicker is part of File System Access API
@@ -87,7 +87,7 @@ export async function pickExistingLiveFile(): Promise<{ name: string } | null> {
   await setHandle(handle);
   await writeFullSnapshot(handle);
   localStorage.removeItem(COMPAT_ENABLED);
-  return { name: handle.name || 'kabum-backup.json' };
+  return { name: handle.name || 'price-watcher-backup.json' };
 }
 
 /** Existe um arquivo vivo nativo vinculado? */
@@ -139,11 +139,11 @@ export function isCompatDirty(): boolean {
 
 function dispatchCompatStatus() {
   try {
-    window.dispatchEvent(new CustomEvent('kabum:compat-live-status', {
+    window.dispatchEvent(new CustomEvent('pw:compat-live-status', {
       detail: {
         enabled: isCompatLiveEnabled(),
         dirty: isCompatDirty(),
-        filename: localStorage.getItem(COMPAT_NAME) || 'kabum-backup.json',
+        filename: localStorage.getItem(COMPAT_NAME) || 'price-watcher-backup.json',
       },
     }));
   } catch { }
@@ -156,7 +156,7 @@ export function downloadCompatNow() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = localStorage.getItem(COMPAT_NAME) || 'kabum-backup.json';
+  a.download = localStorage.getItem(COMPAT_NAME) || 'price-watcher-backup.json';
   document.body.appendChild(a);
   a.click();
   a.remove();
@@ -176,8 +176,8 @@ export function initLiveFileSync() {
     });
   };
 
-  window.addEventListener('kabum:data-changed', onChange as EventListener);
-  window.addEventListener('kabum:auto-refresh', onChange as EventListener);
+  window.addEventListener('pw:data-changed', onChange as EventListener);
+  window.addEventListener('pw:auto-refresh', onChange as EventListener);
 
   const onVisible = () => { if (document.visibilityState === 'visible') onChange(); };
   document.addEventListener('visibilitychange', onVisible);
