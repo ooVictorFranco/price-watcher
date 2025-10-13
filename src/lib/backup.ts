@@ -10,7 +10,6 @@ import {
   upsertHistory,
   emitDataChanged,
   pruneHistoryByAge,
-  FAV_LIMIT,
   loadProductGroups,
   saveProductGroups,
 } from './utils';
@@ -87,7 +86,7 @@ type BackupBlobAny = BackupBlob | BackupBlobV1;
 /**
  * Importa/mescla um backup com retrocompatibilidade:
  * - Suporta versão 1 (antiga) e versão 2 (nova)
- * - Favoritos: união por id, mantém os 25 mais recentes (addedAt desc)
+ * - Favoritos: união por id, ordenados por addedAt desc
  * - Grupos: merge por id
  * - Históricos: upsert ordenado por timestamp + retenção de 3 meses
  * - Retorna lista de IDs que necessitam hidratação
@@ -105,7 +104,7 @@ export function importDataMerge(blob: BackupBlobAny): {
 
   const needsHydration: string[] = [];
 
-  // ---- Favoritos (união + clamp 25)
+  // ---- Favoritos (união, sem limite)
   const existing = loadFavorites();
   const map = new Map<string, Favorite>();
 
@@ -133,8 +132,7 @@ export function importDataMerge(blob: BackupBlobAny): {
   }
 
   const mergedFavs = [...map.values()]
-    .sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0))
-    .slice(0, FAV_LIMIT);
+    .sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0));
   saveFavorites(mergedFavs);
 
   // ---- Grupos (merge - apenas v2)

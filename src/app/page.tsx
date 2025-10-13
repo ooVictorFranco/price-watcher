@@ -14,7 +14,6 @@ import {
   removeFavorite,
   upsertHistory,
   getHistoryKey,
-  FAV_LIMIT,
 } from '@/lib/utils';
 import SearchBar from '@/components/SearchBar';
 import ProductHeader from '@/components/ProductHeader';
@@ -151,11 +150,6 @@ function PageContent() {
       removeFavorite(id);
       setFavorites(prev => prev.filter(f => f.id !== id));
       toast.success('Removido dos favoritos.');
-      return;
-    }
-
-    if (favorites.length >= FAV_LIMIT) {
-      toast.warning(`Limite de ${FAV_LIMIT} favoritos atingido.`);
       return;
     }
 

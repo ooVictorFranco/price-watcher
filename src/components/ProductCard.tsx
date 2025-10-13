@@ -88,6 +88,8 @@ type ProductCardProps = {
   menuOpen?: boolean;
   onMenuToggle?: () => void;
   onMenuClose?: () => void;
+  onManageGroup?: () => void;
+  isInGroup?: boolean;
 };
 
 export default function ProductCard({
@@ -105,6 +107,8 @@ export default function ProductCard({
   menuOpen = false,
   onMenuToggle,
   onMenuClose,
+  onManageGroup,
+  isInGroup = false,
 }: ProductCardProps) {
   const prefersReduced = useReducedMotion();
 
@@ -118,8 +122,8 @@ export default function ProductCard({
     : null;
 
   return (
-    <motion.div
-      className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all
+    <div
+      className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all duration-200
         ${isSelected ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/30 shadow-lg' : 'bg-white border-gray-200 hover:shadow-md'}
         ${isBestPrice ? 'ring-2 ring-green-500 border-green-500 shadow-lg' : ''}`}
       onClick={onSelect}
@@ -134,8 +138,6 @@ export default function ProductCard({
           onSelect?.();
         }
       }}
-      whileHover={{ scale: prefersReduced ? 1 : 1.01 }}
-      whileTap={{ scale: prefersReduced ? 1 : 0.99 }}
     >
       {/* Badge melhor preço */}
       {isBestPrice && (
@@ -179,11 +181,11 @@ export default function ProductCard({
 
           {menuOpen && (
             <motion.div
-              initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.96, y: -4 }}
-              animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: prefersReduced ? 1 : 0.98, y: -4 }}
-              transition={{ type: 'spring', stiffness: 400, damping: 24 }}
-              className="absolute right-0 mt-1 w-48 rounded-lg border bg-white shadow-lg overflow-hidden"
+              initial={{ opacity: 0, y: -4 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -4 }}
+              transition={{ duration: 0.15, ease: 'easeOut' }}
+              className="absolute right-0 mt-1 w-56 rounded-lg border bg-white shadow-lg overflow-hidden z-50"
               role="menu"
               onMouseLeave={onMenuClose}
             >
@@ -194,7 +196,7 @@ export default function ProductCard({
                   role="menuitem"
                   disabled={isShimmering}
                 >
-                  Atualizar agora
+                  🔄 Atualizar agora
                 </button>
               )}
               <a
@@ -204,16 +206,31 @@ export default function ProductCard({
                 className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors"
                 role="menuitem"
               >
-                Ver na loja
+                🔗 Ver na loja
               </a>
+              {onManageGroup && (
+                <>
+                  <div className="border-t border-gray-200 my-1" />
+                  <button
+                    onClick={() => { onMenuClose?.(); onManageGroup(); }}
+                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-blue-600"
+                    role="menuitem"
+                  >
+                    {isInGroup ? '📦 Gerenciar grupo' : '➕ Adicionar a grupo'}
+                  </button>
+                </>
+              )}
               {onRemove && (
-                <button
-                  onClick={() => { onMenuClose?.(); onRemove(); }}
-                  className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-red-600"
-                  role="menuitem"
-                >
-                  Remover
-                </button>
+                <>
+                  <div className="border-t border-gray-200 my-1" />
+                  <button
+                    onClick={() => { onMenuClose?.(); onRemove(); }}
+                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-red-600"
+                    role="menuitem"
+                  >
+                    🗑️ Remover dos favoritos
+                  </button>
+                </>
               )}
             </motion.div>
           )}
@@ -225,11 +242,7 @@ export default function ProductCard({
         {isShimmering ? (
           <div className="h-32 w-32 rounded-lg skeleton mb-4" role="status" aria-label="Carregando" />
         ) : favorite.image ? (
-          <motion.div
-            className="relative h-32 w-32 rounded-lg bg-gray-50 border mb-4"
-            whileHover={{ rotate: prefersReduced ? 0 : 1 }}
-            transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-          >
+          <div className="relative h-32 w-32 rounded-lg bg-gray-50 border mb-4">
             <Image
               src={favorite.image}
               alt={favorite.name}
@@ -237,7 +250,7 @@ export default function ProductCard({
               className="rounded-lg object-contain p-2"
               sizes="128px"
             />
-          </motion.div>
+          </div>
         ) : (
           <div className="h-32 w-32 rounded-lg bg-gray-100 grid place-items-center text-3xl border mb-4" aria-label="Sem imagem">
             ⭐
@@ -294,18 +307,16 @@ export default function ProductCard({
 
         {/* Botão de ação */}
         {onMonitor && (
-          <motion.button
-            whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
-            whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
+          <button
             onClick={(e) => { e.stopPropagation(); onMonitor(); }}
-            className="w-full rounded-lg px-4 py-2.5 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="w-full rounded-lg px-4 py-2.5 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.98]"
             disabled={isShimmering}
             aria-label={`Monitorar ${favorite.name}`}
           >
             Monitorar Produto
-          </motion.button>
+          </button>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

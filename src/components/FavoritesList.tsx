@@ -3,17 +3,15 @@
 
 import { Favorite, Snapshot, ProductGroup } from '@/types';
 import {
-  brl,
-  FAV_LIMIT,
   getGroupPrices,
   getBestPriceInGroup,
-  getProviderName,
   loadProductGroups,
 } from '@/lib/utils';
 import { useState, useEffect, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import GroupCompareChart from './GroupCompareChart';
 import ProductCard from './ProductCard';
+import GroupCard from './GroupCard';
 
 type Props = {
   favorites: Favorite[];
@@ -28,11 +26,15 @@ type Props = {
   compareSelected?: string[];
   onToggleCompare?: (id: string) => void;
   shimmeringIds?: string[];
+  onManageGroup?: (productId: string) => void;
+  onRenameGroup?: (groupId: string, newName: string) => void;
+  onDeleteGroup?: (groupId: string) => void;
 };
 
 export default function FavoritesList({
   favorites, onMonitor, onRemove, latestById, prevById,
   onRefreshAll, onRefreshOne, loadingAll, compareSelected = [], onToggleCompare, shimmeringIds = [],
+  onManageGroup, onRenameGroup, onDeleteGroup,
 }: Props) {
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(new Set());
@@ -99,41 +101,22 @@ export default function FavoritesList({
   }, [openMenuId]);
 
   const total = favorites.length;
-  const remaining = Math.max(FAV_LIMIT - total, 0);
-  const atLimit = remaining === 0;
 
   return (
     <motion.div
-      layout
       className="rounded-2xl border bg-white shadow-md p-5"
-      initial={{ opacity: 0, y: prefersReduced ? 0 : 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ type: 'spring', stiffness: 400, damping: 28 }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.2, ease: 'easeOut' }}
     >
       <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
             <h3 className="text-sm font-medium">Favoritos</h3>
             <div className="text-xs text-gray-500">
-              <span className={atLimit ? 'text-red-600 font-medium' : ''}>
-                {total}/{FAV_LIMIT}
-              </span>
-              {' '}•{' '}
-              <span className={atLimit ? 'text-red-600 font-medium' : ''}>
-                {atLimit ? 'limite atingido' : `restam ${remaining}`}
-              </span>
+              {total} {total === 1 ? 'produto' : 'produtos'}
             </div>
           </div>
-
-          {atLimit && (
-            <motion.span
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              className="text-[11px] rounded-full px-2 py-0.5 border border-red-200 bg-red-50 text-red-700"
-            >
-              Você atingiu o limite de {FAV_LIMIT} itens
-            </motion.span>
-          )}
         </div>
 
         {onRefreshAll && (
@@ -152,11 +135,11 @@ export default function FavoritesList({
 
       {favorites.length === 0 ? (
         <p className="text-sm text-gray-600">
-          Nenhum favorito ainda. Use &quot;Favoritar&quot; no produto monitorado. Limite: {FAV_LIMIT} itens.
+          Nenhum favorito ainda. Use &quot;Favoritar&quot; no produto monitorado.
         </p>
       ) : (
-        <motion.ul layout className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {groupedFavorites.map((item, idx) => {
+        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {groupedFavorites.map((item) => {
             if (item.type === 'group') {
               const { group, favorites: groupFavs } = item;
               const bestPrice = getBestPriceInGroup(group.id);
@@ -164,50 +147,17 @@ export default function FavoritesList({
               const groupPrices = getGroupPrices(group.id);
 
               return (
-                <motion.li
+                <GroupCard
                   key={`group-${group.id}`}
-                  layout
-                  initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="col-span-full"
+                  group={group}
+                  bestPrice={bestPrice}
+                  productCount={groupFavs.length}
+                  isExpanded={isExpanded}
+                  onToggleExpand={() => toggleGroupExpansion(group.id)}
+                  onRenameGroup={(newName) => onRenameGroup?.(group.id, newName)}
+                  onDeleteGroup={() => onDeleteGroup?.(group.id)}
                 >
-                  <div className="rounded-xl border-2 border-blue-200 bg-blue-50/30 p-4">
-                    <div className="flex items-start gap-3 mb-3">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-600 text-white">
-                            Produto unificado
-                          </span>
-                          <h4 className="text-sm font-bold">{group.name}</h4>
-                        </div>
-
-                        {bestPrice && (
-                          <div className="flex items-center gap-2 mb-2">
-                            <span className="text-xs text-gray-600">Melhor preço:</span>
-                            <span className="text-lg font-bold text-green-600">{brl(bestPrice.priceVista)}</span>
-                            <span className="text-xs text-gray-500">em {getProviderName(bestPrice.provider)}</span>
-                          </div>
-                        )}
-
-                        <div className="text-xs text-gray-500 mb-3">
-                          {groupFavs.length} {groupFavs.length === 1 ? 'loja' : 'lojas'} disponíveis
-                        </div>
-
-                        <button
-                          onClick={() => toggleGroupExpansion(group.id)}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          {isExpanded ? '▼ Ocultar detalhes' : '▶ Ver todas as lojas'}
-                        </button>
-                      </div>
-                    </div>
-
-                    {isExpanded && (
-                      <motion.div
-                        initial={{ opacity: 0, height: 0 }}
-                        animate={{ opacity: 1, height: 'auto' }}
-                        exit={{ opacity: 0, height: 0 }}
-                      >
+                  <div className="transition-all duration-300 ease-out">
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-blue-200">
                           {groupFavs.map((f) => {
                             const last = latestById?.[f.id];
@@ -229,6 +179,9 @@ export default function FavoritesList({
                                 menuOpen={openMenuId === f.id}
                                 onMenuToggle={() => setOpenMenuId((id) => (id === f.id ? null : f.id))}
                                 onMenuClose={() => setOpenMenuId(null)}
+                                onManageGroup={() => onManageGroup?.(f.id)}
+                                isInGroup={!!f.groupId}
+                                onRemove={() => onRemove(f.id)}
                               />
                             );
                           })}
@@ -256,10 +209,8 @@ export default function FavoritesList({
                           </div>
                           <GroupCompareChart group={group} metric={groupMetric} />
                         </div>
-                      </motion.div>
-                    )}
-                  </div>
-                </motion.li>
+                      </div>
+                </GroupCard>
               );
             }
 
@@ -271,12 +222,8 @@ export default function FavoritesList({
             const shimmering = isShimmering(f.id);
 
             return (
-              <motion.li
+              <li
                 key={f.id}
-                layout
-                initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ type: 'spring', stiffness: 420, damping: 30, delay: Math.min(idx * 0.03, 0.15) }}
                 className="col-span-1"
               >
                 <ProductCard
@@ -292,11 +239,13 @@ export default function FavoritesList({
                   menuOpen={openMenuId === f.id}
                   onMenuToggle={() => setOpenMenuId((id) => (id === f.id ? null : f.id))}
                   onMenuClose={() => setOpenMenuId(null)}
+                  onManageGroup={() => onManageGroup?.(f.id)}
+                  isInGroup={!!f.groupId}
                 />
-              </motion.li>
+              </li>
             );
           })}
-        </motion.ul>
+        </ul>
       )}
     </motion.div>
   );

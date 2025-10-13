@@ -28,7 +28,6 @@ export function timeAgo(timestamp?: number | null): string {
 }
 
 /** Limites globais */
-export const FAV_LIMIT = 25;
 export const HISTORY_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 90; // 90 dias
 
 export const HISTORY_PREFIX = 'pw_history:';
@@ -143,14 +142,8 @@ export function loadFavorites(): Favorite[] {
   }
 }
 
-function clampFavorites(list: Favorite[]): Favorite[] {
-  const sorted = [...list].sort((a, b) => (b.addedAt ?? 0) - (a.addedAt ?? 0));
-  return sorted.slice(0, FAV_LIMIT);
-}
-
 export function saveFavorites(list: Favorite[]) {
-  const clamped = clampFavorites(list);
-  localStorage.setItem(FAV_KEY, JSON.stringify(clamped));
+  localStorage.setItem(FAV_KEY, JSON.stringify(list));
   emitDataChanged();
 }
 
@@ -209,6 +202,15 @@ export function createProductGroup(productIds: string[], favorites: Favorite[]):
     throw new Error('É necessário selecionar pelo menos 2 produtos para criar um grupo');
   }
 
+  // Valida se algum produto já está em outro grupo
+  const groups = loadProductGroups();
+  for (const productId of productIds) {
+    const existingGroup = groups.find(g => g.productIds.includes(productId));
+    if (existingGroup) {
+      throw new Error(`O produto já está no grupo "${existingGroup.name}". Remova-o primeiro.`);
+    }
+  }
+
   // Pega o nome do primeiro produto como base
   const primaryProduct = favorites.find(f => f.id === productIds[0]);
   const groupName = primaryProduct?.name || 'Produto unificado';
@@ -222,7 +224,6 @@ export function createProductGroup(productIds: string[], favorites: Favorite[]):
     primaryProductId: productIds[0],
   };
 
-  const groups = loadProductGroups();
   groups.push(newGroup);
   saveProductGroups(groups);
 
@@ -289,8 +290,19 @@ export function addProductToGroup(groupId: string, productId: string, favorites:
   const groups = loadProductGroups();
   const group = groups.find(g => g.id === groupId);
 
-  if (!group) return;
-  if (group.productIds.includes(productId)) return; // Já está no grupo
+  if (!group) {
+    throw new Error('Grupo não encontrado');
+  }
+
+  if (group.productIds.includes(productId)) {
+    throw new Error('Este produto já está neste grupo');
+  }
+
+  // Valida se o produto já está em outro grupo
+  const existingGroup = groups.find(g => g.id !== groupId && g.productIds.includes(productId));
+  if (existingGroup) {
+    throw new Error(`Este produto já está no grupo "${existingGroup.name}"`);
+  }
 
   group.productIds.push(productId);
   saveProductGroups(groups);

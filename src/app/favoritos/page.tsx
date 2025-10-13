@@ -12,10 +12,15 @@ import {
   saveHistory,
   createProductGroup,
   loadProductGroups,
+  addProductToGroup,
+  removeProductFromGroup,
+  deleteProductGroup,
+  updateGroupName,
 } from '@/lib/utils';
 import FavoritesList from '@/components/FavoritesList';
 import ComparePanel from '@/components/ComparePanel';
 import CompareChart, { makeCompareSeries } from '@/components/CompareChart';
+import GroupManagementModal from '@/components/GroupManagementModal';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast';
 
@@ -31,6 +36,10 @@ export default function FavoritosPage() {
 
   const [latestById, setLatestById] = useState<Record<string, Snapshot | undefined>>({});
   const [prevById, setPrevById] = useState<Record<string, Snapshot | undefined>>({});
+
+  // Estados do modal de gerenciamento de grupos
+  const [isGroupModalOpen, setIsGroupModalOpen] = useState(false);
+  const [selectedProductForGroup, setSelectedProductForGroup] = useState<string | null>(null);
 
   useEffect(() => {
     document.title = 'Favoritos — Monitor de preço';
@@ -114,6 +123,78 @@ export default function FavoritosPage() {
       toast.success(`Produtos unificados com sucesso! Grupo: ${newGroup.name}`);
     } catch (error) {
       const message = error instanceof Error ? error.message : 'Erro ao unificar produtos';
+      toast.error(message);
+    }
+  };
+
+  // Handlers do modal de gerenciamento de grupos
+  const handleOpenGroupModal = (productId: string) => {
+    setSelectedProductForGroup(productId);
+    setIsGroupModalOpen(true);
+  };
+
+  const handleCloseGroupModal = () => {
+    setIsGroupModalOpen(false);
+    setSelectedProductForGroup(null);
+  };
+
+  const handleAddToGroup = (groupId: string, productId: string) => {
+    try {
+      addProductToGroup(groupId, productId, favorites);
+      const updatedFavorites = loadFavorites();
+      setFavorites(updatedFavorites);
+      toast.success('Produto adicionado ao grupo com sucesso!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao adicionar produto ao grupo';
+      toast.error(message);
+    }
+  };
+
+  const handleRemoveFromGroup = (groupId: string, productId: string) => {
+    try {
+      removeProductFromGroup(groupId, productId, favorites);
+      const updatedFavorites = loadFavorites();
+      setFavorites(updatedFavorites);
+      toast.success('Produto removido do grupo!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao remover produto do grupo';
+      toast.error(message);
+    }
+  };
+
+  const handleMoveToGroup = (fromGroupId: string, toGroupId: string, productId: string) => {
+    try {
+      // Remove do grupo atual
+      removeProductFromGroup(fromGroupId, productId, favorites);
+      // Adiciona ao novo grupo
+      const updatedFavorites = loadFavorites();
+      addProductToGroup(toGroupId, productId, updatedFavorites);
+      setFavorites(loadFavorites());
+      toast.success('Produto movido para outro grupo!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao mover produto';
+      toast.error(message);
+    }
+  };
+
+  const handleRenameGroup = (groupId: string, newName: string) => {
+    try {
+      updateGroupName(groupId, newName);
+      toast.success('Grupo renomeado com sucesso!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao renomear grupo';
+      toast.error(message);
+    }
+  };
+
+  const handleDeleteGroup = (groupId: string) => {
+    try {
+      deleteProductGroup(groupId, favorites);
+      const updatedFavorites = loadFavorites();
+      setFavorites(updatedFavorites);
+      toast.success('Grupo excluído com sucesso!');
+    } catch (error) {
+      const message = error instanceof Error ? error.message : 'Erro ao excluir grupo';
       toast.error(message);
     }
   };
@@ -272,6 +353,12 @@ export default function FavoritosPage() {
 
   const compareSeries = makeCompareSeries(compareSelected, nameById, historyById, compareMetric);
 
+  const selectedProductName = useMemo(() => {
+    if (!selectedProductForGroup) return '';
+    const product = favorites.find(f => f.id === selectedProductForGroup);
+    return product?.name || 'Produto';
+  }, [selectedProductForGroup, favorites]);
+
   return (
     <main className="min-h-screen py-8">
       <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
@@ -295,6 +382,9 @@ export default function FavoritosPage() {
             compareSelected={compareSelected}
             onToggleCompare={toggleCompare}
             shimmeringIds={shimmeringIds}
+            onManageGroup={handleOpenGroupModal}
+            onRenameGroup={handleRenameGroup}
+            onDeleteGroup={handleDeleteGroup}
           />
 
           <ComparePanel
@@ -320,6 +410,17 @@ export default function FavoritosPage() {
         {compareSelected.length >= 2 && (
           <CompareChart series={compareSeries} />
         )}
+
+        {/* Modal de gerenciamento de produtos */}
+        <GroupManagementModal
+          isOpen={isGroupModalOpen}
+          productId={selectedProductForGroup}
+          productName={selectedProductName}
+          onClose={handleCloseGroupModal}
+          onAddToGroup={handleAddToGroup}
+          onRemoveFromGroup={handleRemoveFromGroup}
+          onMoveToGroup={handleMoveToGroup}
+        />
       </div>
     </main>
   );
