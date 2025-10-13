@@ -34,7 +34,7 @@ export async function syncFavoriteToDatabase(favoriteId: string) {
         name: favorite.name,
         image: favorite.image,
         url: undefined, // Opcional
-        groupId: favorite.groupId,
+        groupId: null, // Não usar groupId para evitar FK errors (grupos ainda não implementados no banco)
       }),
     });
 

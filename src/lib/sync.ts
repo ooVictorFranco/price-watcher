@@ -29,7 +29,7 @@ export async function migrateLocalStorageToDatabase() {
           provider = 'amazon';
         }
 
-        // Adiciona produto ao banco
+        // Adiciona produto ao banco (sem groupId na migração inicial para evitar foreign key errors)
         const response = await fetch('/api/favorites', {
           method: 'POST',
           headers: getAuthHeaders(),
@@ -38,8 +38,8 @@ export async function migrateLocalStorageToDatabase() {
             provider,
             name: fav.name,
             image: fav.image,
-            url: undefined, // Opcional, pode ser undefined
-            groupId: fav.groupId,
+            url: undefined, // Opcional
+            groupId: null, // Não migrar grupos inicialmente para evitar FK errors
           }),
         });
 
