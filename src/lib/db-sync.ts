@@ -74,29 +74,47 @@ export async function syncPriceHistoryToDatabase(favoriteId: string) {
       provider = 'amazon';
     }
 
-    // Envia snapshots em batch (últimos 10 para não sobrecarregar)
-    const recentSnapshots = history.slice(-10);
+    // Envia snapshots em batch (últimos 3 para não sobrecarregar)
+    const recentSnapshots = history.slice(-3);
 
     for (const snap of recentSnapshots) {
-      try {
-        await fetch('/api/prices/update', {
-          method: 'POST',
-          headers: getAuthHeaders(),
-          body: JSON.stringify({
-            productId: favoriteId,
-            provider,
-            priceVista: snap.priceVista,
-            priceParcelado: snap.priceParcelado,
-            priceOriginal: snap.priceOriginal,
-            source: 'manual',
-          }),
-        });
+      let retries = 2;
+      let success = false;
 
-        // Pequeno delay entre requests
-        await new Promise((resolve) => setTimeout(resolve, 100));
-      } catch (error) {
-        console.error(`Error syncing snapshot for ${favoriteId}:`, error);
+      while (retries > 0 && !success) {
+        try {
+          const response = await fetch('/api/prices/update', {
+            method: 'POST',
+            headers: getAuthHeaders(),
+            body: JSON.stringify({
+              productId: favoriteId,
+              provider,
+              priceVista: snap.priceVista,
+              priceParcelado: snap.priceParcelado,
+              priceOriginal: snap.priceOriginal,
+              source: 'manual',
+            }),
+          });
+
+          if (response.ok) {
+            success = true;
+          } else {
+            retries--;
+            if (retries > 0) {
+              await new Promise((resolve) => setTimeout(resolve, 500));
+            }
+          }
+        } catch (error) {
+          console.error(`Error syncing snapshot for ${favoriteId}:`, error);
+          retries--;
+          if (retries > 0) {
+            await new Promise((resolve) => setTimeout(resolve, 500));
+          }
+        }
       }
+
+      // Delay entre requests
+      await new Promise((resolve) => setTimeout(resolve, 200));
     }
 
     console.log(`✓ Synced ${recentSnapshots.length} snapshots for ${favoriteId}`);
@@ -135,10 +153,11 @@ export async function syncAllToDatabase() {
           synced++;
         }
 
-        // Delay entre produtos
-        await new Promise((resolve) => setTimeout(resolve, 500));
+        // Delay entre produtos para evitar rate limiting
+        await new Promise((resolve) => setTimeout(resolve, 1000));
       } catch (error) {
         console.error(`Error syncing ${favorite.id}:`, error);
+        // Continua mesmo com erro
       }
     }
 
