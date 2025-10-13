@@ -1,45 +1,84 @@
 # 🛒 Price Watcher
 
-Monitor inteligente de preços para múltiplas lojas online (**KaBuM!**, **Amazon** e mais no futuro), com histórico, comparação e atualização automática em segundo plano.
+**Descubra se as lojas realmente baixaram os preços na Black Friday!** Monitor inteligente de preços para **KaBuM!** e **Amazon**, com histórico completo, comparação entre lojas e atualização automática. Identifique falsos descontos em promoções sazonais.
+
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![Next.js](https://img.shields.io/badge/Next.js-15.5.4-black)](https://nextjs.org/)
+[![React](https://img.shields.io/badge/React-19-blue)](https://react.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5-blue)](https://www.typescriptlang.org/)
 
 ## 📋 Sobre o Projeto
 
-**Price Watcher** é uma aplicação web que permite monitorar preços de produtos em diversas lojas online, mantendo um histórico completo de variações e oferecendo recursos de comparação entre produtos e lojas.
+**Price Watcher** é uma aplicação web open-source projetada para ajudar consumidores brasileiros a monitorarem preços de produtos durante períodos promocionais como **Black Friday**, **Cyber Monday** e outras datas sazonais.
+
+O objetivo é trazer **transparência** e ajudar você a identificar se os descontos anunciados são reais ou apenas estratégias de marketing, mantendo um histórico completo de preços ao longo do tempo.
 
 ### ✨ Principais Funcionalidades
 
-- 🔍 **Monitoramento de Preços**: Acompanhe produtos do KaBum! (ID ou URL) e Amazon (ASIN ou URL)
-- 📊 **Histórico Visual**: Gráficos interativos mostrando a evolução dos preços (à vista, parcelado e original)
-- ⭐ **Favoritos**: Salve até 25 produtos para acompanhamento rápido
+#### 🎯 Monitoramento Inteligente
+- 🔍 **Múltiplas Lojas**: Monitore produtos da KaBuM! (ID ou URL) e Amazon (ASIN ou URL, incluindo links encurtados)
+- 📊 **Histórico Completo**: Gráficos interativos mostrando a evolução dos preços (à vista, parcelado e original)
 - 🔄 **Atualização Automática**: Consulta preços a cada 3 horas enquanto a aplicação estiver aberta
-- 📈 **Comparação**: Compare até 3 produtos lado a lado com gráficos unificados
-- 💾 **Backup e Sincronização**: Exporte/importe dados ou use "arquivo vivo" para backup automático
-- 🌐 **Suporte Multi-loja**: KaBum! e Amazon em uma única plataforma
-- 📱 **Responsivo**: Interface otimizada para desktop e mobile
+- ⏰ **90 Dias de Histórico**: Acompanhe a variação de preços por até 3 meses
+
+#### ⭐ Favoritos e Organização
+- 💾 **Favoritos Ilimitados**: Sem limite de produtos (anteriormente limitado a 25)
+- 📦 **Grupos Unificados**: Agrupe o mesmo produto de lojas diferentes para comparar preços lado a lado
+- 🏷️ **Gerenciamento Completo**: Adicione, remova, mova produtos entre grupos ou renomeie/delete grupos
+- 💰 **Badge "MELHOR PREÇO"**: Identifique automaticamente qual loja oferece o menor preço no grupo
+
+#### 📈 Comparação e Análise
+- 🔀 **Compare Múltiplos Produtos**: Selecione vários produtos e visualize gráficos comparativos unificados
+- 📉 **3 Métricas**: À vista, parcelado ou preço original
+- 🎨 **Gráficos de Histórico do Grupo**: Visualize a evolução de preços de produtos agrupados ao longo do tempo
+
+#### 💾 Backup e Segurança de Dados
+- 📤 **Exportar/Importar JSON**: Faça backup completo de todos os seus dados
+- 🔗 **Arquivo Vivo**: Sincronização automática com arquivo local (Chrome/Edge)
+- 🔄 **Modo Compatível**: Alertas para backup manual (Firefox/Safari)
+- 🗂️ **Backup Otimizado v2**: Sistema eficiente com retrocompatibilidade
+
+#### 🎨 UX/UI Moderna
+- 📱 **Totalmente Responsivo**: Interface otimizada para desktop, tablet e mobile
+- ♿ **Acessibilidade**: Conformidade com WCAG 2.1 Level AA
+- 🎭 **Animações Sutis**: Micro-interações com Framer Motion, respeitando preferências de movimento reduzido
+- 🌈 **Design Limpo**: Gradientes suaves, cards organizados, feedback visual claro
 
 ### 🎯 Dados Monitorados
 
 Para cada produto, o sistema rastreia:
-- ✅ Preço à vista
-- ✅ Preço parcelado
-- ✅ Preço original (de/por)
-- ✅ Desconto percentual
+- ✅ Preço à vista (cash payment)
+- ✅ Preço parcelado (installment price)
+- ✅ Preço original (de/por - "was/now")
+- ✅ Desconto percentual calculado
 - ✅ Histórico de variações (últimos 90 dias)
 - ✅ Timestamp de última atualização
+- ✅ Nome do produto e imagem (metadados)
+- ✅ Identificação da loja (provider badge)
 
 ## 🚀 Tecnologias
 
-Este projeto foi desenvolvido com:
+Este projeto foi desenvolvido com tecnologias web modernas:
 
-- [Next.js 15.5.4](https://nextjs.org/) com Turbopack
-- [React 19](https://react.dev/)
-- [TypeScript 5](https://www.typescriptlang.org/)
-- [Tailwind CSS 4](https://tailwindcss.com/)
-- [Framer Motion](https://www.framer.com/motion/) - Animações
-- [Chart.js](https://www.chartjs.org/) - Gráficos
-- [Cheerio](https://cheerio.js.org/) - Web scraping
-- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - Armazenamento local
-- [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) - Arquivo vivo
+### Core
+- [Next.js 15.5.4](https://nextjs.org/) - Framework React com App Router e Turbopack
+- [React 19](https://react.dev/) - Biblioteca UI com hooks modernos
+- [TypeScript 5](https://www.typescriptlang.org/) - Tipagem estática para maior confiabilidade
+- [Tailwind CSS 4](https://tailwindcss.com/) - Framework CSS utilitário
+
+### UI/UX
+- [Framer Motion](https://www.framer.com/motion/) - Animações fluidas e transições
+- [Chart.js](https://www.chartjs.org/) - Gráficos interativos de histórico de preços
+- [Next/Image](https://nextjs.org/docs/app/api-reference/components/image) - Otimização automática de imagens
+
+### Data & Storage
+- [LocalStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) - Armazenamento de favoritos e preferências
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - Armazenamento de histórico de preços
+- [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) - Arquivo vivo para backup automático
+
+### Web Scraping
+- [Cheerio](https://cheerio.js.org/) - Parsing de HTML para extração de dados
+- Next.js API Routes - Backend serverless para scraping
 
 ## 📦 Instalação
 
@@ -88,16 +127,16 @@ Este projeto foi desenvolvido com:
 ## 🛠️ Scripts Disponíveis
 
 ```bash
-# Desenvolvimento com hot-reload
+# Desenvolvimento com hot-reload e Turbopack
 npm run dev
 
-# Build de produção
+# Build de produção otimizado
 npm run build
 
 # Iniciar servidor de produção
 npm run start
 
-# Executar linter
+# Executar linter (ESLint)
 npm run lint
 ```
 
@@ -105,101 +144,255 @@ npm run lint
 
 ### 1. Monitorar um Produto
 
-Na página **Monitoramento**:
-- Cole o ID do KaBum! (ex: `922662`)
-- Ou cole a URL completa do produto (ex: `https://www.kabum.com.br/produto/922662`)
-- Ou cole o ASIN da Amazon (ex: `B0F7Z9F9SD`)
-- Ou cole a URL da Amazon (incluindo links encurtados `a.co` e `amzn.to`)
+Na página **Monitoramento** (página inicial):
+
+**KaBuM!:**
+- Cole o ID do produto (ex: `922662`)
+- Ou cole a URL completa (ex: `https://www.kabum.com.br/produto/922662`)
+
+**Amazon:**
+- Cole o ASIN (ex: `B0F7Z9F9SD`)
+- Ou cole a URL completa (ex: `https://www.amazon.com.br/dp/B0F7Z9F9SD`)
+- Funciona com links encurtados: `https://a.co/d/3K52ue9` ou `https://amzn.to/xyz`
+
+O sistema começará a monitorar o produto automaticamente e criará um histórico de preços.
 
 ### 2. Adicionar aos Favoritos
 
 - Clique no botão **⭐ Favoritar** no produto monitorado
-- Limite: 25 produtos favoritos
+- **Sem limite**: Adicione quantos produtos quiser!
+- Os favoritos são salvos localmente no seu navegador
 
-### 3. Comparar Produtos
+### 3. Criar Grupos de Produtos Unificados
 
-Na página **Favoritos & Comparar**:
-- Selecione os checkboxes de 2 a 3 produtos
-- Clique em **Comparar selecionados**
-- Escolha a métrica (À vista, Parcelado ou Original)
-- Visualize o gráfico unificado
+Agrupe o mesmo produto de lojas diferentes para comparar preços:
 
-### 4. Backup e Arquivo Vivo
+1. Vá para **Favoritos & Comparar**
+2. Selecione 2 ou mais produtos (checkboxes)
+3. Clique em **Unificar produtos**
+4. Digite um nome para o grupo (ex: "Placa de Vídeo RTX 4060")
+5. O grupo exibirá automaticamente qual loja tem o melhor preço
+
+**Gerenciamento de Grupos:**
+- **Renomear**: Menu ⋯ do grupo → Renomear grupo
+- **Excluir**: Menu ⋯ do grupo → Excluir grupo
+- **Adicionar produto**: Menu ⋯ do produto → Adicionar a grupo
+- **Remover do grupo**: Menu ⋯ do produto → Gerenciar grupo → Remover
+- **Mover entre grupos**: Menu ⋯ do produto → Gerenciar grupo → Mover
+
+### 4. Comparar Produtos
+
+Compare múltiplos produtos individualmente (fora de grupos):
+
+1. Na página **Favoritos & Comparar**
+2. Selecione os checkboxes de 2 ou mais produtos
+3. Clique em **Comparar selecionados**
+4. Escolha a métrica (À vista, Parcelado ou Original)
+5. Visualize o gráfico unificado com todas as linhas
+
+### 5. Backup e Arquivo Vivo
 
 **Exportar/Importar:**
-- Menu **Backup** → **Exportar JSON**: Salva todos os dados
+- Menu **Backup** → **Exportar JSON**: Salva todos os dados (favoritos, histórico, grupos)
 - Menu **Backup** → **Importar JSON**: Mescla dados importados com os existentes
 
 **Arquivo Vivo (Chrome/Edge):**
 - Menu **Backup** → **Vincular arquivo (nativo)**
-- Escolha um arquivo `.json` que será atualizado automaticamente
+- Escolha um arquivo `.json` que será atualizado automaticamente a cada mudança
+- Requer suporte a File System Access API
 
 **Modo Compatível (Firefox/Safari):**
 - Menu **Backup** → **Ativar modo compatível**
-- Receba lembretes para salvar quando houver alterações
+- Receba lembretes visuais para salvar quando houver alterações não exportadas
 
 ## 🏗️ Estrutura do Projeto
 
 ```
 price-watcher/
 ├── src/
-│   ├── app/                      # Páginas Next.js (App Router)
-│   │   ├── layout.tsx            # Layout raiz
-│   │   ├── page.tsx              # Página de monitoramento
-│   │   ├── favoritos/            # Página de favoritos e comparação
-│   │   └── api/                  # API Routes para scraping
-│   ├── components/               # Componentes React
-│   │   ├── FavoritesList.tsx     # Lista de favoritos
-│   │   ├── ComparePanel.tsx      # Painel de comparação
-│   │   ├── BackupMenu.tsx        # Menu de backup
+│   ├── app/                          # Páginas Next.js (App Router)
+│   │   ├── layout.tsx                # Layout raiz com SEO otimizado
+│   │   ├── page.tsx                  # Página de monitoramento
+│   │   ├── favoritos/                # Página de favoritos e comparação
+│   │   │   └── page.tsx
+│   │   ├── privacidade/              # Página de política de privacidade
+│   │   │   └── page.tsx
+│   │   └── api/                      # API Routes para scraping
+│   │       ├── scrape/route.ts       # Scraper KaBuM!
+│   │       ├── scrape-amazon/route.ts # Scraper Amazon
+│   │       └── search/route.ts       # Busca de produtos
+│   ├── components/                   # Componentes React
+│   │   ├── FavoritesList.tsx         # Lista de favoritos com grupos
+│   │   ├── ProductCard.tsx           # Card de produto individual
+│   │   ├── GroupCard.tsx             # Card de grupo unificado
+│   │   ├── GroupManagementModal.tsx  # Modal de gerenciamento de grupos
+│   │   ├── ComparePanel.tsx          # Painel de comparação
+│   │   ├── CompareChart.tsx          # Gráfico comparativo
+│   │   ├── GroupCompareChart.tsx     # Gráfico de grupo
+│   │   ├── BackupMenu.tsx            # Menu de backup
+│   │   ├── Footer.tsx                # Rodapé com links
 │   │   └── ...
-│   ├── lib/                      # Utilitários e lógica de negócio
-│   │   ├── utils.ts              # Funções auxiliares
-│   │   ├── backup.ts             # Sistema de backup
-│   │   ├── livefile.ts           # Arquivo vivo
-│   │   ├── background.ts         # Atualização em segundo plano
-│   │   └── parseKabum.ts         # Parser de HTML
-│   └── types/                    # Definições TypeScript
-├── public/                       # Arquivos estáticos
-├── package.json                  # Dependências
-├── tsconfig.json                 # Configuração TypeScript
-└── tailwind.config.ts            # Configuração Tailwind
+│   ├── lib/                          # Utilitários e lógica de negócio
+│   │   ├── utils.ts                  # Funções auxiliares, grupos
+│   │   ├── backup.ts                 # Sistema de backup v2
+│   │   ├── livefile.ts               # Arquivo vivo
+│   │   ├── background.ts             # Atualização em segundo plano
+│   │   ├── parseKabum.ts             # Parser HTML KaBuM!
+│   │   ├── parseAmazon.ts            # Parser HTML Amazon
+│   │   ├── toast.ts                  # Sistema de notificações
+│   │   └── idb.ts                    # Wrapper IndexedDB
+│   └── types/                        # Definições TypeScript
+│       └── index.ts                  # Favorite, Snapshot, ProductGroup, etc.
+├── public/                           # Arquivos estáticos
+├── package.json                      # Dependências e scripts
+├── tsconfig.json                     # Configuração TypeScript
+├── tailwind.config.ts                # Configuração Tailwind CSS
+├── next.config.ts                    # Configuração Next.js
+└── LICENSE                           # Licença MIT
 
 ```
 
-## 🔒 Privacidade e Armazenamento
+## 🔒 Privacidade e Segurança
 
-- ✅ **100% Local**: Todos os dados são armazenados no navegador (localStorage + IndexedDB)
-- ✅ **Sem Backend**: Não enviamos dados para servidores externos
-- ✅ **Sem Cookies de Rastreamento**: Apenas localStorage para funcionalidade
-- ⚠️ **Cuidado ao limpar cache**: Faça backup antes de limpar dados do navegador
+### ✅ O que NÃO coletamos
+
+O Price Watcher **NÃO** coleta, armazena ou transmite **NENHUM** dos seguintes dados:
+- ❌ Dados pessoais (nome, CPF, e-mail, telefone)
+- ❌ Dados de navegação ou comportamento
+- ❌ Endereço IP ou localização geográfica
+- ❌ Cookies de rastreamento ou analytics
+- ❌ Histórico de compras ou preferências de navegação
+- ❌ Informações de pagamento ou cartão de crédito
+- ❌ Nenhum dado é enviado para servidores externos
+
+### 📦 Dados armazenados localmente
+
+**APENAS** no seu navegador (localStorage/IndexedDB):
+- ✅ Lista de favoritos (IDs dos produtos)
+- ✅ Histórico de preços (timestamps + valores)
+- ✅ Metadados dos produtos (nome, imagem)
+- ✅ Grupos de produtos unificados
+- ✅ Configurações do usuário
+
+**Importante**:
+- Todos os dados ficam exclusivamente no seu dispositivo
+- Nenhum dado é enviado para servidores externos
+- Se limpar o cache do navegador, você perderá os dados (faça backup!)
+
+### 🛡️ Transparência Total
+
+- 📖 Código 100% open-source - audite você mesmo!
+- 🔍 Sem backend externo - tudo roda no seu navegador
+- 🚫 Sem telemetria ou analytics
+- ✅ Conformidade com LGPD (Lei Geral de Proteção de Dados)
+
+Para mais detalhes, leia nossa [Política de Privacidade](src/app/privacidade/page.tsx).
+
+## 🌐 Como Funciona o Web Scraping
+
+O Price Watcher utiliza técnicas de web scraping ético e responsável:
+
+1. **Você fornece o identificador**: ID/URL do produto
+2. **Requisição HTTP**: A aplicação faz uma requisição à página pública do produto
+3. **Parsing HTML**: Usamos Cheerio para extrair apenas informações de preços
+4. **Armazenamento local**: Os dados são salvos no seu navegador com timestamp
+5. **Atualização periódica**: A cada 3 horas (apenas com aba aberta)
+
+### ⚖️ Práticas Éticas
+
+- ✅ Acessamos apenas páginas públicas
+- ✅ Respeitamos robots.txt das lojas
+- ✅ Não fazemos login ou acessamos áreas restritas
+- ✅ Requisições feitas de forma responsável (não sobrecarregamos servidores)
+- ✅ Dados usados apenas para fins educacionais e de pesquisa de preços
 
 ## ⚠️ Limitações e Considerações
 
-- 📊 Histórico mantém apenas os últimos **90 dias**
-- ⭐ Máximo de **25 produtos** nos favoritos
-- 🔄 Atualização automática ocorre apenas com a aplicação aberta
+- 📊 Histórico mantém apenas os últimos **90 dias** (para otimizar espaço)
+- 🔄 Atualização automática ocorre apenas com a aplicação **aberta em uma aba** (mesmo em segundo plano)
 - 🌐 Requer conexão com internet para consultar preços
-- 🚫 Web scraping pode falhar se as lojas alterarem o HTML
+- 🚫 Web scraping pode falhar se as lojas alterarem o HTML das páginas
+- 🔒 Dados armazenados localmente podem ser perdidos ao limpar cache do navegador
+- 🏪 Dependemos da estrutura HTML das lojas (KaBuM! e Amazon)
 
 ## 🤝 Contribuindo
 
-Contribuições são bem-vindas! Para contribuir:
+Contribuições são muito bem-vindas! Este é um projeto open-source mantido pela comunidade.
 
-1. Fork o projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/MinhaFeature`)
-3. Commit suas mudanças (`git commit -m 'Adiciona MinhaFeature'`)
-4. Push para a branch (`git push origin feature/MinhaFeature`)
-5. Abra um Pull Request
+### Como Contribuir
 
-## 📝 Licença
+1. **Fork o projeto**
+2. **Crie uma branch para sua feature**
+   ```bash
+   git checkout -b feature/MinhaFeature
+   ```
+3. **Commit suas mudanças**
+   ```bash
+   git commit -m 'Adiciona MinhaFeature'
+   ```
+4. **Push para a branch**
+   ```bash
+   git push origin feature/MinhaFeature
+   ```
+5. **Abra um Pull Request**
 
-Este projeto está sob a licença MIT. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+### Ideias para Contribuições
+
+- 🏪 Adicionar suporte para novas lojas (Magalu, Mercado Livre, etc.)
+- 📧 Sistema de alertas por e-mail quando preço cair
+- 📱 Versão PWA (Progressive Web App)
+- 🌍 Internacionalização (i18n)
+- 🎨 Temas customizáveis (dark mode, light mode)
+- 📊 Mais métricas e análises estatísticas
+- 🔔 Notificações push do navegador
 
 ## 🐛 Bugs e Sugestões
 
-Encontrou um bug ou tem uma sugestão? Abra uma [issue](https://github.com/ooVictorFranco/price-watcher/issues) no GitHub!
+Encontrou um bug ou tem uma sugestão de melhoria?
+
+- 🐞 **Reportar Bug**: [Abra uma issue](https://github.com/ooVictorFranco/price-watcher/issues/new?template=bug_report.md)
+- 💡 **Sugerir Feature**: [Abra uma issue](https://github.com/ooVictorFranco/price-watcher/issues/new?template=feature_request.md)
+- 💬 **Discussões**: [Participe das discussões](https://github.com/ooVictorFranco/price-watcher/discussions)
+
+## 📝 Licença
+
+Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) para mais detalhes.
+
+## 📊 Status do Projeto
+
+🚀 **Versão Atual**: v0.1.0-beta.1
+
+**Changelog:**
+- ✅ Suporte para KaBuM! e Amazon
+- ✅ Sistema de grupos de produtos unificados
+- ✅ Gerenciamento completo de grupos (adicionar, remover, mover, renomear)
+- ✅ Favoritos ilimitados (limite de 25 removido)
+- ✅ Backup otimizado v2
+- ✅ Melhorias de UX/UI e acessibilidade
+- ✅ Animações sutis com Framer Motion
+- ✅ SEO otimizado para Black Friday
+- ✅ Página de política de privacidade completa
+- ✅ Footer com links para GitHub
+
+## 🙏 Agradecimentos
+
+- Comunidade Next.js e React
+- Mantenedores do Cheerio
+- Todos os contribuidores do projeto
+- Usuários que reportam bugs e sugerem melhorias
+
+## 📞 Contato
+
+- **GitHub**: [@ooVictorFranco](https://github.com/ooVictorFranco)
+- **Repositório**: [price-watcher](https://github.com/ooVictorFranco/price-watcher)
+- **Issues**: [Reportar problemas](https://github.com/ooVictorFranco/price-watcher/issues)
 
 ---
 
-Desenvolvido com ❤️ para ajudar a encontrar as melhores ofertas online.
+<div align="center">
+
+**Desenvolvido com ❤️ para ajudar consumidores a encontrarem os melhores preços durante a Black Friday e promoções sazonais.**
+
+⭐ Se este projeto foi útil para você, considere dar uma estrela no GitHub!
+
+</div>
