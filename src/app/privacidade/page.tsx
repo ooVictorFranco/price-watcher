@@ -139,6 +139,37 @@ export default function PrivacidadePage() {
                   de todos os produtos a cada 3 horas, mesmo quando você não está com o navegador aberto.
                 </li>
               </ol>
+
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-4 space-y-2">
+                <p className="font-semibold text-purple-900 mb-2">🚀 Cache Compartilhado (Novo!)</p>
+                <p className="text-purple-800 leading-relaxed">
+                  Para melhorar a experiência de todos os usuários e reduzir requisições desnecessárias às lojas,
+                  implementamos um <strong>sistema de cache compartilhado</strong>:
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-purple-800 ml-4">
+                  <li>
+                    <strong>Todas as buscas são salvas:</strong> Quando você pesquisa um produto (mesmo sem favoritar),
+                    os dados são salvos no banco de dados global
+                  </li>
+                  <li>
+                    <strong>Benefício coletivo:</strong> Se outro usuário buscar o mesmo produto em até 3 horas,
+                    os dados vêm do cache instantaneamente (sem scraping)
+                  </li>
+                  <li>
+                    <strong>Atualização inteligente:</strong> Após 3 horas, uma nova busca atualiza o cache para todos
+                  </li>
+                  <li>
+                    <strong>Privacidade mantida:</strong> Apenas o ID do produto é compartilhado, não seus favoritos
+                    ou seu histórico pessoal
+                  </li>
+                </ul>
+                <p className="text-sm text-purple-700 mt-2">
+                  ℹ️ <strong>Exemplo:</strong> Se você pesquisar uma RTX 4090, e outro usuário buscar a mesma placa
+                  10 minutos depois, ele receberá os dados instantaneamente do cache. Quanto mais pessoas usam,
+                  mais rápido e eficiente o sistema fica para todos!
+                </p>
+              </div>
+
               <p className="text-gray-700 leading-relaxed mt-3">
                 <strong>Transparência:</strong> Todo o código-fonte está disponível no{' '}
                 <a

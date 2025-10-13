@@ -106,7 +106,7 @@ async function scrapeProduct(
 
   const data = await response.json();
 
-  return {
+  const productData = {
     name: data.name ?? null,
     image: data.image ?? null,
     priceVista: data.priceVista ?? null,
@@ -115,6 +115,44 @@ async function scrapeProduct(
     installmentsCount: data.installmentsCount ?? null,
     installmentsValue: data.installmentsValue ?? null,
   };
+
+  // Salva resultado no cache global (não bloqueia o retorno)
+  saveToGlobalCache(productId, provider, productData).catch(err => {
+    console.error('[CACHE] Failed to save to global cache:', err);
+  });
+
+  return productData;
+}
+
+/**
+ * Salva produto no cache global após scraping
+ */
+async function saveToGlobalCache(
+  productId: string,
+  provider: 'kabum' | 'amazon',
+  data: ProductData
+): Promise<void> {
+  try {
+    await fetch('/api/products/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        productId,
+        provider,
+        name: data.name,
+        image: data.image,
+        priceVista: data.priceVista,
+        priceParcelado: data.priceParcelado,
+        priceOriginal: data.priceOriginal,
+        installmentsCount: data.installmentsCount,
+        installmentsValue: data.installmentsValue,
+      }),
+    });
+
+    console.log(`[CACHE] ✓ Saved ${productId} to global cache`);
+  } catch (error) {
+    console.error(`[CACHE] ✗ Failed to save ${productId}:`, error);
+  }
 }
 
 /**
