@@ -115,8 +115,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ product }, { status: 201 });
   } catch (error) {
     console.error('Error adding favorite:', error);
+    // Log detalhado do erro
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    const errorStack = error instanceof Error ? error.stack : undefined;
+    console.error('Error details:', { errorMessage, errorStack });
+
     return NextResponse.json(
-      { error: 'Failed to add favorite' },
+      { error: 'Failed to add favorite', details: errorMessage },
       { status: 500 }
     );
   }

@@ -38,6 +38,7 @@ export async function migrateLocalStorageToDatabase() {
             provider,
             name: fav.name,
             image: fav.image,
+            url: undefined, // Opcional, pode ser undefined
             groupId: fav.groupId,
           }),
         });
@@ -112,7 +113,20 @@ export async function migrateLocalStorageToDatabase() {
           migrated++;
           console.log(`[SYNC] ✓ Migrated ${fav.name}`);
         } else {
-          console.error(`[SYNC] Failed to migrate ${fav.name}:`, response.status, await response.text());
+          const errorText = await response.text();
+          console.error(`[SYNC] Failed to migrate ${fav.name}:`, {
+            status: response.status,
+            statusText: response.statusText,
+            error: errorText,
+          });
+
+          // Tenta parsear o JSON do erro
+          try {
+            const errorJson = JSON.parse(errorText);
+            console.error(`[SYNC] Error details:`, errorJson);
+          } catch {
+            // Não é JSON, já logou o texto
+          }
         }
       } catch (error) {
         console.error(`[SYNC] Error migrating ${fav.name}:`, error);

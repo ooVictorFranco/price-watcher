@@ -33,6 +33,7 @@ export async function syncFavoriteToDatabase(favoriteId: string) {
         provider,
         name: favorite.name,
         image: favorite.image,
+        url: undefined, // Opcional
         groupId: favorite.groupId,
       }),
     });
