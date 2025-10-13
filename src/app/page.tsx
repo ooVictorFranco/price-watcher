@@ -3,7 +3,7 @@
 
 import { useEffect, useMemo, useRef, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
-import { ApiResponse, Favorite, ProductInfo, Snapshot } from '@/types';
+import { Favorite, ProductInfo, Snapshot } from '@/types';
 import {
   addFavorite,
   discountPctFrom,
@@ -23,6 +23,7 @@ import HistoryTable from '@/components/HistoryTable';
 import EmptyState from '@/components/EmptyState';
 import SkeletonCards from '@/components/SkeletonCards';
 import { toast } from '@/lib/toast';
+import { fetchProductWithCache, detectProvider } from '@/lib/product-fetch';
 
 export const dynamic = 'force-dynamic';
 
@@ -64,60 +65,38 @@ function PageContent() {
     }
   };
 
-  async function fetchKabum(idOrUrl: string) {
-    const url = new URL(window.location.origin + '/api/scrape');
-    if (/^\d+$/.test(idOrUrl)) url.searchParams.set('id', idOrUrl);
-    else url.searchParams.set('url', idOrUrl);
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) throw new Error('fetch_failed');
-    return (await res.json()) as ApiResponse;
-  }
-
-  async function fetchAmazon(asinOrUrl: string) {
-    const url = new URL(window.location.origin + '/api/scrape-amazon');
-    // aceita ASIN puro ou URL
-    if (/^[A-Z0-9]{10}$/i.test(asinOrUrl)) url.searchParams.set('asin', asinOrUrl);
-    else url.searchParams.set('url', asinOrUrl);
-    const res = await fetch(url.toString(), { cache: 'no-store' });
-    if (!res.ok) {
-      const errorData = await res.json();
-      // Mostra mensagem específica se disponível
-      if (errorData.hint) {
-        throw new Error(`${errorData.error}: ${errorData.hint}`);
-      }
-      throw new Error(errorData.error || 'amazon_fetch_failed');
-    }
-    return (await res.json()) as ApiResponse;
-  }
-
   const doFetch = async (raw: string) => {
     setLoadingMonitor(true);
     try {
       const parsed = parseIdOrUrl(raw);
+      const idKey = parsed.idOrUrl;
+      const provider = detectProvider(idKey);
 
-      const json =
-        parsed.provider === 'amazon'
-          ? await fetchAmazon(parsed.idOrUrl)
-          : await fetchKabum(parsed.idOrUrl);
+      // Tenta buscar do cache primeiro, depois faz scraping se necessário
+      const result = await fetchProductWithCache(idKey, provider);
 
       const now = Date.now();
 
-      const idKey = parsed.idOrUrl; // usamos o identificador “como digitado”: KaBuM (número) ou Amazon (ASIN)
+      // Mostra indicador visual de cache hit
+      if (result.cached) {
+        toast.success('Dados carregados do cache compartilhado!', { duration: 2000 });
+      }
+
       setProduct({
         idOrUrl: idKey,
-        name: json.name ?? null,
-        image: json.image ?? null,
+        name: result.data.name ?? null,
+        image: result.data.image ?? null,
         lastCheck: now,
-        installmentsCount: json.installmentsCount ?? null,
-        installmentsValue: json.installmentsValue ?? null,
+        installmentsCount: result.data.installmentsCount ?? null,
+        installmentsValue: result.data.installmentsValue ?? null,
       });
 
       const prev = loadHistoryLS(idKey);
       const current: Snapshot = {
         timestamp: now,
-        priceVista: json.priceVista ?? null,
-        priceParcelado: json.priceParcelado ?? null,
-        priceOriginal: json.priceOriginal ?? null,
+        priceVista: result.data.priceVista ?? null,
+        priceParcelado: result.data.priceParcelado ?? null,
+        priceOriginal: result.data.priceOriginal ?? null,
       };
       const next = upsertHistory(prev, current);
       saveHistory(idKey, next);

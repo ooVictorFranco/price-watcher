@@ -23,6 +23,7 @@ import CompareChart, { makeCompareSeries } from '@/components/CompareChart';
 import GroupManagementModal from '@/components/GroupManagementModal';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast';
+import { fetchProductWithCache, detectProvider } from '@/lib/product-fetch';
 
 export default function FavoritosPage() {
   const router = useRouter();
@@ -201,58 +202,48 @@ export default function FavoritosPage() {
 
   /** Busca dados (KaBuM/Amazon), atualiza histórico e também name/image do favorito. */
   async function fetchAndUpsert(id: string, { silent = false }: { silent?: boolean } = {}) {
-    let res: Response;
-    if (/^\d+$/.test(id)) {
-      const u = new URL(window.location.origin + '/api/scrape');
-      u.searchParams.set('id', id);
-      res = await fetch(u.toString(), { cache: 'no-store' });
-    } else if (/^[A-Z0-9]{10}$/i.test(id) || /^https?:\/\//i.test(id)) {
-      const u = new URL(window.location.origin + '/api/scrape-amazon');
-      if (/^[A-Z0-9]{10}$/i.test(id)) u.searchParams.set('asin', id);
-      else u.searchParams.set('url', id);
-      res = await fetch(u.toString(), { cache: 'no-store' });
-    } else {
-      const u = new URL(window.location.origin + '/api/scrape');
-      u.searchParams.set('url', id);
-      res = await fetch(u.toString(), { cache: 'no-store' });
-    }
+    try {
+      const provider = detectProvider(id);
 
-    if (!res.ok) {
-      if (!silent) toast.error('Falha ao atualizar um favorito.');
-      return;
-    }
-    const json = await res.json();
+      // Usa cache compartilhado
+      const result = await fetchProductWithCache(id, provider);
 
-    const now = Date.now();
-    const key = getHistoryKey(id);
-    const prevRaw = localStorage.getItem(key);
-    const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
+      const now = Date.now();
+      const key = getHistoryKey(id);
+      const prevRaw = localStorage.getItem(key);
+      const prev = prevRaw ? (JSON.parse(prevRaw) as Snapshot[]) : [];
 
-    const snap: Snapshot = {
-      timestamp: now,
-      priceVista: json.priceVista ?? null,
-      priceParcelado: json.priceParcelado ?? null,
-      priceOriginal: json.priceOriginal ?? null,
-    };
-    const next = upsertHistory(prev, snap);
-    saveHistory(id, next);
+      const snap: Snapshot = {
+        timestamp: now,
+        priceVista: result.data.priceVista ?? null,
+        priceParcelado: result.data.priceParcelado ?? null,
+        priceOriginal: result.data.priceOriginal ?? null,
+      };
+      const next = upsertHistory(prev, snap);
+      saveHistory(id, next);
 
-    if (json?.name || json?.image) {
-      setFavorites(curr => {
-        const ix = curr.findIndex(f => f.id === id);
-        if (ix === -1) return curr;
-        const current = curr[ix];
-        const updated: Favorite = {
-          ...current,
-          name: json.name ?? current.name,
-          image: json.image ?? current.image,
-        };
-        if (updated.name === current.name && updated.image === current.image) return curr;
-        const nextFavs = [...curr];
-        nextFavs[ix] = updated;
-        saveFavorites(nextFavs);
-        return nextFavs;
-      });
+      if (result.data?.name || result.data?.image) {
+        setFavorites(curr => {
+          const ix = curr.findIndex(f => f.id === id);
+          if (ix === -1) return curr;
+          const current = curr[ix];
+          const updated: Favorite = {
+            ...current,
+            name: result.data.name ?? current.name,
+            image: result.data.image ?? current.image,
+          };
+          if (updated.name === current.name && updated.image === current.image) return curr;
+          const nextFavs = [...curr];
+          nextFavs[ix] = updated;
+          saveFavorites(nextFavs);
+          return nextFavs;
+        });
+      }
+    } catch (error) {
+      if (!silent) {
+        const message = error instanceof Error ? error.message : 'Falha ao atualizar um favorito.';
+        toast.error(message);
+      }
     }
   }
 
