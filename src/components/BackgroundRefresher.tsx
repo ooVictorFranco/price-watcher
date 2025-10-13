@@ -10,6 +10,7 @@ import {
   upsertHistory,
   saveHistory,
 } from '@/lib/utils';
+import { syncFavoriteToDatabase, syncPriceHistoryToDatabase } from '@/lib/db-sync';
 
 const THREE_HOURS = 3 * 60 * 60 * 1000;
 const TICK_MS = 60 * 1000;            // verifica a fila a cada 1 min
@@ -114,6 +115,10 @@ export default function BackgroundRefresher() {
           }
         }
       }
+
+      // sincroniza com banco de dados (não bloqueia)
+      syncFavoriteToDatabase(id).catch(console.error);
+      syncPriceHistoryToDatabase(id).catch(console.error);
 
       // notifica telas para atualizarem os cards/graficos
       try {

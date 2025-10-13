@@ -11,6 +11,7 @@ import ToastHost from '@/components/ToastHost';
 import RouteTransitions from '@/components/RouteTransitions';
 import Footer from '@/components/Footer';
 import DataMigration from '@/components/DataMigration';
+import AutoSync from '@/components/AutoSync';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Hosts/Inicializadores */}
         <ToastHost />
         <DataMigration />
+        <AutoSync />
         <BackgroundRefresher />
         <LiveFileSync />
         <CompatLivePill />
