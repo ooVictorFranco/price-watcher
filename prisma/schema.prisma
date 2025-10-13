@@ -1,0 +1,98 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("POSTGRES_URL")
+  directUrl = env("POSTGRES_URL_NON_POOLING")
+}
+
+// Usuário (identificado por sessionId do navegador)
+model User {
+  id        String   @id @default(cuid())
+  sessionId String   @unique // ID único gerado no navegador
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  products  Product[]
+  groups    ProductGroup[]
+
+  @@index([sessionId])
+}
+
+// Produto monitorado
+model Product {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  // Informações do produto
+  productId         String   // ID KaBuM ou ASIN Amazon
+  provider          String   // 'kabum' ou 'amazon'
+  name              String
+  image             String?
+  url               String?
+
+  // Metadados
+  addedAt           DateTime @default(now())
+  lastCheckedAt     DateTime?
+
+  // Informações de parcelamento
+  installmentsCount Int?
+  installmentsValue Float?
+
+  // Grupo (opcional)
+  groupId           String?
+  group             ProductGroup? @relation(fields: [groupId], references: [id], onDelete: SetNull)
+
+  // Histórico de preços
+  priceHistory      PriceSnapshot[]
+
+  @@unique([userId, productId, provider])
+  @@index([userId])
+  @@index([productId, provider])
+  @@index([groupId])
+}
+
+// Snapshot de preço (histórico)
+model PriceSnapshot {
+  id                String   @id @default(cuid())
+  productId         String
+  product           Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  timestamp         DateTime @default(now())
+
+  priceVista        Float?
+  priceParcelado    Float?
+  priceOriginal     Float?
+
+  installmentsCount Int?
+  installmentsValue Float?
+
+  source            String   @default("scheduled") // 'manual', 'scheduled', 'auto'
+
+  @@index([productId, timestamp])
+  @@index([timestamp])
+}
+
+// Grupo de produtos (unifica produtos de diferentes lojas)
+model ProductGroup {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  name              String
+  image             String?
+  primaryProductId  String?   // ID do produto principal (opcional)
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+
+  products          Product[]
+
+  @@index([userId])
+}

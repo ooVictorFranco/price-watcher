@@ -44,48 +44,70 @@ export default function PrivacidadePage() {
                 <li>Cookies de rastreamento ou analytics</li>
                 <li>Histórico de compras ou preferências de navegação</li>
                 <li>Informações de pagamento ou cartão de crédito</li>
-                <li>Nenhum dado é enviado para servidores externos</li>
               </ul>
             </div>
-            <p className="text-gray-700 leading-relaxed">
-              A aplicação funciona <strong>100% no seu navegador</strong> (client-side). Não temos servidores
-              que armazenem seus dados, nem coletamos telemetria ou analytics de qualquer tipo.
-            </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">3. Dados armazenados localmente</h2>
+            <h2 className="text-xl font-semibold text-gray-900">3. Armazenamento de dados</h2>
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
               <p className="text-blue-900 font-medium">
-                📦 Os seguintes dados são armazenados APENAS no seu navegador (localStorage):
+                📦 Seus dados são armazenados de duas formas:
               </p>
-              <ul className="list-disc list-inside space-y-2 text-blue-800 ml-4">
-                <li>
-                  <strong>Lista de favoritos:</strong> IDs dos produtos que você marcou como favoritos
-                  (números do KaBuM! ou ASINs da Amazon)
-                </li>
-                <li>
-                  <strong>Histórico de preços:</strong> Registros históricos dos preços coletados para cada produto
-                  (preço à vista, parcelado e original)
-                </li>
-                <li>
-                  <strong>Metadados dos produtos:</strong> Nome do produto e URL da imagem (obtidos das lojas)
-                </li>
-                <li>
-                  <strong>Configurações:</strong> Preferências de exibição e configurações do &quot;Arquivo Vivo&quot;
-                </li>
-                <li>
-                  <strong>Grupos de produtos:</strong> Agrupamentos criados por você para comparar o mesmo produto
-                  em lojas diferentes
-                </li>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="font-semibold text-blue-900 mb-2">A) Banco de Dados Neon (PostgreSQL)</p>
+                  <ul className="list-disc list-inside space-y-1 text-blue-800 ml-4">
+                    <li>
+                      <strong>Identificação anônima:</strong> Um ID único gerado no seu navegador (sessionId) para associar seus dados
+                    </li>
+                    <li>
+                      <strong>Lista de favoritos:</strong> IDs dos produtos que você marcou como favoritos
+                    </li>
+                    <li>
+                      <strong>Histórico de preços:</strong> Snapshots de preços coletados automaticamente
+                    </li>
+                    <li>
+                      <strong>Grupos de produtos:</strong> Agrupamentos para comparação entre lojas
+                    </li>
+                    <li>
+                      <strong>Metadados:</strong> Nome e imagem dos produtos (obtidos das lojas)
+                    </li>
+                  </ul>
+                  <p className="text-sm text-blue-700 mt-2">
+                    ℹ️ O banco de dados permite atualização automática de preços mesmo com o navegador fechado e sincronização entre dispositivos.
+                  </p>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-blue-900 mb-2">B) Armazenamento Local (localStorage/IndexedDB)</p>
+                  <ul className="list-disc list-inside space-y-1 text-blue-800 ml-4">
+                    <li>
+                      <strong>SessionId:</strong> Identificador único do seu dispositivo
+                    </li>
+                    <li>
+                      <strong>Cache local:</strong> Cópia dos dados para acesso offline
+                    </li>
+                    <li>
+                      <strong>Configurações:</strong> Preferências de exibição e backup
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mt-3">
+              <p className="text-yellow-900 font-medium mb-2">⚠️ Importante sobre privacidade:</p>
+              <ul className="list-disc list-inside space-y-1 text-yellow-800 ml-4">
+                <li>Não coletamos dados pessoais identificáveis (nome, email, CPF)</li>
+                <li>O sessionId é apenas um UUID aleatório, não pode ser usado para te identificar</li>
+                <li>Não há autenticação ou login - você não precisa criar conta</li>
+                <li>Os dados das lojas (preços) são públicos e obtidos via web scraping</li>
+                <li>Você pode exportar ou deletar todos os seus dados a qualquer momento</li>
               </ul>
             </div>
-            <p className="text-gray-700 leading-relaxed">
-              <strong>Importante:</strong> Esses dados permanecem exclusivamente no seu dispositivo.
-              Se você limpar o cache/histórico do navegador ou usar o modo anônimo, esses dados serão perdidos.
-              Por isso, recomendamos usar a função de <strong>Backup → Exportar JSON</strong> ou ativar o
-              <strong> Arquivo Vivo</strong> para manter seus dados seguros.
-            </p>
           </section>
 
           <section className="space-y-4">
@@ -113,8 +135,8 @@ export default function PrivacidadePage() {
                   junto com um timestamp, criando um histórico temporal.
                 </li>
                 <li>
-                  <strong>Atualização periódica:</strong> Enquanto você mantiver uma aba do app aberta (mesmo em segundo plano),
-                  a aplicação verifica automaticamente os preços a cada 3 horas.
+                  <strong>Atualização automática:</strong> Um cron job na Vercel atualiza automaticamente os preços
+                  de todos os produtos a cada 3 horas, mesmo quando você não está com o navegador aberto.
                 </li>
               </ol>
               <p className="text-gray-700 leading-relaxed mt-3">
@@ -133,7 +155,25 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">5. Conformidade com lojas online</h2>
+            <h2 className="text-xl font-semibold text-gray-900">5. Infraestrutura e hospedagem</h2>
+            <p className="text-gray-700 leading-relaxed">
+              O Price Watcher é hospedado na <strong>Vercel</strong> (plataforma de hospedagem)
+              e utiliza o banco de dados <strong>Neon PostgreSQL</strong> (serverless) para armazenamento.
+            </p>
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
+              <p className="font-semibold text-gray-900">Garantias de privacidade:</p>
+              <ul className="list-disc list-inside space-y-1 text-gray-700 ml-4">
+                <li>Ambos os provedores estão em conformidade com LGPD e GDPR</li>
+                <li>Conexões protegidas por SSL/TLS (HTTPS)</li>
+                <li>Banco de dados acessível apenas pela aplicação (não público)</li>
+                <li>Dados criptografados em trânsito e em repouso</li>
+                <li>Sem compartilhamento de dados com terceiros</li>
+              </ul>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">6. Conformidade com lojas online</h2>
             <p className="text-gray-700 leading-relaxed">
               O Price Watcher acessa apenas informações públicas disponíveis nas páginas de produtos das lojas.
               Não fazemos login em contas, não acessamos áreas restritas e respeitamos os robots.txt das lojas.
@@ -146,7 +186,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">6. Backup e exportação de dados</h2>
+            <h2 className="text-xl font-semibold text-gray-900">7. Backup e exportação de dados</h2>
             <p className="text-gray-700 leading-relaxed">
               Você tem controle total sobre seus dados:
             </p>
@@ -170,7 +210,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">7. Tecnologias utilizadas</h2>
+            <h2 className="text-xl font-semibold text-gray-900">8. Tecnologias utilizadas</h2>
             <p className="text-gray-700 leading-relaxed">
               O Price Watcher é construído com tecnologias web modernas:
             </p>
@@ -178,14 +218,16 @@ export default function PrivacidadePage() {
               <li><strong>Next.js 15:</strong> Framework React para renderização e API routes</li>
               <li><strong>React 19:</strong> Biblioteca UI para interface interativa</li>
               <li><strong>TypeScript:</strong> Tipagem estática para maior confiabilidade</li>
-              <li><strong>LocalStorage & IndexedDB:</strong> Armazenamento local no navegador</li>
+              <li><strong>PostgreSQL (Neon):</strong> Banco de dados serverless para armazenamento confiável</li>
+              <li><strong>Prisma ORM:</strong> Interface segura com o banco de dados</li>
+              <li><strong>LocalStorage & IndexedDB:</strong> Cache local no navegador</li>
               <li><strong>Cheerio:</strong> Parsing de HTML para extração de dados</li>
               <li><strong>Chart.js:</strong> Visualização de gráficos de histórico de preços</li>
             </ul>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">8. Seus direitos</h2>
+            <h2 className="text-xl font-semibold text-gray-900">9. Seus direitos</h2>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <ul className="list-disc list-inside space-y-2 text-gray-700 ml-2">
                 <li>Você pode deletar todos os seus dados a qualquer momento limpando o cache do navegador</li>
@@ -198,7 +240,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">9. Alterações nesta política</h2>
+            <h2 className="text-xl font-semibold text-gray-900">10. Alterações nesta política</h2>
             <p className="text-gray-700 leading-relaxed">
               Como este é um projeto open-source em evolução, esta política de privacidade pode ser atualizada.
               Mudanças significativas serão comunicadas através do repositório GitHub. A data da última atualização
@@ -207,7 +249,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">10. Contato e contribuições</h2>
+            <h2 className="text-xl font-semibold text-gray-900">11. Contato e contribuições</h2>
             <p className="text-gray-700 leading-relaxed">
               Este projeto é mantido pela comunidade. Se você tiver dúvidas, sugestões ou quiser contribuir:
             </p>
@@ -235,9 +277,10 @@ export default function PrivacidadePage() {
 
           <footer className="mt-8 pt-6 border-t">
             <p className="text-sm text-gray-600">
-              <strong>Resumo:</strong> O Price Watcher não coleta dados pessoais, não usa analytics,
-              não armazena dados em servidores externos e é 100% transparente com código aberto.
-              Todos os dados ficam no seu navegador e você tem controle total sobre eles.
+              <strong>Resumo:</strong> O Price Watcher não coleta dados pessoais identificáveis, não usa analytics
+              de terceiros e é 100% transparente com código aberto. Seus dados são armazenados de forma segura
+              em banco de dados PostgreSQL (Neon) usando apenas um ID anônimo para associação. Você tem controle
+              total sobre seus dados e pode exportá-los ou deletá-los a qualquer momento.
             </p>
             <div className="mt-4">
               <Link

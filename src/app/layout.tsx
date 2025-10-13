@@ -10,6 +10,7 @@ import CompatLivePill from '@/components/CompatLivePill';
 import ToastHost from '@/components/ToastHost';
 import RouteTransitions from '@/components/RouteTransitions';
 import Footer from '@/components/Footer';
+import DataMigration from '@/components/DataMigration';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -43,6 +44,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${inter.variable} font-sans bg-gradient-to-br from-gray-50 to-gray-100 text-gray-900`}>
         {/* Hosts/Inicializadores */}
         <ToastHost />
+        <DataMigration />
         <BackgroundRefresher />
         <LiveFileSync />
         <CompatLivePill />

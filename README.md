@@ -18,8 +18,9 @@ O objetivo é trazer **transparência** e ajudar você a identificar se os desco
 #### 🎯 Monitoramento Inteligente
 - 🔍 **Múltiplas Lojas**: Monitore produtos da KaBuM! (ID ou URL) e Amazon (ASIN ou URL, incluindo links encurtados)
 - 📊 **Histórico Completo**: Gráficos interativos mostrando a evolução dos preços (à vista, parcelado e original)
-- 🔄 **Atualização Automática**: Consulta preços a cada 3 horas enquanto a aplicação estiver aberta
-- ⏰ **90 Dias de Histórico**: Acompanhe a variação de preços por até 3 meses
+- 🔄 **Atualização Automática**: Preços atualizados automaticamente **a cada 3 horas, mesmo com navegador fechado** (Vercel Cron Jobs)
+- ☁️ **Sincronização na Nuvem**: Dados armazenados em PostgreSQL (Neon) e sincronizados entre dispositivos
+- ⏰ **Histórico Ilimitado**: Acompanhe a variação de preços sem limite de tempo
 
 #### ⭐ Favoritos e Organização
 - 💾 **Favoritos Ilimitados**: Sem limite de produtos (anteriormente limitado a 25)
@@ -72,13 +73,16 @@ Este projeto foi desenvolvido com tecnologias web modernas:
 - [Next/Image](https://nextjs.org/docs/app/api-reference/components/image) - Otimização automática de imagens
 
 ### Data & Storage
-- [LocalStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) - Armazenamento de favoritos e preferências
-- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - Armazenamento de histórico de preços
+- [PostgreSQL (Neon)](https://neon.tech/) - Banco de dados serverless para armazenamento confiável e sincronizado
+- [Prisma ORM](https://www.prisma.io/) - Interface type-safe com o banco de dados
+- [LocalStorage API](https://developer.mozilla.org/en-US/docs/Web/API/Window/localStorage) - Cache local de dados
+- [IndexedDB](https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API) - Cache de histórico de preços
 - [File System Access API](https://developer.mozilla.org/en-US/docs/Web/API/File_System_Access_API) - Arquivo vivo para backup automático
 
-### Web Scraping
+### Web Scraping & Automation
 - [Cheerio](https://cheerio.js.org/) - Parsing de HTML para extração de dados
 - Next.js API Routes - Backend serverless para scraping
+- [Vercel Cron Jobs](https://vercel.com/docs/cron-jobs) - Atualização automática de preços a cada 3 horas
 
 ## 📦 Instalação
 
@@ -104,12 +108,17 @@ Este projeto foi desenvolvido com tecnologias web modernas:
    pnpm install
    ```
 
-3. **Configure as variáveis de ambiente** (opcional)
+3. **Configure o banco de dados** (obrigatório para atualização automática)
 
-   Crie um arquivo `.env.local` na raiz do projeto se necessário:
-   ```env
-   # Adicione variáveis de ambiente aqui, se necessário
-   ```
+   O projeto utiliza PostgreSQL (Neon) para armazenamento e atualização automática de preços.
+
+   **Para uso completo com atualização automática:**
+   - Siga o guia completo: [DATABASE_SETUP.md](DATABASE_SETUP.md)
+   - Ou guia rápido: [QUICKSTART_DATABASE.md](QUICKSTART_DATABASE.md)
+
+   **Para testes locais (sem banco):**
+   - A aplicação funcionará, mas sem sincronização entre dispositivos
+   - A atualização de preços só ocorrerá manualmente ou com o navegador aberto
 
 4. **Execute o servidor de desenvolvimento**
    ```bash
@@ -130,7 +139,7 @@ Este projeto foi desenvolvido com tecnologias web modernas:
 # Desenvolvimento com hot-reload e Turbopack
 npm run dev
 
-# Build de produção otimizado
+# Build de produção otimizado (gera Prisma Client automaticamente)
 npm run build
 
 # Iniciar servidor de produção
@@ -138,6 +147,11 @@ npm run start
 
 # Executar linter (ESLint)
 npm run lint
+
+# Prisma (banco de dados)
+npx prisma generate     # Gera o Prisma Client
+npx prisma db push      # Sincroniza schema com o banco de dados
+npx prisma studio       # Abre interface visual do banco de dados
 ```
 
 ## 📖 Como Usar
@@ -257,33 +271,41 @@ price-watcher/
 ### ✅ O que NÃO coletamos
 
 O Price Watcher **NÃO** coleta, armazena ou transmite **NENHUM** dos seguintes dados:
-- ❌ Dados pessoais (nome, CPF, e-mail, telefone)
+- ❌ Dados pessoais identificáveis (nome, CPF, e-mail, telefone)
 - ❌ Dados de navegação ou comportamento
 - ❌ Endereço IP ou localização geográfica
-- ❌ Cookies de rastreamento ou analytics
+- ❌ Cookies de rastreamento ou analytics de terceiros
 - ❌ Histórico de compras ou preferências de navegação
 - ❌ Informações de pagamento ou cartão de crédito
-- ❌ Nenhum dado é enviado para servidores externos
 
-### 📦 Dados armazenados localmente
+### 📦 Como seus dados são armazenados
 
-**APENAS** no seu navegador (localStorage/IndexedDB):
+**PostgreSQL (Neon)** - Banco de dados serverless:
 - ✅ Lista de favoritos (IDs dos produtos)
 - ✅ Histórico de preços (timestamps + valores)
 - ✅ Metadados dos produtos (nome, imagem)
 - ✅ Grupos de produtos unificados
+- ✅ Identificação anônima via **sessionId** (UUID gerado no navegador)
+
+**localStorage/IndexedDB** - Cache local:
+- ✅ SessionId (identificador único do dispositivo)
+- ✅ Cache de dados para acesso offline
 - ✅ Configurações do usuário
 
-**Importante**:
-- Todos os dados ficam exclusivamente no seu dispositivo
-- Nenhum dado é enviado para servidores externos
-- Se limpar o cache do navegador, você perderá os dados (faça backup!)
+**Importante sobre privacidade**:
+- 🔒 Não coletamos dados pessoais identificáveis
+- 🆔 O sessionId é apenas um UUID aleatório - não pode ser usado para te identificar
+- 🚫 Sem login ou autenticação - não precisa criar conta
+- 🔐 Dados criptografados em trânsito (HTTPS) e em repouso
+- ✅ Banco de dados acessível apenas pela aplicação
+- 📤 Você pode exportar ou deletar todos os dados a qualquer momento
 
 ### 🛡️ Transparência Total
 
 - 📖 Código 100% open-source - audite você mesmo!
-- 🔍 Sem backend externo - tudo roda no seu navegador
-- 🚫 Sem telemetria ou analytics
+- 🔍 Hospedagem: Vercel (LGPD/GDPR compliant)
+- 🗄️ Banco: Neon PostgreSQL (serverless, seguro)
+- 🚫 Sem telemetria ou analytics de terceiros
 - ✅ Conformidade com LGPD (Lei Geral de Proteção de Dados)
 
 Para mais detalhes, leia nossa [Política de Privacidade](src/app/privacidade/page.tsx).
@@ -303,17 +325,17 @@ O Price Watcher utiliza técnicas de web scraping ético e responsável:
 - ✅ Acessamos apenas páginas públicas
 - ✅ Respeitamos robots.txt das lojas
 - ✅ Não fazemos login ou acessamos áreas restritas
-- ✅ Requisições feitas de forma responsável (não sobrecarregamos servidores)
+- ✅ Requisições feitas de forma responsável (delays entre requests, não sobrecarregamos servidores)
+- ✅ Atualização automática com intervalo de 3 horas (respeitando rate limits)
 - ✅ Dados usados apenas para fins educacionais e de pesquisa de preços
 
 ## ⚠️ Limitações e Considerações
 
-- 📊 Histórico mantém apenas os últimos **90 dias** (para otimizar espaço)
-- 🔄 Atualização automática ocorre apenas com a aplicação **aberta em uma aba** (mesmo em segundo plano)
-- 🌐 Requer conexão com internet para consultar preços
+- 🌐 Requer conexão com internet para consultar preços e sincronizar
 - 🚫 Web scraping pode falhar se as lojas alterarem o HTML das páginas
-- 🔒 Dados armazenados localmente podem ser perdidos ao limpar cache do navegador
 - 🏪 Dependemos da estrutura HTML das lojas (KaBuM! e Amazon)
+- 🔄 Cron job atualiza preços a cada 3 horas (não em tempo real)
+- 💾 Banco de dados gratuito (Neon) tem limite de 5GB (suficiente para milhares de produtos)
 
 ## 🤝 Contribuindo
 
@@ -360,9 +382,19 @@ Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) par
 
 ## 📊 Status do Projeto
 
-🚀 **Versão Atual**: v0.1.0-beta.2
+🚀 **Versão Atual**: v0.1.0-beta.3
 
-### Changelog v0.1.0-beta.2 (Atual)
+### Changelog v0.1.0-beta.3 (Atual)
+- ✅ **Backend com PostgreSQL**: Banco de dados Neon para armazenamento confiável
+- ✅ **Atualização Automática**: Cron jobs da Vercel atualizam preços a cada 3 horas (mesmo com navegador fechado)
+- ✅ **Sincronização na Nuvem**: Dados sincronizados entre múltiplos dispositivos
+- ✅ **Migração Automática**: Dados do localStorage migrados automaticamente para o banco
+- ✅ **Prisma ORM**: Interface type-safe com o banco de dados
+- ✅ **Histórico Ilimitado**: Sem limite de tempo para manter histórico de preços
+- ✅ **Documentação Completa**: Guias de setup do banco de dados (DATABASE_SETUP.md)
+- ✅ **Política de Privacidade Atualizada**: Informações sobre armazenamento em nuvem
+
+### Changelog v0.1.0-beta.2
 - ✅ **SEO Otimizado**: Meta tags completas focadas em Black Friday e Cyber Monday
 - ✅ **Política de Privacidade**: Página completa explicando coleta de dados e transparência
 - ✅ **Footer Novo**: Links para GitHub, política de privacidade e seção de contribuições
