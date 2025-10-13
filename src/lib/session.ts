@@ -15,6 +15,9 @@ export function getSessionId(): string {
     // Gera um ID único usando crypto.randomUUID (ou fallback)
     sessionId = crypto.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).substring(2)}`;
     localStorage.setItem(SESSION_KEY, sessionId);
+    console.log('[Session] Created new sessionId:', sessionId);
+  } else {
+    console.log('[Session] Using existing sessionId:', sessionId);
   }
 
   return sessionId;

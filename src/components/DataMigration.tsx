@@ -15,19 +15,23 @@ export default function DataMigration() {
       const alreadyMigrated = localStorage.getItem(MIGRATION_KEY);
 
       if (alreadyMigrated === 'true') {
+        console.log('[DataMigration] Already migrated, skipping');
         setStatus('done');
         return;
       }
 
+      console.log('[DataMigration] Starting migration...');
       // Inicia migração
       setStatus('migrating');
 
       const result = await migrateLocalStorageToDatabase();
 
       if (result.success) {
+        console.log(`[DataMigration] Success! Migrated ${result.migrated} products`);
         localStorage.setItem(MIGRATION_KEY, 'true');
         setStatus('done');
       } else {
+        console.error('[DataMigration] Migration failed:', result.error);
         setStatus('error');
       }
     };

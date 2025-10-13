@@ -45,20 +45,22 @@ export async function migrateLocalStorageToDatabase() {
         if (response.ok || response.status === 409) {
           // 409 = já existe, tudo bem
           const data = await response.json();
-          const productDbId = data.product?.id;
+          console.log(`[SYNC] Product ${fav.name} response:`, data);
 
           // Migra histórico de preços
-          if (productDbId) {
-            const historyKey = getHistoryKey(fav.id);
-            const historyRaw = localStorage.getItem(historyKey);
+          const historyKey = getHistoryKey(fav.id);
+          const historyRaw = localStorage.getItem(historyKey);
 
-            if (historyRaw) {
-              try {
-                const history: Snapshot[] = JSON.parse(historyRaw);
+          if (historyRaw) {
+            try {
+              const history: Snapshot[] = JSON.parse(historyRaw);
+
+              if (history.length > 0) {
+                console.log(`[SYNC] Migrating ${history.length} snapshots for ${fav.id}`);
 
                 // Envia snapshots para o banco (batch)
                 for (const snap of history) {
-                  await fetch('/api/prices/update', {
+                  const priceResponse = await fetch('/api/prices/update', {
                     method: 'POST',
                     headers: getAuthHeaders(),
                     body: JSON.stringify({
@@ -70,17 +72,26 @@ export async function migrateLocalStorageToDatabase() {
                       source: 'manual',
                     }),
                   });
+
+                  if (!priceResponse.ok) {
+                    console.error(`[SYNC] Failed to sync snapshot:`, await priceResponse.text());
+                  }
+
+                  // Pequeno delay para não sobrecarregar
+                  await new Promise(resolve => setTimeout(resolve, 50));
                 }
 
                 console.log(`[SYNC] ✓ Migrated ${history.length} price snapshots for ${fav.id}`);
-              } catch (e) {
-                console.error(`[SYNC] Error migrating history for ${fav.id}:`, e);
               }
+            } catch (e) {
+              console.error(`[SYNC] Error migrating history for ${fav.id}:`, e);
             }
           }
 
           migrated++;
           console.log(`[SYNC] ✓ Migrated ${fav.name}`);
+        } else {
+          console.error(`[SYNC] Failed to migrate ${fav.name}:`, response.status, await response.text());
         }
       } catch (error) {
         console.error(`[SYNC] Error migrating ${fav.name}:`, error);
