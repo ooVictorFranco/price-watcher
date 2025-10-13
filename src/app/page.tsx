@@ -174,9 +174,11 @@ function PageContent() {
     <main className="min-h-screen py-8">
       <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-bold">Monitoramento</h1>
+          <h1 className="text-2xl font-bold">Monitore Preços da Black Friday</h1>
           <p className="text-sm text-gray-600">
-            Cole o ID/URL do KaBuM! (<code>922662</code>) ou o ASIN/URL da Amazon (<code>B0F7Z9F9SD</code>).
+            Descubra se as lojas realmente baixaram os preços nas promoções.
+            Cole o ID/URL do KaBuM! (<code>922662</code>) ou o ASIN/URL da Amazon (<code>B0F7Z9F9SD</code>)
+            e acompanhe o histórico de preços ao longo do tempo.
           </p>
         </header>
 

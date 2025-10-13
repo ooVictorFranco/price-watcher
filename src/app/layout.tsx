@@ -9,12 +9,32 @@ import LiveFileSync from '@/components/LiveFileSync';
 import CompatLivePill from '@/components/CompatLivePill';
 import ToastHost from '@/components/ToastHost';
 import RouteTransitions from '@/components/RouteTransitions';
+import Footer from '@/components/Footer';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'Monitor de preço',
-  description: 'Monitoramento, favoritos e comparativo de preços em múltiplas lojas online',
+  title: 'Price Watcher - Monitor de Preços Black Friday 2025 | KaBuM! e Amazon',
+  description: 'Descubra se as lojas realmente baixaram os preços na Black Friday! Monitore preços da KaBuM! e Amazon automaticamente. Compare históricos e evite falsos descontos em promoções sazonais.',
+  keywords: 'monitor de preços, black friday, cyber monday, promoções, kabum, amazon, comparar preços, histórico de preços, descontos reais',
+  authors: [{ name: 'Victor Franco', url: 'https://github.com/ooVictorFranco' }],
+  creator: 'Victor Franco',
+  openGraph: {
+    type: 'website',
+    locale: 'pt_BR',
+    title: 'Price Watcher - Monitor de Preços Black Friday 2025',
+    description: 'Descubra se as lojas realmente baixaram os preços na Black Friday! Monitore preços automaticamente e evite falsos descontos.',
+    siteName: 'Price Watcher',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Price Watcher - Monitor de Preços Black Friday 2025',
+    description: 'Descubra se as lojas realmente baixaram os preços na Black Friday! Monitore preços automaticamente.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,7 +50,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <header className="bg-white/80 backdrop-blur border-b sticky top-0 z-[200]">
           <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-3">
             <Link href="/" className="font-semibold transition-transform hover:scale-[1.02]">
-              Monitor de preço
+              Price Watcher
             </Link>
 
             <div className="ml-auto flex items-center gap-1 text-sm">
@@ -44,23 +64,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {/* Transições entre páginas */}
         <RouteTransitions>{children}</RouteTransitions>
 
-        <footer className="mt-10 border-t bg-white">
-          <div className="mx-auto max-w-6xl px-6 py-4 text-xs text-gray-500 space-y-1">
-            <p>
-              <strong>Aviso:</strong> este site realiza uma consulta automática a cada <strong>3 horas</strong>{' '}
-              para todos os produtos salvos em <Link href="/favoritos" className="underline">Favoritos</Link>,{' '}
-              enquanto ao menos uma aba desta aplicação estiver aberta (mesmo em segundo plano).
-            </p>
-            <p>
-              Os dados (favoritos e histórico de preços) são armazenados <strong>no seu navegador</strong>.
-              Ao limpar histórico/cache do navegador, você pode perder essas informações.
-              Use <strong>Backup → Exportar JSON</strong> ou ative o <strong>Arquivo vivo</strong>.
-            </p>
-            <p>
-              <strong>Retenção do histórico:</strong> o histórico exibido e o arquivo vivo mantêm apenas os últimos <strong>90 dias</strong> de dados para manter o arquivo leve.
-            </p>
-          </div>
-        </footer>
+        {/* Footer atualizado */}
+        <Footer />
       </body>
     </html>
   );

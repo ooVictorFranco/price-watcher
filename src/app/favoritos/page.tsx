@@ -42,7 +42,7 @@ export default function FavoritosPage() {
   const [selectedProductForGroup, setSelectedProductForGroup] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Favoritos — Monitor de preço';
+    document.title = 'Favoritos — Price Watcher | Compare Preços Black Friday';
   }, []);
 
   useEffect(() => {
@@ -363,9 +363,11 @@ export default function FavoritosPage() {
     <main className="min-h-screen py-8">
       <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-bold">Favoritos</h1>
+          <h1 className="text-2xl font-bold">Meus Favoritos - Compare Preços</h1>
           <p className="text-sm text-gray-600">
-            Agora também aceitamos Amazon (ASIN/URL). O app verifica automaticamente a cada <strong>3 horas</strong>.
+            Monitore seus produtos favoritos da KaBuM! e Amazon automaticamente.
+            O app verifica os preços a cada <strong>3 horas</strong> e mantém um histórico completo
+            para você identificar os melhores momentos de compra na Black Friday e outras promoções sazonais.
           </p>
         </header>
 
