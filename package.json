@@ -1,7 +1,7 @@
 {
   "name": "price-watcher",
-  "version": "0.1.0-beta.1",
-  "description": "Monitor inteligente de preços para múltiplas lojas online (KaBuM!, Amazon) com histórico, comparação e atualização automática",
+  "version": "0.1.0-beta.2",
+  "description": "Descubra se as lojas realmente baixaram os preços na Black Friday! Monitor inteligente de preços para KaBuM! e Amazon com histórico, comparação e grupos unificados",
   "author": "Victor Franco",
   "license": "MIT",
   "repository": {
@@ -11,10 +11,14 @@
   "keywords": [
     "price-tracker",
     "price-monitor",
+    "black-friday",
+    "cyber-monday",
     "kabum",
     "amazon",
     "web-scraping",
     "price-comparison",
+    "price-history",
+    "product-groups",
     "nextjs",
     "react",
     "typescript"

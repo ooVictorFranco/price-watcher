@@ -360,9 +360,16 @@ Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) par
 
 ## 📊 Status do Projeto
 
-🚀 **Versão Atual**: v0.1.0-beta.1
+🚀 **Versão Atual**: v0.1.0-beta.2
 
-**Changelog:**
+### Changelog v0.1.0-beta.2 (Atual)
+- ✅ **SEO Otimizado**: Meta tags completas focadas em Black Friday e Cyber Monday
+- ✅ **Política de Privacidade**: Página completa explicando coleta de dados e transparência
+- ✅ **Footer Novo**: Links para GitHub, política de privacidade e seção de contribuições
+- ✅ **Textos Aprimorados**: Toda aplicação com foco em identificar falsos descontos
+- ✅ **README Completo**: Documentação profissional com badges e guias detalhados
+
+### Changelog v0.1.0-beta.1
 - ✅ Suporte para KaBuM! e Amazon
 - ✅ Sistema de grupos de produtos unificados
 - ✅ Gerenciamento completo de grupos (adicionar, remover, mover, renomear)
@@ -370,9 +377,6 @@ Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) par
 - ✅ Backup otimizado v2
 - ✅ Melhorias de UX/UI e acessibilidade
 - ✅ Animações sutis com Framer Motion
-- ✅ SEO otimizado para Black Friday
-- ✅ Página de política de privacidade completa
-- ✅ Footer com links para GitHub
 
 ## 🙏 Agradecimentos
 
