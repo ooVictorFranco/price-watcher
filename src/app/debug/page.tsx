@@ -5,10 +5,20 @@ import { useEffect, useState } from 'react';
 import { loadFavorites } from '@/lib/utils';
 import { getSessionId, getAuthHeaders } from '@/lib/session';
 
+interface DbProduct {
+  id: string;
+  productId: string;
+  provider: string;
+  name: string;
+  image: string | null;
+  groupId: string | null;
+  addedAt: string;
+}
+
 export default function DebugPage() {
   const [sessionId, setSessionId] = useState('');
-  const [localFavorites, setLocalFavorites] = useState<any[]>([]);
-  const [dbFavorites, setDbFavorites] = useState<any[]>([]);
+  const [localFavorites, setLocalFavorites] = useState<unknown[]>([]);
+  const [dbFavorites, setDbFavorites] = useState<DbProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [migrationStatus, setMigrationStatus] = useState('');
 
