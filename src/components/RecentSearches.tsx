@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { motion, useReducedMotion, useMotionValue, useAnimationFrame } from 'framer-motion';
 import Image from 'next/image';
 
@@ -60,7 +60,7 @@ export default function RecentSearches({ onProductClick }: Props) {
   const offsetRef = useRef(0);
   const lastSwapIndexRef = useRef<number>(-1);
 
-  function applyOffset(value: number, length?: number) {
+  const applyOffset = useCallback((value: number, length?: number) => {
     const total = length ?? productsLengthRef.current;
     if (!total) {
       offsetRef.current = 0;
@@ -80,17 +80,17 @@ export default function RecentSearches({ onProductClick }: Props) {
 
     offsetRef.current = next;
     x.set(next);
-  }
+  }, [x]);
 
-  function getVisibleStart(length?: number) {
+  const getVisibleStart = useCallback((length?: number) => {
     const total = length ?? productsLengthRef.current;
     if (!total) return 0;
     const normalized = Math.abs(offsetRef.current);
     const index = Math.floor(normalized / CARD_WIDTH);
     return index % total;
-  }
+  }, []);
 
-  const getVisibleIndices = (total: number) => {
+  const getVisibleIndices = useCallback((total: number) => {
     if (total === 0) return [];
     const visibleStart = getVisibleStart(total);
     const visibleSlots = Math.min(visibleCountRef.current, total);
@@ -99,7 +99,7 @@ export default function RecentSearches({ onProductClick }: Props) {
       indices.push((visibleStart + i) % total);
     }
     return indices;
-  };
+  }, [getVisibleStart]);
 
   const dedupeProducts = (list: RecentProduct[]) => {
     const seen = new Set<string>();
@@ -128,7 +128,7 @@ export default function RecentSearches({ onProductClick }: Props) {
       }
     });
     return unsubscribe;
-  }, [x]);
+  }, [applyOffset, x]);
 
   useEffect(() => {
     let mounted = true;
@@ -204,7 +204,7 @@ export default function RecentSearches({ onProductClick }: Props) {
       mounted = false;
       if (timeout) clearTimeout(timeout);
     };
-  }, []);
+  }, [getVisibleIndices]);
 
   useEffect(() => {
     const updateVisibleCount = () => {
@@ -245,7 +245,7 @@ export default function RecentSearches({ onProductClick }: Props) {
     }
 
     applyOffset(offsetRef.current, products.length);
-  }, [products.length]);
+  }, [applyOffset, products.length]);
 
   useAnimationFrame((_, delta) => {
     if (prefersReducedMotion || productsLengthRef.current === 0) return;
