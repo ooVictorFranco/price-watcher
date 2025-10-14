@@ -207,7 +207,7 @@ function PageContent() {
           value={input}
           loadingMonitor={loadingMonitor}
           onChange={setInput}
-          onMonitor={() => startMonitoring()}
+          onMonitor={(value) => startMonitoring(value)}
           onClear={clearCurrent}
           placeholder="Cole o ID (ex.: 922662 ou B0F7Z9F9SD) ou URL do produto"
         />

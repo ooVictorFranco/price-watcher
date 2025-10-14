@@ -8,7 +8,7 @@ import ProductAutocomplete from './ProductAutocomplete';
 type Props = {
   value: string;
   onChange: (v: string) => void;
-  onMonitor: () => void;
+  onMonitor: (value?: string) => void;
   onClear: () => void;
   loadingMonitor?: boolean;
   placeholder?: string;
@@ -37,7 +37,7 @@ export default function SearchBar({
   }, []);
 
   const handleSelect = (productId: string, provider: 'kabum' | 'amazon') => {
-    // Constrói URL completa para evitar problemas de parsing
+    // Constrói identificador válido para parsing
     let fullIdentifier: string;
     if (provider === 'kabum') {
       fullIdentifier = /^\d+$/.test(productId)
@@ -49,11 +49,13 @@ export default function SearchBar({
         : `https://www.amazon.com.br/dp/${productId}`;
     }
 
+    // Atualiza o input para mostrar o valor selecionado
     onChange(fullIdentifier);
     setShowAutocomplete(false);
     setIsFocused(false);
-    // Aguarda para garantir que o valor foi atualizado
-    setTimeout(() => onMonitor(), 100);
+
+    // Chama onMonitor DIRETAMENTE com o valor, sem depender do estado
+    onMonitor(fullIdentifier);
   };
 
   const handleInputChange = (newValue: string) => {
