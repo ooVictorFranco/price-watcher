@@ -129,12 +129,12 @@ export default function HistoryChart({ history }: Props) {
   }, [labels, datasets]);
 
   return (
-    <div className="rounded-2xl border bg-white shadow-md p-5">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
-        <h3 className="text-sm font-medium">Histórico de Preços</h3>
+    <div className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg p-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <h3 className="text-lg font-semibold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">Histórico de Preços</h3>
         <PeriodFilter value={period} onChange={setPeriod} />
       </div>
-      <div className="rounded-xl bg-white p-2 h-80">
+      <div className="rounded-xl bg-gradient-to-br from-gray-50/50 to-white/50 p-4 h-80 border border-gray-100">
         <canvas ref={canvasRef} />
       </div>
       {filteredHistory.length === 0 && (

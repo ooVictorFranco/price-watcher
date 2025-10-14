@@ -82,7 +82,7 @@ export default function SearchBar({
 
   return (
     <motion.section
-      className="rounded-2xl border bg-white shadow-md p-4"
+      className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg p-6 relative z-50"
       initial={{ opacity: 0, y: -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -95,22 +95,23 @@ export default function SearchBar({
       >
         <div className="flex-1 relative" ref={containerRef}>
           <label htmlFor={id} className="sr-only">
-            Busque pelo nome, ID ou cole a URL do produto
+            Pesquise pelo produto ou cole o link/ID do KaBuM ou ASIN da Amazon
           </label>
           <input
             id={id}
             type="text"
             className={`
-              w-full rounded-xl border-2 p-3 outline-none
-              transition-colors duration-200
+              w-full rounded-xl border p-4 outline-none
+              transition-all duration-200
               disabled:bg-gray-50 disabled:cursor-not-allowed
+              bg-white/50
               ${
                 isFocused
-                  ? 'border-blue-500 ring-2 ring-blue-200'
-                  : 'border-gray-200'
+                  ? 'border-violet-400 ring-2 ring-violet-200 shadow-lg'
+                  : 'border-gray-200 hover:border-gray-300'
               }
             `}
-            placeholder={placeholder ?? 'Busque pelo nome, ID (922662) ou cole a URL do produto'}
+            placeholder={placeholder ?? 'Pesquise pelo nome do produto ou cole o link/ID do KaBuM ou ASIN da Amazon'}
             value={value}
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={handleFocus}
@@ -125,7 +126,7 @@ export default function SearchBar({
             aria-controls={showAutocomplete ? `${id}-autocomplete` : undefined}
           />
           <p id={`${id}-description`} className="sr-only">
-            Digite o nome do produto para buscar no cache, ou cole um ID/URL para monitorar
+            Pesquise pelo nome do produto no banco de dados colaborativo ou cole um link/ID para monitorar
           </p>
 
           {/* Autocomplete */}
@@ -139,11 +140,11 @@ export default function SearchBar({
         <div className="flex gap-2">
           <motion.button
             type="submit"
-            className="rounded-xl px-6 py-3 bg-blue-600 text-white font-medium
-              hover:bg-blue-700 active:bg-blue-800
+            className="rounded-xl px-6 py-3 bg-gradient-to-r from-violet-600 to-blue-600 text-white font-semibold
+              hover:from-violet-700 hover:to-blue-700 active:from-violet-800 active:to-blue-800
               disabled:opacity-50 disabled:cursor-not-allowed
-              focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2
-              transition-colors duration-200
+              focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
+              transition-all duration-200 shadow-md hover:shadow-lg
               min-w-[120px]"
             disabled={loadingMonitor || !hasValue}
             aria-label={loadingMonitor ? 'Monitorando produto' : 'Iniciar monitoramento do produto'}
@@ -164,12 +165,12 @@ export default function SearchBar({
           <motion.button
             type="button"
             onClick={onClear}
-            className="rounded-xl px-6 py-3 border-2 border-gray-200 text-gray-700 font-medium
-              hover:bg-gray-50 hover:border-gray-300
+            className="rounded-xl px-6 py-3 border border-gray-200 text-gray-700 font-medium
+              hover:bg-white/60 hover:border-gray-300
               active:bg-gray-100
               disabled:opacity-50 disabled:cursor-not-allowed
               focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2
-              transition-colors duration-200"
+              transition-all duration-200 bg-white/40 backdrop-blur-sm"
             disabled={loadingMonitor}
             aria-label="Limpar busca e reiniciar"
             whileHover={{ scale: loadingMonitor ? 1 : 1.02 }}

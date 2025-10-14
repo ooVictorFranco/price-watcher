@@ -43,7 +43,7 @@ export default function FavoritosPage() {
   const [selectedProductForGroup, setSelectedProductForGroup] = useState<string | null>(null);
 
   useEffect(() => {
-    document.title = 'Favoritos — Price Watcher | Acompanhe Seus Produtos';
+    document.title = 'Meus Favoritos — Radar de Ofertas | Acompanhe Seus Produtos';
   }, []);
 
   useEffect(() => {
@@ -351,13 +351,15 @@ export default function FavoritosPage() {
   }, [selectedProductForGroup, favorites]);
 
   return (
-    <main className="min-h-screen py-8">
-      <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-bold">Favoritos & Comparação</h1>
-          <p className="text-sm text-gray-600">
-            Acompanhe seus produtos com atualização automática periódica.
-            Histórico ilimitado para identificar tendências e o melhor momento para comprar.
+    <main className="min-h-screen py-12">
+      <div className="mx-auto w-full max-w-6xl px-6 space-y-8">
+        <header className="space-y-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-violet-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">
+            Meus Favoritos
+          </h1>
+          <p className="text-lg text-gray-700 max-w-3xl mx-auto font-medium">
+            Acompanhe seus produtos favoritos com histórico completo e atualização automática.
+            Compare preços entre lojas e descubra o melhor momento para comprar!
           </p>
         </header>
 
@@ -387,7 +389,7 @@ export default function FavoritosPage() {
             onRemove={(id) => removeFromCompare(id)}
             onClear={() => clearCompare()}
             onCompare={() => {
-              if (compareSelected.length < 2) return;
+              if (compareSelected.length < 1) return;
               const el = document.getElementById('compare-anchor');
               if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
             }}
@@ -399,7 +401,7 @@ export default function FavoritosPage() {
         </section>
 
         <div id="compare-anchor" />
-        {compareSelected.length >= 2 && (
+        {compareSelected.length >= 1 && (
           <CompareChart series={compareSeries} />
         )}
 

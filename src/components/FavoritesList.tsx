@@ -100,21 +100,49 @@ export default function FavoritesList({
     };
   }, [openMenuId]);
 
+  const [searchQuery, setSearchQuery] = useState('');
+  const [filterType, setFilterType] = useState<'all' | 'grouped' | 'individual'>('all');
+
   const total = favorites.length;
+
+  // Filtra favoritos baseado na busca e tipo
+  const filteredGroupedFavorites = groupedFavorites.filter(item => {
+    // Filtro por tipo
+    if (filterType === 'grouped' && item.type !== 'group') return false;
+    if (filterType === 'individual' && item.type !== 'single') return false;
+
+    // Filtro por busca
+    if (!searchQuery) return true;
+
+    const query = searchQuery.toLowerCase();
+    if (item.type === 'group') {
+      const groupMatches = item.group.name.toLowerCase().includes(query);
+      const anyProductMatches = item.favorites.some(f =>
+        f.name.toLowerCase().includes(query) || f.id.toLowerCase().includes(query)
+      );
+      return groupMatches || anyProductMatches;
+    } else {
+      return item.favorite.name.toLowerCase().includes(query) ||
+             item.favorite.id.toLowerCase().includes(query);
+    }
+  });
 
   return (
     <motion.div
-      className="rounded-2xl border bg-white shadow-md p-5"
+      className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg p-6"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.2, ease: 'easeOut' }}
     >
-      <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
+      {/* Header com título e contador */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
-            <h3 className="text-sm font-medium">Favoritos</h3>
-            <div className="text-xs text-gray-500">
-              {total} {total === 1 ? 'produto' : 'produtos'}
+            <h3 className="text-lg font-semibold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">
+              Meus Favoritos
+            </h3>
+            <div className="text-sm text-gray-600">
+              {total} {total === 1 ? 'produto' : 'produtos'} • {filteredGroupedFavorites.length} {filteredGroupedFavorites.length === 1 ? 'item' : 'itens'} exibidos
             </div>
           </div>
         </div>
@@ -125,7 +153,7 @@ export default function FavoritesList({
             whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
             onClick={onRefreshAll}
             disabled={favorites.length === 0 || loadingAll}
-            className="rounded-lg px-3 py-2 text-sm border hover:bg-gray-50 disabled:opacity-50 transition"
+            className="rounded-xl px-4 py-2 text-sm bg-gradient-to-r from-violet-50 to-blue-50 border border-violet-200 text-violet-700 hover:from-violet-100 hover:to-blue-100 disabled:opacity-50 transition-all shadow-sm"
             title="Atualiza os preços de todos os favoritos"
           >
             {loadingAll ? 'Atualizando…' : 'Atualizar todos'}
@@ -133,13 +161,58 @@ export default function FavoritesList({
         )}
       </div>
 
+      {/* Barra de busca e filtros */}
+      {favorites.length > 0 && (
+        <div className="mb-6 space-y-3">
+          <input
+            type="text"
+            placeholder="Buscar produtos por nome ou ID..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full rounded-xl border border-gray-200 bg-white/50 px-4 py-3 outline-none transition-all focus:border-violet-400 focus:ring-2 focus:ring-violet-200 focus:shadow-lg"
+          />
+          <div className="flex gap-2 flex-wrap">
+            <button
+              onClick={() => setFilterType('all')}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                filterType === 'all'
+                  ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-md'
+                  : 'bg-white/60 border border-gray-200 text-gray-700 hover:bg-white/80'
+              }`}
+            >
+              Todos ({groupedFavorites.length})
+            </button>
+            <button
+              onClick={() => setFilterType('grouped')}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                filterType === 'grouped'
+                  ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-md'
+                  : 'bg-white/60 border border-gray-200 text-gray-700 hover:bg-white/80'
+              }`}
+            >
+              Grupos ({groupedFavorites.filter(i => i.type === 'group').length})
+            </button>
+            <button
+              onClick={() => setFilterType('individual')}
+              className={`rounded-lg px-4 py-2 text-sm font-medium transition-all ${
+                filterType === 'individual'
+                  ? 'bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-md'
+                  : 'bg-white/60 border border-gray-200 text-gray-700 hover:bg-white/80'
+              }`}
+            >
+              Individuais ({groupedFavorites.filter(i => i.type === 'single').length})
+            </button>
+          </div>
+        </div>
+      )}
+
       {favorites.length === 0 ? (
         <p className="text-sm text-gray-600">
           Nenhum favorito ainda. Use &quot;Favoritar&quot; no produto monitorado.
         </p>
       ) : (
-        <ul className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          {groupedFavorites.map((item) => {
+        <ul className="space-y-3">
+          {filteredGroupedFavorites.map((item) => {
             if (item.type === 'group') {
               const { group, favorites: groupFavs } = item;
               const bestPrice = getBestPriceInGroup(group.id);
@@ -158,7 +231,7 @@ export default function FavoritesList({
                   onDeleteGroup={() => onDeleteGroup?.(group.id)}
                 >
                   <div className="transition-all duration-300 ease-out">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3 pt-3 border-t border-blue-200">
+                        <div className="space-y-2 mt-3 pt-3 border-t border-violet-200/50">
                           {groupFavs.map((f) => {
                             const last = latestById?.[f.id];
                             const prev = prevById?.[f.id];

@@ -123,9 +123,9 @@ export default function ProductCard({
 
   return (
     <div
-      className={`relative rounded-xl border-2 p-4 cursor-pointer transition-all duration-200
-        ${isSelected ? 'ring-2 ring-blue-500 border-blue-500 bg-blue-50/30 shadow-lg' : 'bg-white border-gray-200 hover:shadow-md'}
-        ${isBestPrice ? 'ring-2 ring-green-500 border-green-500 shadow-lg' : ''}`}
+      className={`relative rounded-xl border p-3 cursor-pointer transition-all duration-200
+        ${isSelected ? 'ring-2 ring-violet-500 border-violet-500 bg-violet-50/30 shadow-lg' : 'bg-white/60 border-gray-200 hover:shadow-md'}
+        ${isBestPrice ? 'ring-2 ring-emerald-500 border-emerald-500 shadow-lg' : ''}`}
       onClick={onSelect}
       role="button"
       tabIndex={0}
@@ -141,7 +141,7 @@ export default function ProductCard({
     >
       {/* Badge melhor preço */}
       {isBestPrice && (
-        <div className="absolute -top-2 -right-2 bg-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md z-10" aria-label="Melhor preço">
+        <div className="absolute -top-2 -right-2 bg-gradient-to-r from-emerald-600 to-green-600 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-md z-10" aria-label="Melhor preço">
           💰 MELHOR PREÇO
         </div>
       )}
@@ -151,7 +151,7 @@ export default function ProductCard({
         <div className="absolute left-3 top-3 z-10">
           <input
             type="checkbox"
-            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 focus:ring-2"
+            className="h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500 focus:ring-2"
             checked={isSelected}
             onChange={onSelect}
             onClick={(e) => e.stopPropagation()}
@@ -169,7 +169,7 @@ export default function ProductCard({
           <motion.button
             whileHover={{ scale: prefersReduced ? 1 : 1.05 }}
             whileTap={{ scale: prefersReduced ? 1 : 0.95 }}
-            className="rounded-md px-2 py-1 text-lg leading-none hover:bg-gray-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rounded-md px-2 py-1 text-lg leading-none hover:bg-gray-100 disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-violet-500"
             disabled={isShimmering}
             onClick={onMenuToggle}
             aria-haspopup="menu"
@@ -185,7 +185,7 @@ export default function ProductCard({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -4 }}
               transition={{ duration: 0.15, ease: 'easeOut' }}
-              className="absolute right-0 mt-1 w-56 rounded-lg border bg-white shadow-lg overflow-hidden z-50"
+              className="absolute right-0 mt-1 w-56 rounded-lg border border-gray-200 bg-white/95 backdrop-blur-sm shadow-lg overflow-hidden z-50"
               role="menu"
               onMouseLeave={onMenuClose}
             >
@@ -213,7 +213,7 @@ export default function ProductCard({
                   <div className="border-t border-gray-200 my-1" />
                   <button
                     onClick={() => { onMenuClose?.(); onManageGroup(); }}
-                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-blue-600"
+                    className="block w-full text-left px-3 py-2 text-sm hover:bg-gray-50 transition-colors text-violet-600"
                     role="menuitem"
                   >
                     {isInGroup ? '📦 Gerenciar grupo' : '➕ Adicionar a grupo'}
@@ -237,84 +237,122 @@ export default function ProductCard({
         </div>
       )}
 
-      <div className="flex flex-col items-center pt-6">
+      {/* Layout Horizontal */}
+      <div className="flex gap-4 items-center">
         {/* Imagem do produto */}
-        {isShimmering ? (
-          <div className="h-32 w-32 rounded-lg skeleton mb-4" role="status" aria-label="Carregando" />
-        ) : favorite.image ? (
-          <div className="relative h-32 w-32 rounded-lg bg-gray-50 border mb-4">
-            <Image
-              src={favorite.image}
-              alt={favorite.name}
-              fill
-              className="rounded-lg object-contain p-2"
-              sizes="128px"
-            />
+        <div className="flex-shrink-0">
+          {isShimmering ? (
+            <div className="h-20 w-20 rounded-lg skeleton" role="status" aria-label="Carregando" />
+          ) : favorite.image ? (
+            <div className="relative h-20 w-20 rounded-lg bg-gray-50 border border-gray-100">
+              <Image
+                src={favorite.image}
+                alt={favorite.name}
+                fill
+                className="rounded-lg object-contain p-1"
+                sizes="80px"
+              />
+            </div>
+          ) : (
+            <div className="h-20 w-20 rounded-lg bg-gradient-to-br from-gray-50 to-gray-100 grid place-items-center text-2xl border border-gray-100" aria-label="Sem imagem">
+              ⭐
+            </div>
+          )}
+        </div>
+
+        {/* Info do Produto */}
+        <div className="flex-1 min-w-0">
+          {/* Nome e Badge */}
+          <div className="flex items-start gap-2 mb-2">
+            {isShimmering ? (
+              <div className="h-8 w-full rounded-md skeleton" role="status" />
+            ) : (
+              <>
+                <h5 className="text-sm font-semibold text-gray-900 line-clamp-2 flex-1">
+                  {favorite.name}
+                </h5>
+                {provider && (
+                  <span className="flex-shrink-0 text-[10px] font-semibold px-2 py-0.5 rounded-md bg-violet-100 text-violet-700 border border-violet-200">
+                    {getProviderName(provider)}
+                  </span>
+                )}
+              </>
+            )}
           </div>
-        ) : (
-          <div className="h-32 w-32 rounded-lg bg-gray-100 grid place-items-center text-3xl border mb-4" aria-label="Sem imagem">
-            ⭐
+
+          {/* Timestamp */}
+          {!isShimmering && latest?.timestamp && (
+            <time className="text-[10px] text-gray-400 block mb-2" dateTime={new Date(latest.timestamp).toISOString()}>
+              Atualizado {timeAgo(latest.timestamp)}
+            </time>
+          )}
+
+          {/* Preços em linha */}
+          <div className="flex flex-wrap gap-2">
+            {/* Preço Original */}
+            {latest?.priceOriginal && (
+              <div className="flex items-center gap-1 text-[11px]">
+                <span className="text-gray-500">De:</span>
+                <span className="text-gray-400 line-through">{brl(latest.priceOriginal)}</span>
+                <DiffArrow curr={latest.priceOriginal} prev={prev?.priceOriginal} />
+              </div>
+            )}
+
+            {/* Separador */}
+            {latest?.priceOriginal && latest?.priceVista && (
+              <span className="text-gray-300">•</span>
+            )}
+
+            {/* Preço À Vista */}
+            {latest?.priceVista && (
+              <div className="flex items-center gap-1">
+                <span className="text-[11px] text-emerald-700 font-medium">À vista:</span>
+                <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">
+                  {brl(latest.priceVista)}
+                </span>
+                <DiffArrow curr={latest.priceVista} prev={prev?.priceVista} />
+              </div>
+            )}
+
+            {/* Separador */}
+            {latest?.priceVista && latest?.priceParcelado && (
+              <span className="text-gray-300">•</span>
+            )}
+
+            {/* Preço Parcelado */}
+            {latest?.priceParcelado && (
+              <div className="flex items-center gap-1">
+                <span className="text-[11px] text-gray-600">Parc:</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  {brl(latest.priceParcelado)}
+                </span>
+                <DiffArrow curr={latest.priceParcelado} prev={prev?.priceParcelado} />
+              </div>
+            )}
+
+            {/* Parcelas */}
+            {installments && installments.count > 1 && (
+              <div className="text-[10px] text-gray-500">
+                ({installments.count}x de {brl(installments.value)})
+              </div>
+            )}
           </div>
-        )}
-
-        {/* Badge da loja (se provider fornecido) */}
-        {provider && (
-          <span className="text-xs font-semibold px-2.5 py-1 rounded-md bg-blue-100 text-blue-700 border border-blue-200 mb-2">
-            {getProviderName(provider)}
-          </span>
-        )}
-
-        {/* Nome do produto */}
-        {isShimmering ? (
-          <div className="h-10 w-full rounded-md skeleton mb-3" role="status" />
-        ) : (
-          <h5 className="text-sm font-medium text-gray-900 text-center line-clamp-2 mb-2 min-h-[40px]">
-            {favorite.name}
-          </h5>
-        )}
-
-        {/* Timestamp */}
-        {!isShimmering && latest?.timestamp && (
-          <time className="text-[10px] text-gray-400 mb-3" dateTime={new Date(latest.timestamp).toISOString()}>
-            Atualizado {timeAgo(latest.timestamp)}
-          </time>
-        )}
-
-        {/* Seção de preços */}
-        <div className="w-full space-y-2 mb-4">
-          <PriceDisplay
-            label="De:"
-            price={latest?.priceOriginal ?? null}
-            arrow={<DiffArrow curr={latest?.priceOriginal} prev={prev?.priceOriginal} />}
-            variant="muted"
-          />
-
-          <PriceDisplay
-            label="À vista"
-            price={latest?.priceVista ?? null}
-            arrow={<DiffArrow curr={latest?.priceVista} prev={prev?.priceVista} />}
-            variant="highlight"
-          />
-
-          <PriceDisplay
-            label="Parcelado"
-            price={latest?.priceParcelado ?? null}
-            arrow={<DiffArrow curr={latest?.priceParcelado} prev={prev?.priceParcelado} />}
-            variant="default"
-            installments={installments}
-          />
         </div>
 
         {/* Botão de ação */}
         {onMonitor && (
-          <button
-            onClick={(e) => { e.stopPropagation(); onMonitor(); }}
-            className="w-full rounded-lg px-4 py-2.5 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 active:scale-[0.98]"
-            disabled={isShimmering}
-            aria-label={`Monitorar ${favorite.name}`}
-          >
-            Monitorar Produto
-          </button>
+          <div className="flex-shrink-0">
+            <motion.button
+              whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
+              whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
+              onClick={(e) => { e.stopPropagation(); onMonitor(); }}
+              className="rounded-lg px-4 py-2 text-sm font-medium bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:from-violet-700 hover:to-blue-700 disabled:opacity-50 transition-all duration-200 shadow-sm focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+              disabled={isShimmering}
+              aria-label={`Monitorar ${favorite.name}`}
+            >
+              Monitorar
+            </motion.button>
+          </div>
         )}
       </div>
     </div>

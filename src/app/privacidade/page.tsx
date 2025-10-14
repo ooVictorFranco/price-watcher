@@ -6,36 +6,112 @@ import Link from 'next/link';
 
 export default function PrivacidadePage() {
   useEffect(() => {
-    document.title = 'Política de Privacidade — Price Watcher';
+    document.title = 'Política de Privacidade — Radar de Ofertas';
   }, []);
 
   return (
-    <main className="min-h-screen py-8">
+    <main className="min-h-screen py-12">
       <div className="mx-auto w-full max-w-4xl px-6">
-        <article className="bg-white rounded-2xl border shadow-md p-8 space-y-6">
-          <header className="space-y-3 border-b pb-6">
-            <h1 className="text-3xl font-bold text-gray-900">Política de Privacidade</h1>
+        <article className="bg-white/80 backdrop-blur-sm rounded-2xl border border-white/40 shadow-lg p-10 space-y-6">
+          <header className="space-y-4 border-b border-gray-200 pb-6">
+            <h1 className="text-4xl font-black bg-gradient-to-r from-violet-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">Política de Privacidade</h1>
             <p className="text-sm text-gray-600">
               Última atualização: {new Date().toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
             </p>
           </header>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">1. Sobre o Price Watcher</h2>
+            <h2 className="text-xl font-semibold text-gray-900">1. Sobre o Radar de Ofertas</h2>
             <p className="text-gray-700 leading-relaxed">
-              O <strong>Price Watcher</strong> é uma aplicação open-source projetada para ajudar consumidores
-              a monitorarem preços de produtos em lojas online brasileiras (KaBuM! e Amazon) durante períodos
-              promocionais como Black Friday, Cyber Monday e outras datas sazonais. Nosso objetivo é trazer
-              transparência e ajudar você a identificar se os descontos anunciados são reais ou apenas estratégias
+              O <strong>Radar de Ofertas</strong> (anteriormente Price Watcher) é uma aplicação open-source projetada
+              para ajudar consumidores a monitorarem preços de produtos em lojas online brasileiras (KaBuM! e Amazon)
+              durante períodos promocionais como Black Friday, Cyber Monday e outras datas sazonais. Nosso objetivo é
+              trazer transparência e ajudar você a identificar se os descontos anunciados são reais ou apenas estratégias
               de marketing.
             </p>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">2. Dados que NÃO coletamos</h2>
+            <h2 className="text-xl font-semibold text-gray-900">2. Disclaimer Importante: Sobre os Preços Exibidos</h2>
+            <div className="bg-orange-50 border-2 border-orange-300 rounded-xl p-5 space-y-3">
+              <p className="text-orange-900 font-semibold text-lg mb-3">
+                ⚠️ Importante: Leia com Atenção
+              </p>
+
+              <div className="space-y-3 text-orange-900">
+                <p className="leading-relaxed">
+                  <strong>Os preços exibidos nesta plataforma são coletados automaticamente e podem não refletir
+                  os valores exatos praticados pelas lojas.</strong> As variações de preço podem ocorrer por diversos motivos:
+                </p>
+
+                <ul className="list-disc list-inside space-y-2 ml-4 text-orange-800">
+                  <li>
+                    <strong>Diferenças entre formas de pagamento:</strong> O preço à vista (PIX) pode ser diferente
+                    do preço no boleto ou no cartão de crédito em 1x. Cada loja define suas próprias políticas de desconto.
+                  </li>
+                  <li>
+                    <strong>Promoções regionais:</strong> Algumas lojas aplicam preços diferentes baseados na localização
+                    geográfica do usuário ou disponibilidade regional.
+                  </li>
+                  <li>
+                    <strong>Erros de coleta:</strong> Embora nos esforcemos para coletar dados precisos, mudanças no
+                    layout das lojas ou problemas técnicos podem resultar em informações incorretas.
+                  </li>
+                  <li>
+                    <strong>Atualização defasada:</strong> Os preços são atualizados periodicamente, mas podem não
+                    refletir promoções relâmpago ou alterações em tempo real.
+                  </li>
+                  <li>
+                    <strong>Disponibilidade de estoque:</strong> Produtos podem estar indisponíveis mesmo que exibam preço.
+                  </li>
+                </ul>
+
+                <div className="bg-white/50 rounded-lg p-4 mt-4 border border-orange-200">
+                  <p className="font-semibold text-orange-900 mb-2">📊 Como funciona a coleta colaborativa:</p>
+                  <p className="text-orange-800 leading-relaxed">
+                    O Radar de Ofertas funciona de forma <strong>colaborativa</strong>: quanto mais pessoas usam a
+                    ferramenta, mais dados verdadeiros conseguimos coletar sobre os preços. Cada busca realizada
+                    alimenta nosso banco de dados compartilhado, beneficiando toda a comunidade com informações
+                    mais precisas e atualizadas.
+                  </p>
+                </div>
+
+                <div className="bg-red-50 rounded-lg p-4 mt-4 border-2 border-red-300">
+                  <p className="font-semibold text-red-900 mb-2">🚫 Responsabilidade e Isenção:</p>
+                  <ul className="list-disc list-inside space-y-1 text-red-800 ml-2">
+                    <li>
+                      <strong>Sem vínculo com lojas:</strong> O Radar de Ofertas não tem nenhum compromisso,
+                      parceria ou obrigação com as lojas monitoradas.
+                    </li>
+                    <li>
+                      <strong>Ferramenta informativa:</strong> Esta plataforma serve apenas como referência e
+                      não garante a exatidão dos preços exibidos.
+                    </li>
+                    <li>
+                      <strong>Verificação obrigatória:</strong> Sempre confira o preço final diretamente no
+                      site da loja antes de realizar qualquer compra.
+                    </li>
+                    <li>
+                      <strong>Sem responsabilidade por divergências:</strong> Não nos responsabilizamos por
+                      diferenças entre os preços exibidos aqui e os praticados pelas lojas.
+                    </li>
+                  </ul>
+                </div>
+
+                <p className="text-sm text-orange-700 italic mt-4">
+                  💡 <strong>Dica:</strong> Use o Radar de Ofertas como uma ferramenta de <em>monitoramento e
+                  comparação de tendências</em>, não como fonte definitiva de preços. O valor apresentado pelas
+                  lojas em seus sites oficiais é sempre o que prevalece.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">3. Dados que NÃO coletamos</h2>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
               <p className="text-green-900 font-medium">
-                ✅ O Price Watcher NÃO coleta, armazena ou transmite NENHUM dos seguintes dados:
+                ✅ O Radar de Ofertas NÃO coleta, armazena ou transmite NENHUM dos seguintes dados:
               </p>
               <ul className="list-disc list-inside space-y-1 text-green-800 ml-4">
                 <li>Dados pessoais (nome, CPF, e-mail, telefone)</li>
@@ -114,7 +190,7 @@ export default function PrivacidadePage() {
             <h2 className="text-xl font-semibold text-gray-900">4. Como funciona o monitoramento de preços</h2>
             <div className="space-y-3">
               <p className="text-gray-700 leading-relaxed">
-                O Price Watcher utiliza técnicas de web scraping para coletar informações públicas de preços
+                O Radar de Ofertas utiliza técnicas de web scraping para coletar informações públicas de preços
                 diretamente das páginas das lojas online. O processo funciona da seguinte forma:
               </p>
               <ol className="list-decimal list-inside space-y-2 text-gray-700 ml-4">
@@ -200,7 +276,7 @@ export default function PrivacidadePage() {
           <section className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">5. Infraestrutura e hospedagem</h2>
             <p className="text-gray-700 leading-relaxed">
-              O Price Watcher é hospedado na <strong>Vercel</strong> (plataforma de hospedagem)
+              O Radar de Ofertas é hospedado na <strong>Vercel</strong> (plataforma de hospedagem)
               e utiliza o banco de dados <strong>Neon PostgreSQL</strong> (serverless) para armazenamento.
             </p>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4 space-y-2">
@@ -218,7 +294,7 @@ export default function PrivacidadePage() {
           <section className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">6. Conformidade com lojas online</h2>
             <p className="text-gray-700 leading-relaxed">
-              O Price Watcher acessa apenas informações públicas disponíveis nas páginas de produtos das lojas.
+              O Radar de Ofertas acessa apenas informações públicas disponíveis nas páginas de produtos das lojas.
               Não fazemos login em contas, não acessamos áreas restritas e respeitamos os robots.txt das lojas.
               As requisições são feitas de forma responsável para não sobrecarregar os servidores das lojas.
             </p>
@@ -255,7 +331,7 @@ export default function PrivacidadePage() {
           <section className="space-y-4">
             <h2 className="text-xl font-semibold text-gray-900">8. Tecnologias utilizadas</h2>
             <p className="text-gray-700 leading-relaxed">
-              O Price Watcher é construído com tecnologias web modernas:
+              O Radar de Ofertas é construído com tecnologias web modernas:
             </p>
             <ul className="list-disc list-inside space-y-1 text-gray-700 ml-4">
               <li><strong>Next.js 15:</strong> Framework React para renderização e API routes</li>
@@ -320,7 +396,7 @@ export default function PrivacidadePage() {
 
           <footer className="mt-8 pt-6 border-t">
             <p className="text-sm text-gray-600">
-              <strong>Resumo:</strong> O Price Watcher não coleta dados pessoais identificáveis, não usa analytics
+              <strong>Resumo:</strong> O Radar de Ofertas não coleta dados pessoais identificáveis, não usa analytics
               de terceiros e é 100% transparente com código aberto. Seus dados são armazenados de forma segura
               em banco de dados PostgreSQL (Neon) usando apenas um ID anônimo para associação. Você tem controle
               total sobre seus dados e pode exportá-los ou deletá-los a qualquer momento.

@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 export default function SkeletonCards() {
   return (
     <motion.div
-      className="rounded-2xl border bg-white shadow-md p-5 space-y-5"
+      className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg p-6 space-y-5 relative z-0"
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}

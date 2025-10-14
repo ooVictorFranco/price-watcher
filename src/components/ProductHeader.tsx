@@ -30,7 +30,7 @@ export default function ProductHeader({
 
   return (
     <motion.div
-      className="rounded-2xl border bg-white shadow-md p-5"
+      className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg p-6"
       initial={{ opacity: 0, y: prefersReduced ? 0 : -10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
@@ -82,7 +82,14 @@ export default function ProductHeader({
           {onFavorite && (
             <motion.button
               onClick={onFavorite}
-              className="border-2 hover:bg-gray-50 rounded-xl px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+              className={`
+                border rounded-xl px-4 py-2 text-sm font-medium transition-all
+                focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2
+                ${isFav
+                  ? 'bg-gradient-to-r from-yellow-400 to-orange-400 text-white border-yellow-500 hover:from-yellow-500 hover:to-orange-500 shadow-md'
+                  : 'bg-white/40 border-gray-200 hover:bg-white/60 hover:border-gray-300'
+                }
+              `}
               whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
               whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
               aria-label={isFav ? 'Remover dos favoritos' : 'Adicionar aos favoritos'}
@@ -94,7 +101,7 @@ export default function ProductHeader({
           {onClear && (
             <motion.button
               onClick={onClear}
-              className="border-2 hover:bg-gray-50 rounded-xl px-4 py-2 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              className="border border-gray-200 bg-white/40 hover:bg-white/60 hover:border-gray-300 rounded-xl px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
               whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
               whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
               aria-label="Limpar pesquisa atual"
@@ -104,7 +111,7 @@ export default function ProductHeader({
           )}
           <motion.button
             onClick={onRefresh}
-            className="border-2 hover:bg-gray-50 rounded-xl px-4 py-2 text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+            className="border border-violet-300 bg-gradient-to-r from-violet-50 to-blue-50 hover:from-violet-100 hover:to-blue-100 rounded-xl px-4 py-2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2 text-violet-700"
             disabled={loading}
             whileHover={{ scale: prefersReduced || loading ? 1 : 1.02 }}
             whileTap={{ scale: prefersReduced || loading ? 1 : 0.98 }}

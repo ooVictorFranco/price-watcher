@@ -19,7 +19,6 @@ import SearchBar from '@/components/SearchBar';
 import ProductHeader from '@/components/ProductHeader';
 import PriceCards from '@/components/PriceCards';
 import HistoryChart from '@/components/HistoryChart';
-import HistoryTable from '@/components/HistoryTable';
 import EmptyState from '@/components/EmptyState';
 import SkeletonCards from '@/components/SkeletonCards';
 import { toast } from '@/lib/toast';
@@ -209,13 +208,18 @@ function PageContent() {
   };
 
   return (
-    <main className="min-h-screen py-8">
-      <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
-        <header className="space-y-2">
-          <h1 className="text-2xl font-bold">Monitor de Preços</h1>
-          <p className="text-sm text-gray-600">
-            Acompanhe preços e identifique o melhor momento para comprar.
-            Cole o ID ou URL do produto para visualizar o histórico completo.
+    <main className="min-h-screen py-12">
+      <div className="mx-auto w-full max-w-6xl px-6 space-y-8">
+        <header className="space-y-4 text-center">
+          <h1 className="text-4xl md:text-5xl font-black bg-gradient-to-r from-violet-600 via-blue-600 to-emerald-600 bg-clip-text text-transparent">
+            Nunca Mais Pague Caro!
+          </h1>
+          <p className="text-lg md:text-xl text-gray-700 max-w-3xl mx-auto font-medium">
+            Descubra se as ofertas são reais com histórico completo de preços.
+            Sistema colaborativo que te ajuda a economizar dinheiro.
+          </p>
+          <p className="text-sm text-gray-500 max-w-2xl mx-auto">
+            Pesquise produtos no nosso banco colaborativo ou cole o ID/URL da <span className="font-semibold text-orange-600">KaBuM!</span> ou <span className="font-semibold text-blue-600">Amazon</span> para monitorar
           </p>
         </header>
 
@@ -245,7 +249,6 @@ function PageContent() {
             />
             <PriceCards product={product} last={last} />
             <HistoryChart history={history} />
-            <HistoryTable history={history} />
             <div className="text-xs text-gray-500">
               Abrir na loja:{' '}
               <a

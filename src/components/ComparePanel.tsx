@@ -35,7 +35,7 @@ export default function ComparePanel({
 
   return (
     <motion.div
-      className="rounded-2xl border bg-white shadow-md p-5"
+      className="rounded-2xl bg-white/80 backdrop-blur-sm border border-white/40 shadow-lg p-6"
       initial={{ opacity: 0, y: prefersReduced ? 0 : 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3, delay: 0.1 }}
@@ -43,11 +43,11 @@ export default function ComparePanel({
       role="region"
       aria-label="Painel de comparação"
     >
-      <div className="flex items-center justify-between mb-3">
-        <h3 className="text-sm font-medium">Comparar selecionados</h3>
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold bg-gradient-to-r from-violet-600 to-blue-600 bg-clip-text text-transparent">Comparar selecionados</h3>
         <motion.span
           key={selected.length}
-          className="text-xs font-semibold text-white bg-blue-600 rounded-full px-2.5 py-1"
+          className="text-xs font-semibold text-white bg-gradient-to-r from-violet-600 to-blue-600 rounded-full px-3 py-1.5 shadow-sm"
           initial={{ scale: prefersReduced ? 1 : 0.8 }}
           animate={{ scale: 1 }}
           transition={{ type: 'spring', stiffness: 400, damping: 20 }}
@@ -58,9 +58,9 @@ export default function ComparePanel({
       </div>
 
       {loading && (
-        <div className="h-1 bg-gray-200 rounded-full overflow-hidden mb-3" role="progressbar" aria-label="Carregando">
+        <div className="h-1 bg-gray-100 rounded-full overflow-hidden mb-4" role="progressbar" aria-label="Carregando">
           <motion.div
-            className="h-full bg-blue-600"
+            className="h-full bg-gradient-to-r from-violet-600 to-blue-600"
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}
             transition={{ duration: 1.5, repeat: Infinity }}
@@ -70,13 +70,13 @@ export default function ComparePanel({
 
       {selected.length === 0 ? (
         <motion.div
-          className="rounded-xl bg-gray-50 border border-gray-200 p-4 text-center"
+          className="rounded-xl bg-gradient-to-br from-gray-50/50 to-white/50 border border-gray-100 p-6 text-center"
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="text-2xl mb-2" aria-hidden="true">📊</div>
-          <p className="text-sm text-gray-600">
+          <div className="text-3xl mb-2" aria-hidden="true">📊</div>
+          <p className="text-sm text-gray-700 font-medium">
             Selecione itens nos cards de favoritos (clique no card) para montar o comparativo.
           </p>
         </motion.div>
@@ -87,7 +87,7 @@ export default function ComparePanel({
               {selected.map((id, idx) => (
                 <motion.span
                   key={id}
-                  className="inline-flex items-center gap-2 rounded-full border-2 border-blue-200 bg-blue-50 px-3 py-1.5 text-sm"
+                  className="inline-flex items-center gap-2 rounded-full border border-violet-200 bg-gradient-to-r from-violet-50/50 to-blue-50/50 backdrop-blur-sm px-3 py-1.5 text-sm shadow-sm"
                   title={nameById[id] ?? id}
                   role="listitem"
                   initial={{ opacity: 0, scale: prefersReduced ? 1 : 0.8 }}
@@ -96,10 +96,10 @@ export default function ComparePanel({
                   transition={{ delay: idx * 0.05 }}
                   layout
                 >
-                  <span className="max-w-[18rem] truncate font-medium">{nameById[id] ?? id}</span>
+                  <span className="max-w-[18rem] truncate font-medium text-gray-700">{nameById[id] ?? id}</span>
                   <motion.button
                     onClick={() => onRemove(id)}
-                    className="rounded-full border border-blue-300 bg-white px-1.5 py-0.5 text-xs hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
+                    className="rounded-full border border-gray-200 bg-white/80 px-1.5 py-0.5 text-xs hover:bg-red-50 hover:border-red-300 hover:text-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-1"
                     aria-label={`Remover ${nameById[id] ?? id} da comparação`}
                     title="Remover"
                     disabled={disabled}
@@ -122,7 +122,7 @@ export default function ComparePanel({
                 id="metric-select"
                 value={metric}
                 onChange={(e) => onMetric(e.target.value as 'vista' | 'parcelado' | 'original')}
-                className="rounded-lg border-2 border-gray-200 px-3 py-1.5 text-sm font-medium transition-colors focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="rounded-xl border border-gray-200 bg-white/50 px-3 py-2 text-sm font-medium transition-all focus:outline-none focus:border-violet-400 focus:ring-2 focus:ring-violet-200 focus:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                 disabled={disabled}
                 aria-label="Selecionar métrica de comparação"
               >
@@ -133,20 +133,20 @@ export default function ComparePanel({
             </div>
 
             <motion.button
-              disabled={selected.length < 2 || disabled}
+              disabled={selected.length < 1 || disabled}
               onClick={onCompare}
-              className="rounded-lg px-4 py-2 text-sm font-medium bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-              whileHover={{ scale: prefersReduced || selected.length < 2 || disabled ? 1 : 1.02 }}
-              whileTap={{ scale: prefersReduced || selected.length < 2 || disabled ? 1 : 0.98 }}
-              aria-label={loading ? 'Comparando produtos' : 'Iniciar comparação'}
+              className="rounded-xl px-5 py-2.5 text-sm font-semibold bg-gradient-to-r from-violet-600 to-blue-600 text-white hover:from-violet-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:ring-offset-2"
+              whileHover={{ scale: prefersReduced || selected.length < 1 || disabled ? 1 : 1.02 }}
+              whileTap={{ scale: prefersReduced || selected.length < 1 || disabled ? 1 : 0.98 }}
+              aria-label={loading ? (selected.length === 1 ? 'Visualizando histórico' : 'Comparando produtos') : (selected.length === 1 ? 'Ver histórico' : 'Iniciar comparação')}
             >
-              {loading ? 'Comparando…' : 'Comparar'}
+              {loading ? (selected.length === 1 ? 'Carregando…' : 'Comparando…') : (selected.length === 1 ? 'Ver histórico' : 'Comparar')}
             </motion.button>
 
             <motion.button
               disabled={selected.length === 0 || disabled}
               onClick={onRefreshSelected}
-              className="rounded-lg px-4 py-2 text-sm font-medium border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              className="rounded-xl px-5 py-2.5 text-sm font-medium border border-gray-200 bg-white/40 backdrop-blur-sm text-gray-700 hover:bg-white/60 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
               whileHover={{ scale: prefersReduced || selected.length === 0 || disabled ? 1 : 1.02 }}
               whileTap={{ scale: prefersReduced || selected.length === 0 || disabled ? 1 : 0.98 }}
               aria-label={loading ? 'Atualizando produtos selecionados' : 'Atualizar preços dos produtos selecionados'}
@@ -157,7 +157,7 @@ export default function ComparePanel({
             <motion.button
               disabled={selected.length === 0 || disabled}
               onClick={onClear}
-              className="rounded-lg px-4 py-2 text-sm font-medium border-2 border-gray-200 hover:bg-gray-50 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
+              className="rounded-xl px-5 py-2.5 text-sm font-medium border border-gray-200 bg-white/40 backdrop-blur-sm text-gray-700 hover:bg-white/60 hover:border-gray-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
               whileHover={{ scale: prefersReduced || selected.length === 0 || disabled ? 1 : 1.02 }}
               whileTap={{ scale: prefersReduced || selected.length === 0 || disabled ? 1 : 0.98 }}
               aria-label="Limpar seleção de produtos"
@@ -169,7 +169,7 @@ export default function ComparePanel({
               <motion.button
                 disabled={selected.length < 2 || disabled}
                 onClick={onUnifyProducts}
-                className="rounded-lg px-4 py-2 text-sm font-medium bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+                className="rounded-xl px-5 py-2.5 text-sm font-semibold bg-gradient-to-r from-emerald-600 to-green-600 text-white hover:from-emerald-700 hover:to-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2"
                 whileHover={{ scale: prefersReduced || selected.length < 2 || disabled ? 1 : 1.02 }}
                 whileTap={{ scale: prefersReduced || selected.length < 2 || disabled ? 1 : 0.98 }}
                 title="Unifica os produtos selecionados como o mesmo produto em diferentes lojas"

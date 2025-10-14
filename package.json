@@ -1,6 +1,6 @@
 {
   "name": "price-watcher",
-  "version": "0.1.0-beta.6",
+  "version": "0.1.0-beta.7",
   "description": "Sistema colaborativo de monitoramento de preços com histórico ilimitado, atualização automática e sincronização entre dispositivos. Acompanhe a evolução de preços e tome decisões informadas.",
   "author": "Victor Franco",
   "license": "MIT",

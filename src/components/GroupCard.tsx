@@ -105,11 +105,11 @@ export default function GroupCard({
 
   return (
     <div className="col-span-full">
-      <div className="rounded-xl border-2 border-blue-200 bg-blue-50/30 p-4">
+      <div className="rounded-xl border border-violet-200 bg-gradient-to-br from-violet-50/50 to-blue-50/50 backdrop-blur-sm p-4 shadow-sm">
         <div className="flex items-start gap-3 mb-3">
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
-              <span className="text-xs font-medium px-2 py-1 rounded-full bg-blue-600 text-white">
+              <span className="text-xs font-medium px-2.5 py-1 rounded-full bg-gradient-to-r from-violet-600 to-blue-600 text-white shadow-sm">
                 Produto unificado
               </span>
 
@@ -123,19 +123,19 @@ export default function GroupCard({
                       if (e.key === 'Enter') handleSaveEdit();
                       if (e.key === 'Escape') handleCancelEdit();
                     }}
-                    className="flex-1 px-2 py-1 text-sm border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white"
+                    className="flex-1 px-2 py-1 text-sm border border-violet-300 rounded-lg focus:ring-2 focus:ring-violet-500 focus:border-violet-500 bg-white"
                     autoFocus
                     onClick={(e) => e.stopPropagation()}
                   />
                   <button
                     onClick={handleSaveEdit}
-                    className="px-2 py-1 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+                    className="px-3 py-1 text-xs bg-gradient-to-r from-violet-600 to-blue-600 text-white rounded-lg hover:from-violet-700 hover:to-blue-700 transition shadow-sm"
                   >
                     Salvar
                   </button>
                   <button
                     onClick={handleCancelEdit}
-                    className="px-2 py-1 text-xs bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition"
+                    className="px-3 py-1 text-xs bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition"
                   >
                     Cancelar
                   </button>
@@ -143,14 +143,14 @@ export default function GroupCard({
               ) : isUpdatingName ? (
                 <div className="h-5 w-48 bg-gray-200 rounded animate-pulse" />
               ) : (
-                <h4 className="text-sm font-bold">{displayName}</h4>
+                <h4 className="text-sm font-bold bg-gradient-to-r from-violet-700 to-blue-700 bg-clip-text text-transparent">{displayName}</h4>
               )}
             </div>
 
             {bestPrice && bestPrice.priceVista && !editingName && !isUpdatingName && (
               <div className="flex items-center gap-2 mb-2">
                 <span className="text-xs text-gray-600">Melhor preço:</span>
-                <span className="text-lg font-bold text-green-600">{brl(bestPrice.priceVista)}</span>
+                <span className="text-lg font-bold bg-gradient-to-r from-emerald-600 to-green-600 bg-clip-text text-transparent">{brl(bestPrice.priceVista)}</span>
                 <span className="text-xs text-gray-500">em {getProviderName(bestPrice.provider)}</span>
               </div>
             )}
@@ -162,12 +162,14 @@ export default function GroupCard({
             )}
 
             {!editingName && !isUpdatingName && (
-              <button
+              <motion.button
+                whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
+                whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
                 onClick={onToggleExpand}
-                className="text-sm text-blue-600 hover:underline"
+                className="text-sm text-violet-600 hover:text-violet-700 font-medium transition"
               >
                 {isExpanded ? '▼ Ocultar detalhes' : '▶ Ver todas as lojas'}
-              </button>
+              </motion.button>
             )}
           </div>
 
@@ -177,7 +179,7 @@ export default function GroupCard({
               <motion.button
                 whileHover={{ scale: prefersReduced ? 1 : 1.05 }}
                 whileTap={{ scale: prefersReduced ? 1 : 0.95 }}
-                className="rounded-md px-2 py-1 text-lg leading-none hover:bg-blue-100 transition focus:outline-none focus:ring-2 focus:ring-blue-500"
+                className="rounded-md px-2 py-1 text-lg leading-none hover:bg-white/60 transition focus:outline-none focus:ring-2 focus:ring-violet-500"
                 onClick={() => setMenuOpen(!menuOpen)}
                 aria-haspopup="menu"
                 aria-expanded={menuOpen}
@@ -192,7 +194,7 @@ export default function GroupCard({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15, ease: 'easeOut' }}
-                  className="absolute right-0 mt-1 w-56 rounded-lg border bg-white shadow-lg overflow-hidden z-50"
+                  className="absolute right-0 mt-1 w-56 rounded-lg border border-gray-200 bg-white/95 backdrop-blur-sm shadow-lg overflow-hidden z-50"
                   role="menu"
                 >
                   <button
@@ -220,20 +222,20 @@ export default function GroupCard({
 
         {/* Confirmação de exclusão */}
         {showDeleteConfirm && (
-          <div className="mb-3 p-3 bg-red-50 border border-red-200 rounded-lg animate-fade-in">
+          <div className="mb-3 p-3 bg-red-50/80 border border-red-200 rounded-lg animate-fade-in backdrop-blur-sm">
             <p className="text-sm text-red-800 mb-2">
               ⚠️ Tem certeza que deseja excluir este grupo? Os produtos não serão removidos dos favoritos.
             </p>
             <div className="flex gap-2">
               <button
                 onClick={handleDeleteClick}
-                className="flex-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition text-sm font-medium"
+                className="flex-1 px-3 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition text-sm font-medium shadow-sm"
               >
                 Sim, excluir grupo
               </button>
               <button
                 onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 px-3 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition text-sm font-medium"
+                className="flex-1 px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition text-sm font-medium"
               >
                 Cancelar
               </button>

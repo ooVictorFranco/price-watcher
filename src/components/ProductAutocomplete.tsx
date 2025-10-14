@@ -108,7 +108,7 @@ export default function ProductAutocomplete({ query, onSelect, isVisible }: Prop
         animate={{ opacity: 1, y: 0 }}
         exit={{ opacity: 0, y: -10 }}
         transition={{ duration: 0.2 }}
-        className="absolute top-full left-0 right-0 mt-2 bg-white border-2 border-gray-200 rounded-xl shadow-lg overflow-hidden z-50"
+        className="absolute top-full left-0 right-0 mt-2 bg-white border border-violet-200 rounded-xl shadow-xl overflow-hidden z-[1000]"
       >
         {loading && (
           <div className="px-4 py-3 text-sm text-gray-500">
@@ -129,7 +129,7 @@ export default function ProductAutocomplete({ query, onSelect, isVisible }: Prop
                     transition-colors duration-150
                     ${
                       index === selectedIndex
-                        ? 'bg-blue-50'
+                        ? 'bg-violet-50'
                         : 'hover:bg-gray-50'
                     }
                     ${index !== results.length - 1 ? 'border-b border-gray-100' : ''}

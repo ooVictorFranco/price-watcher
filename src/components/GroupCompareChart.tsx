@@ -140,24 +140,17 @@ export default function GroupCompareChart({ group, metric }: Props) {
 
   if (sortedTimestamps.length === 0) {
     return (
-      <div className="rounded-2xl border bg-white shadow-md p-5">
-        <h3 className="text-sm font-medium mb-3">Histórico Comparativo do Grupo</h3>
-        <p className="text-sm text-gray-600">Sem dados de histórico disponíveis para este grupo.</p>
+      <div className="rounded-xl bg-white/50 backdrop-blur-sm border border-gray-200 p-4">
+        <p className="text-sm text-gray-500 text-center">
+          Sem dados de histórico disponíveis para este grupo.
+        </p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-2xl border bg-white shadow-md p-5">
-      <h3 className="text-sm font-medium mb-3">
-        Histórico Comparativo do Grupo
-        <span className="ml-2 text-xs text-gray-500">
-          ({metric === 'vista' ? 'À vista' : metric === 'parcelado' ? 'Parcelado' : 'Original'})
-        </span>
-      </h3>
-      <div className="rounded-xl bg-white p-2 h-80">
-        <canvas ref={canvasRef} />
-      </div>
+    <div className="rounded-xl bg-gradient-to-br from-gray-50/50 to-white/50 p-4 h-80 border border-gray-100">
+      <canvas ref={canvasRef} />
     </div>
   );
 }
