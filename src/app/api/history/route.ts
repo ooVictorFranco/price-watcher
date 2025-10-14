@@ -1,16 +1,18 @@
 // src/app/api/history/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { getOrCreateUser } from '@/lib/session-server';
 
 export const dynamic = 'force-dynamic';
 
 /**
  * GET /api/history
- * Retorna histórico de preços filtrado por período
+ * Retorna histórico de preços GLOBAL filtrado por período
+ *
+ * Busca histórico de TODOS os usuários que têm o produto
+ * Isso permite que usuários se beneficiem do histórico coletado por outros
  *
  * Query params:
- * - sessionId: ID da sessão do usuário
+ * - sessionId: ID da sessão do usuário (opcional, mantido para compatibilidade)
  * - productId: ID do produto (KaBuM/Amazon)
  * - provider: Provider do produto (kabum/amazon)
  * - period: Período do filtro (today|3days|1week|1month|3months|6months)
@@ -18,29 +20,26 @@ export const dynamic = 'force-dynamic';
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const sessionId = searchParams.get('sessionId');
     const productId = searchParams.get('productId');
     const provider = searchParams.get('provider');
     const period = searchParams.get('period') || '6months';
 
-    if (!sessionId || !productId || !provider) {
+    if (!productId || !provider) {
       return NextResponse.json(
-        { error: 'sessionId, productId e provider são obrigatórios' },
+        { error: 'productId e provider são obrigatórios' },
         { status: 400 }
       );
     }
 
-    // Busca ou cria o usuário
-    const user = await getOrCreateUser(sessionId);
-
-    // Busca o produto
-    const product = await prisma.product.findUnique({
+    // Busca QUALQUER produto com esse productId e provider (histórico global)
+    // Não filtra por userId - pega de todos os usuários
+    const product = await prisma.product.findFirst({
       where: {
-        userId_productId_provider: {
-          userId: user.id,
-          productId,
-          provider,
-        },
+        productId,
+        provider,
+      },
+      orderBy: {
+        lastCheckedAt: 'desc', // Pega o mais recente
       },
     });
 
@@ -75,10 +74,25 @@ export async function GET(req: NextRequest) {
         startDate.setMonth(now.getMonth() - 6);
     }
 
-    // Busca o histórico filtrado
+    // Busca TODOS os produtos com esse productId e provider (de todos os usuários)
+    const allProducts = await prisma.product.findMany({
+      where: {
+        productId,
+        provider,
+      },
+      select: {
+        id: true,
+      },
+    });
+
+    const productIds = allProducts.map(p => p.id);
+
+    // Busca o histórico filtrado de TODOS os produtos (histórico global)
     const snapshots = await prisma.priceSnapshot.findMany({
       where: {
-        productId: product.id,
+        productId: {
+          in: productIds, // Histórico de TODOS os usuários
+        },
         timestamp: {
           gte: startDate,
         },
@@ -96,8 +110,23 @@ export async function GET(req: NextRequest) {
       },
     });
 
+    // Remove duplicatas por timestamp (mesmos produtos podem ter snapshots no mesmo momento)
+    const uniqueSnapshots = new Map();
+    snapshots.forEach(snap => {
+      const key = snap.timestamp.getTime();
+      // Se já existe um snapshot nesse timestamp, mantém o que tem mais dados
+      if (!uniqueSnapshots.has(key) ||
+          (snap.priceVista !== null && uniqueSnapshots.get(key).priceVista === null)) {
+        uniqueSnapshots.set(key, snap);
+      }
+    });
+
+    const dedupedSnapshots = Array.from(uniqueSnapshots.values()).sort((a, b) =>
+      a.timestamp.getTime() - b.timestamp.getTime()
+    );
+
     // Converte para formato compatível com o frontend
-    const history = snapshots.map(snap => ({
+    const history = dedupedSnapshots.map(snap => ({
       timestamp: snap.timestamp.getTime(),
       priceVista: snap.priceVista,
       priceParcelado: snap.priceParcelado,
