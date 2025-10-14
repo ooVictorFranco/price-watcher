@@ -172,7 +172,8 @@ graph LR
 ### 1. Update Prices (09:00 diariamente)
 - **Path**: `/api/cron/update-prices`
 - **Schedule**: `0 9 * * *` (1x por dia às 09:00)
-- **Função**: Atualiza preços de TODOS os produtos favoritos
+- **Função**: Atualiza preços de TODOS os produtos do cache global
+- **Escopo**: Produtos pesquisados por QUALQUER usuário (favoritos ou não)
 - **Filtro**: Produtos não atualizados nas últimas 24 horas
 - **Fonte**: `scheduled`
 - **Nota**: Plano Hobby da Vercel permite apenas execuções diárias

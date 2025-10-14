@@ -84,8 +84,9 @@ export async function GET(request: NextRequest) {
 
     console.log('[CRON] Starting daily price update job...');
 
-    // Busca todos os produtos que precisam ser atualizados
-    // (produtos não atualizados nas últimas 24 horas)
+    // Busca TODOS os produtos pesquisados globalmente (cache compartilhado)
+    // Não importa se são favoritos ou apenas buscas únicas
+    // Atualiza produtos não atualizados nas últimas 24 horas
     const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const products = await prisma.product.findMany({
@@ -95,10 +96,10 @@ export async function GET(request: NextRequest) {
           { lastCheckedAt: { lt: twentyFourHoursAgo } },
         ],
       },
-      // Sem limite - processa todos os produtos em uma única execução diária
+      // Sem limite - processa TODOS os produtos do cache global em uma única execução diária
     });
 
-    console.log(`[CRON] Found ${products.length} products to update`);
+    console.log(`[CRON] Found ${products.length} products to update (global cache)`);
 
     const results = {
       total: products.length,
