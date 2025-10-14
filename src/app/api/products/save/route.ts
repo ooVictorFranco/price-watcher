@@ -43,46 +43,38 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Verifica se produto já existe (de qualquer usuário, incluindo o global)
-    let product = await prisma.product.findFirst({
+    // Usa upsert para garantir que não haja duplicação
+    // A constraint @@unique([userId, productId, provider]) garante isso no nível do banco
+    const product = await prisma.product.upsert({
       where: {
-        productId,
-        provider,
-      },
-      orderBy: {
-        lastCheckedAt: 'desc',
-      },
-    });
-
-    // Se não existe, cria no usuário global
-    if (!product) {
-      product = await prisma.product.create({
-        data: {
+        userId_productId_provider: {
           userId: globalUser.id,
           productId,
           provider,
-          name,
-          image,
-          url: null,
-          groupId: null,
-          installmentsCount,
-          installmentsValue,
-          lastCheckedAt: new Date(),
         },
-      });
-    } else {
-      // Atualiza informações do produto existente
-      product = await prisma.product.update({
-        where: { id: product.id },
-        data: {
-          name,
-          image,
-          installmentsCount,
-          installmentsValue,
-          lastCheckedAt: new Date(),
-        },
-      });
-    }
+      },
+      update: {
+        // Atualiza informações do produto existente
+        name,
+        image,
+        installmentsCount,
+        installmentsValue,
+        lastCheckedAt: new Date(),
+      },
+      create: {
+        // Cria novo produto se não existir
+        userId: globalUser.id,
+        productId,
+        provider,
+        name,
+        image,
+        url: null,
+        groupId: null,
+        installmentsCount,
+        installmentsValue,
+        lastCheckedAt: new Date(),
+      },
+    });
 
     // Adiciona snapshot de preço
     const snapshot = await prisma.priceSnapshot.create({

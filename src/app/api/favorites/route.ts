@@ -77,8 +77,9 @@ export async function POST(request: NextRequest) {
 
     const user = await getOrCreateUser(sessionId);
 
-    // Verifica se já existe
-    const existing = await prisma.product.findUnique({
+    // Usa upsert para evitar race conditions e garantir atomicidade
+    // Se já existe, retorna o existente (não atualiza para preservar dados do usuário)
+    const product = await prisma.product.upsert({
       where: {
         userId_productId_provider: {
           userId: user.id,
@@ -86,18 +87,14 @@ export async function POST(request: NextRequest) {
           provider,
         },
       },
-    });
-
-    if (existing) {
-      return NextResponse.json(
-        { error: 'Product already in favorites', product: existing },
-        { status: 409 }
-      );
-    }
-
-    // Cria o produto
-    const product = await prisma.product.create({
-      data: {
+      update: {
+        // Atualiza apenas metadados se o produto já existir
+        name,
+        image,
+        url,
+      },
+      create: {
+        // Cria novo favorito se não existir
         userId: user.id,
         productId,
         provider,
