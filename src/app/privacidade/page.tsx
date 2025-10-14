@@ -142,6 +142,32 @@ export default function PrivacidadePage() {
                 </div>
 
                 <div>
+                  <p className="font-semibold text-indigo-900 mb-2">Vercel Speed Insights</p>
+                  <ul className="list-disc list-inside space-y-1 text-indigo-800 ml-4">
+                    <li>
+                      <strong>Finalidade:</strong> Acompanhar métricas reais de experiência (Core Web Vitals) e identificar regressões de performance antes que afetem usuários
+                    </li>
+                    <li>
+                      <strong>Dados coletados:</strong> LCP, FID, CLS, tipo de dispositivo, navegador e região aproximada — sempre em formato agregado
+                    </li>
+                    <li>
+                      <strong>Anonimização:</strong> Nenhum identificador pessoal é armazenado; os relatórios são sumarizados por página
+                    </li>
+                    <li>
+                      <strong>Documentação:</strong>{' '}
+                      <a
+                        href="https://vercel.com/docs/speed-insights/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:underline"
+                      >
+                        Vercel Speed Insights Privacy
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
                   <p className="font-semibold text-indigo-900 mb-2">Microsoft Clarity</p>
                   <ul className="list-disc list-inside space-y-1 text-indigo-800 ml-4">
                     <li>

@@ -1,5 +1,5 @@
 // src/app/api/products/recent/route.ts
-import { NextResponse } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
 /**
@@ -7,8 +7,16 @@ import { prisma } from '@/lib/prisma';
  * Retorna os últimos 10 produtos únicos pesquisados globalmente (por qualquer usuário)
  * Ordenado por lastCheckedAt (mais recentes primeiro)
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   try {
+    const { searchParams } = new URL(req.url);
+    const limitParam = Number.parseInt(searchParams.get('limit') ?? '', 10);
+    const poolParam = Number.parseInt(searchParams.get('pool') ?? '', 10);
+
+    const limit = Number.isFinite(limitParam) && limitParam > 0 ? Math.min(limitParam, 50) : 10;
+    const poolSizeRaw = Number.isFinite(poolParam) && poolParam > 0 ? poolParam : limit * 6;
+    const poolSize = Math.min(Math.max(poolSizeRaw, limit), 200);
+
     // Busca os últimos 10 produtos únicos do banco
     // Usa DISTINCT ON (productId, provider) para evitar duplicatas do mesmo produto
     const recentProducts = await prisma.product.findMany({
@@ -28,7 +36,7 @@ export async function GET() {
       orderBy: {
         lastCheckedAt: 'desc',
       },
-      take: 30, // Busca 30 para depois filtrar duplicatas
+      take: poolSize, // Busca um pool maior para permitir randomização antes de limitar
     });
 
     // Remove duplicatas baseado em productId+provider
@@ -41,11 +49,19 @@ export async function GET() {
     }, new Map());
 
     // Pega apenas os 10 primeiros únicos
-    const topTen = Array.from(uniqueProducts.values()).slice(0, 10);
+    const uniqueList = Array.from(uniqueProducts.values());
+
+    for (let i = uniqueList.length - 1; i > 0; i -= 1) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [uniqueList[i], uniqueList[j]] = [uniqueList[j], uniqueList[i]];
+    }
+
+    const selected = uniqueList.slice(0, limit);
 
     return NextResponse.json({
-      products: topTen,
-      count: topTen.length,
+      products: selected,
+      count: selected.length,
+      totalAvailable: uniqueList.length,
     });
   } catch (error) {
     console.error('Error fetching recent products:', error);

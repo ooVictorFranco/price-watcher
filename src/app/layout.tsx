@@ -14,6 +14,7 @@ import AutoSync from '@/components/AutoSync';
 import MobileMenu from '@/components/MobileMenu';
 import AnimatedBackground from '@/components/AnimatedBackground';
 import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import MicrosoftClarity from '@/components/Analytics';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
@@ -189,6 +190,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Analytics */}
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

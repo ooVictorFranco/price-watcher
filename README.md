@@ -263,6 +263,7 @@ O Price Watcher utiliza ferramentas de analytics focadas **exclusivamente** na m
 
 **Ferramentas utilizadas:**
 - ✅ **Vercel Analytics**: Monitora desempenho, velocidade de carregamento e Core Web Vitals
+- ✅ **Vercel Speed Insights**: Analisa métricas reais de experiência (Core Web Vitals) e alerta sobre regressões
 - ✅ **Microsoft Clarity**: Mapas de calor e gravações de sessão anônimas para entender interações
 
 **Por que usamos?**
@@ -313,7 +314,7 @@ O Price Watcher **NÃO** coleta, armazena ou transmite **NENHUM** dos seguintes 
 - 📖 Código 100% open-source - audite você mesmo!
 - 🔍 Hospedagem: Vercel (LGPD/GDPR compliant)
 - 🗄️ Banco: Neon PostgreSQL (serverless, seguro)
-- 📊 Analytics anônimos: Vercel Analytics e Microsoft Clarity (focados em UX)
+- 📊 Analytics anônimos: Vercel Analytics, Vercel Speed Insights e Microsoft Clarity (focados em UX)
 - ✅ Conformidade com LGPD (Lei Geral de Proteção de Dados)
 
 Para mais detalhes, leia nossa [Política de Privacidade](src/app/privacidade/page.tsx).
