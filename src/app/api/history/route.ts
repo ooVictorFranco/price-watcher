@@ -125,15 +125,62 @@ export async function GET(req: NextRequest) {
       a.timestamp.getTime() - b.timestamp.getTime()
     );
 
-    // Converte para formato compatível com o frontend
-    const history = dedupedSnapshots.map(snap => ({
-      timestamp: snap.timestamp.getTime(),
-      priceVista: snap.priceVista,
-      priceParcelado: snap.priceParcelado,
-      priceOriginal: snap.priceOriginal,
-    }));
+    // Filtra apenas mudanças de preço (mantém primeiro e último sempre)
+    const filteredHistory: Array<{
+      timestamp: number;
+      priceVista: number | null;
+      priceParcelado: number | null;
+      priceOriginal: number | null;
+    }> = [];
 
-    return NextResponse.json({ history });
+    if (dedupedSnapshots.length > 0) {
+      // Sempre inclui o primeiro registro
+      filteredHistory.push({
+        timestamp: dedupedSnapshots[0].timestamp.getTime(),
+        priceVista: dedupedSnapshots[0].priceVista,
+        priceParcelado: dedupedSnapshots[0].priceParcelado,
+        priceOriginal: dedupedSnapshots[0].priceOriginal,
+      });
+
+      // Adiciona apenas registros onde houve mudança de preço
+      for (let i = 1; i < dedupedSnapshots.length; i++) {
+        const current = dedupedSnapshots[i];
+        const previous = dedupedSnapshots[i - 1];
+
+        // Verifica se algum preço mudou
+        const priceChanged =
+          current.priceVista !== previous.priceVista ||
+          current.priceParcelado !== previous.priceParcelado ||
+          current.priceOriginal !== previous.priceOriginal;
+
+        if (priceChanged) {
+          filteredHistory.push({
+            timestamp: current.timestamp.getTime(),
+            priceVista: current.priceVista,
+            priceParcelado: current.priceParcelado,
+            priceOriginal: current.priceOriginal,
+          });
+        }
+      }
+
+      // Sempre inclui o último registro (se for diferente do primeiro)
+      if (dedupedSnapshots.length > 1) {
+        const last = dedupedSnapshots[dedupedSnapshots.length - 1];
+        const lastInFiltered = filteredHistory[filteredHistory.length - 1];
+
+        // Só adiciona se não for o mesmo timestamp
+        if (last.timestamp.getTime() !== lastInFiltered.timestamp) {
+          filteredHistory.push({
+            timestamp: last.timestamp.getTime(),
+            priceVista: last.priceVista,
+            priceParcelado: last.priceParcelado,
+            priceOriginal: last.priceOriginal,
+          });
+        }
+      }
+    }
+
+    return NextResponse.json({ history: filteredHistory });
   } catch (error) {
     console.error('Erro ao buscar histórico:', error);
     return NextResponse.json(
