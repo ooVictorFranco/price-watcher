@@ -67,14 +67,17 @@ function PageContent() {
   };
 
   const doFetch = async (raw: string) => {
+    console.log('[PAGE] doFetch called with raw:', raw);
     setLoadingMonitor(true);
     try {
       const parsed = parseIdOrUrl(raw);
       const idKey = parsed.idOrUrl;
       const provider = detectProvider(idKey);
+      console.log('[PAGE] Parsed:', { idKey, provider });
 
       // Tenta buscar do cache primeiro, depois faz scraping se necessário
       const result = await fetchProductWithCache(idKey, provider);
+      console.log('[PAGE] Fetch result:', result);
 
       const now = Date.now();
 
@@ -102,9 +105,11 @@ function PageContent() {
         priceParcelado: result.data.priceParcelado ?? null,
         priceOriginal: result.data.priceOriginal ?? null,
       };
+      console.log('[PAGE] Current snapshot:', current);
 
       // Atualiza localStorage
       const next = upsertHistory(localHistory, current);
+      console.log('[PAGE] History after upsert:', next.length, 'items');
       saveHistory(idKey, next);
 
       // Salva no banco de dados (com seed do histórico local)
@@ -134,8 +139,10 @@ function PageContent() {
 
         if (historyResponse.ok) {
           const historyData = await historyResponse.json();
+          console.log('[PAGE] History from API:', historyData.history?.length || 0, 'items');
           setHistory(historyData.history || next);
         } else {
+          console.log('[PAGE] History API failed, using localStorage:', next.length, 'items');
           // Fallback para localStorage se API falhar
           setHistory(next);
         }
@@ -155,8 +162,14 @@ function PageContent() {
 
   const startMonitoring = async (pre?: string) => {
     const raw = pre ?? input;
+    console.log('[PAGE] startMonitoring called with:', { pre, input, raw });
     const parsed = parseIdOrUrl(raw);
-    setHistory(loadHistoryLS(parsed.idOrUrl));
+    console.log('[PAGE] startMonitoring parsed:', parsed);
+
+    const initialHistory = loadHistoryLS(parsed.idOrUrl);
+    console.log('[PAGE] Initial history from LS:', initialHistory.length, 'items');
+    setHistory(initialHistory);
+
     await doFetch(raw);
 
     if (intervalRef.current) clearInterval(intervalRef.current);
