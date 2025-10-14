@@ -15,7 +15,7 @@ type SearchResult = {
 
 type Props = {
   query: string;
-  onSelect: (productId: string) => void;
+  onSelect: (productId: string, provider: 'kabum' | 'amazon') => void;
   isVisible: boolean;
 };
 
@@ -83,8 +83,8 @@ export default function ProductAutocomplete({ query, onSelect, isVisible }: Prop
     }
   }, [isVisible]);
 
-  const handleSelect = (productId: string) => {
-    onSelect(productId);
+  const handleSelect = (productId: string, provider: 'kabum' | 'amazon') => {
+    onSelect(productId, provider);
     setResults([]);
   };
 
@@ -122,7 +122,7 @@ export default function ProductAutocomplete({ query, onSelect, isVisible }: Prop
               <li key={`${result.provider}:${result.productId}`}>
                 <button
                   type="button"
-                  onClick={() => handleSelect(result.productId)}
+                  onClick={() => handleSelect(result.productId, result.provider)}
                   onMouseEnter={() => setSelectedIndex(index)}
                   className={`
                     w-full px-4 py-3 flex items-center gap-3 text-left

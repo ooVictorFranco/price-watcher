@@ -36,11 +36,23 @@ export default function SearchBar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
-  const handleSelect = (productId: string) => {
-    onChange(productId);
+  const handleSelect = (productId: string, provider: 'kabum' | 'amazon') => {
+    // Constrói URL completa para evitar problemas de parsing
+    let fullIdentifier: string;
+    if (provider === 'kabum') {
+      fullIdentifier = /^\d+$/.test(productId)
+        ? productId // Se já é um ID numérico puro, mantém
+        : `https://www.kabum.com.br/produto/${productId}`;
+    } else {
+      fullIdentifier = /^[A-Z0-9]{10}$/i.test(productId)
+        ? productId // Se já é um ASIN válido, mantém
+        : `https://www.amazon.com.br/dp/${productId}`;
+    }
+
+    onChange(fullIdentifier);
     setShowAutocomplete(false);
     setIsFocused(false);
-    // Aguarda um pouco para garantir que o valor foi atualizado
+    // Aguarda para garantir que o valor foi atualizado
     setTimeout(() => onMonitor(), 100);
   };
 
