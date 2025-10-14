@@ -16,22 +16,22 @@ import AutoSync from '@/components/AutoSync';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'Price Watcher - Monitor de Preços Black Friday 2025 | KaBuM! e Amazon',
-  description: 'Descubra se as lojas realmente baixaram os preços na Black Friday! Monitore preços da KaBuM! e Amazon automaticamente. Compare históricos e evite falsos descontos em promoções sazonais.',
-  keywords: 'monitor de preços, black friday, cyber monday, promoções, kabum, amazon, comparar preços, histórico de preços, descontos reais',
+  title: 'Price Watcher - Monitor de Preços com Histórico Ilimitado 2025',
+  description: 'Monitore preços com histórico ilimitado, atualização automática e cache compartilhado. Sistema colaborativo para decisões informadas de compra.',
+  keywords: 'monitor de preços, comparar preços, histórico de preços, ofertas, promoções, black friday, cyber monday, acompanhamento de preços, cache compartilhado',
   authors: [{ name: 'Victor Franco', url: 'https://github.com/ooVictorFranco' }],
   creator: 'Victor Franco',
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
-    title: 'Price Watcher - Monitor de Preços Black Friday 2025',
-    description: 'Descubra se as lojas realmente baixaram os preços na Black Friday! Monitore preços automaticamente e evite falsos descontos.',
+    title: 'Price Watcher - Monitor de Preços',
+    description: 'Histórico ilimitado, atualização automática e cache compartilhado. Decisões informadas de compra.',
     siteName: 'Price Watcher',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Price Watcher - Monitor de Preços Black Friday 2025',
-    description: 'Descubra se as lojas realmente baixaram os preços na Black Friday! Monitore preços automaticamente.',
+    title: 'Price Watcher - Monitor de Preços',
+    description: 'Histórico ilimitado + cache compartilhado. Sistema colaborativo para compras informadas.',
   },
   robots: {
     index: true,

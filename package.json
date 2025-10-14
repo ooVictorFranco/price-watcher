@@ -1,7 +1,7 @@
 {
   "name": "price-watcher",
-  "version": "0.1.0-beta.3",
-  "description": "Descubra se as lojas realmente baixaram os preços na Black Friday! Monitor inteligente de preços para KaBuM! e Amazon com histórico, comparação e grupos unificados",
+  "version": "0.1.0-beta.4",
+  "description": "Sistema colaborativo de monitoramento de preços com histórico ilimitado, atualização automática e sincronização entre dispositivos. Acompanhe a evolução de preços e tome decisões informadas.",
   "author": "Victor Franco",
   "license": "MIT",
   "repository": {

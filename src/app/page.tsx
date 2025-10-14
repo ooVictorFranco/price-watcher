@@ -24,6 +24,8 @@ import EmptyState from '@/components/EmptyState';
 import SkeletonCards from '@/components/SkeletonCards';
 import { toast } from '@/lib/toast';
 import { fetchProductWithCache, detectProvider } from '@/lib/product-fetch';
+import { getSessionId } from '@/lib/session';
+import { mergeHistoryWithDatabase } from '@/lib/price-history';
 
 export const dynamic = 'force-dynamic';
 
@@ -91,16 +93,49 @@ function PageContent() {
         installmentsValue: result.data.installmentsValue ?? null,
       });
 
-      const prev = loadHistoryLS(idKey);
+      // Carrega histórico local
+      const localHistory = loadHistoryLS(idKey);
+
+      // Cria snapshot atual
       const current: Snapshot = {
         timestamp: now,
         priceVista: result.data.priceVista ?? null,
         priceParcelado: result.data.priceParcelado ?? null,
         priceOriginal: result.data.priceOriginal ?? null,
       };
-      const next = upsertHistory(prev, current);
+
+      // Atualiza localStorage
+      const next = upsertHistory(localHistory, current);
       saveHistory(idKey, next);
-      setHistory(next);
+
+      // Salva no banco de dados (com seed do histórico local)
+      const sessionId = getSessionId();
+      try {
+        await fetch('/api/history/save', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            sessionId,
+            productId: idKey,
+            provider,
+            priceVista: current.priceVista,
+            priceParcelado: current.priceParcelado,
+            priceOriginal: current.priceOriginal,
+            installmentsCount: result.data.installmentsCount,
+            installmentsValue: result.data.installmentsValue,
+            source: 'manual',
+            localHistory: localHistory, // Envia histórico local para seed
+          }),
+        });
+
+        // Busca histórico mesclado (banco + local)
+        const merged = await mergeHistoryWithDatabase(sessionId, idKey, provider, next, '6months');
+        setHistory(merged);
+      } catch (dbError) {
+        console.error('Erro ao salvar no banco, usando localStorage:', dbError);
+        // Fallback para localStorage se o banco falhar
+        setHistory(next);
+      }
     } catch (e) {
       console.error(e);
       const message = e instanceof Error ? e.message : 'Não consegui ler este produto agora.';
@@ -153,11 +188,10 @@ function PageContent() {
     <main className="min-h-screen py-8">
       <div className="mx-auto w-full max-w-6xl px-6 space-y-6">
         <header className="space-y-2">
-          <h1 className="text-2xl font-bold">Monitore Preços da Black Friday</h1>
+          <h1 className="text-2xl font-bold">Monitor de Preços</h1>
           <p className="text-sm text-gray-600">
-            Descubra se as lojas realmente baixaram os preços nas promoções.
-            Cole o ID/URL do KaBuM! (<code>922662</code>) ou o ASIN/URL da Amazon (<code>B0F7Z9F9SD</code>)
-            e acompanhe o histórico de preços ao longo do tempo.
+            Acompanhe preços e identifique o melhor momento para comprar.
+            Cole o ID ou URL do produto para visualizar o histórico completo.
           </p>
         </header>
 
@@ -167,7 +201,7 @@ function PageContent() {
           onChange={setInput}
           onMonitor={() => startMonitoring()}
           onClear={clearCurrent}
-          placeholder="Cole: ID KaBuM (ex.: 922662), ASIN Amazon (ex.: B0F7Z9F9SD) ou uma URL completa"
+          placeholder="Cole o ID (ex.: 922662 ou B0F7Z9F9SD) ou URL do produto"
         />
 
         {!product && !loadingMonitor && <EmptyState />}

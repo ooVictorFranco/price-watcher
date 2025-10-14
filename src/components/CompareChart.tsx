@@ -2,7 +2,7 @@
 'use client';
 
 import dayjs from 'dayjs';
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState, useMemo } from 'react';
 import {
   Chart as ChartJS,
   LineElement,
@@ -16,6 +16,7 @@ import {
 } from 'chart.js';
 import { Snapshot } from '@/types';
 import { brl } from '@/lib/utils';
+import PeriodFilter, { Period } from './PeriodFilter';
 
 ChartJS.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
@@ -46,11 +47,46 @@ function unionSortedTimestamps(series: Series[]): number[] {
 export default function CompareChart({ series }: { series: Series[] }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS | null>(null);
+  const [period, setPeriod] = useState<Period>('6months');
 
-  const union = series.length ? unionSortedTimestamps(series) : [];
+  // Filtra as séries baseado no período
+  const filteredSeries = useMemo(() => {
+    if (!series || series.length === 0) return [];
+
+    const now = Date.now();
+    let cutoffTime = now;
+
+    switch (period) {
+      case 'today':
+        cutoffTime = new Date().setHours(0, 0, 0, 0);
+        break;
+      case '3days':
+        cutoffTime = now - 3 * 24 * 60 * 60 * 1000;
+        break;
+      case '1week':
+        cutoffTime = now - 7 * 24 * 60 * 60 * 1000;
+        break;
+      case '1month':
+        cutoffTime = now - 30 * 24 * 60 * 60 * 1000;
+        break;
+      case '3months':
+        cutoffTime = now - 90 * 24 * 60 * 60 * 1000;
+        break;
+      case '6months':
+        cutoffTime = now - 180 * 24 * 60 * 60 * 1000;
+        break;
+    }
+
+    return series.map(s => ({
+      ...s,
+      history: s.history.filter(h => h.timestamp >= cutoffTime),
+    }));
+  }, [series, period]);
+
+  const union = filteredSeries.length ? unionSortedTimestamps(filteredSeries) : [];
   const labels = union.map((t) => dayjs(t).format('DD/MM HH:mm'));
 
-  const datasets = series.map((s) => {
+  const datasets = filteredSeries.map((s) => {
     const map = new Map<number, Snapshot>();
     s.history.forEach(h => map.set(h.timestamp, h));
 
@@ -119,10 +155,18 @@ export default function CompareChart({ series }: { series: Series[] }) {
 
   return (
     <div className="rounded-2xl border bg-white shadow-md p-5">
-      <h3 className="text-sm font-medium mb-3">Comparativo</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <h3 className="text-sm font-medium">Comparativo de Preços</h3>
+        <PeriodFilter value={period} onChange={setPeriod} />
+      </div>
       <div className="rounded-xl bg-white p-2 h-80">
         <canvas ref={canvasRef} />
       </div>
+      {union.length === 0 && (
+        <p className="text-sm text-gray-500 text-center mt-4">
+          Nenhum dado disponível para o período selecionado
+        </p>
+      )}
     </div>
   );
 }

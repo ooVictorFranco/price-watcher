@@ -46,7 +46,7 @@ export default function SearchBar({
             placeholder={placeholder ?? 'Cole: ID KaBuM (ex.: 922662), ASIN Amazon (ex.: B0F7Z9F9SD) ou URL completa'}
             value={value}
             onChange={(e) => onChange(e.target.value)}
-            autoCapitalize="off"
+            autoCapitalize="none"
             autoCorrect="off"
             spellCheck={false}
             disabled={loadingMonitor}

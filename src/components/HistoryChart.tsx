@@ -4,7 +4,7 @@
 import { Snapshot } from '@/types';
 import { brl } from '@/lib/utils';
 import dayjs from 'dayjs';
-import { useEffect, useRef, useMemo } from 'react';
+import { useEffect, useRef, useMemo, useState } from 'react';
 import {
   Chart as ChartJS,
   LineElement,
@@ -16,6 +16,7 @@ import {
   Legend,
   ChartConfiguration,
 } from 'chart.js';
+import PeriodFilter, { Period } from './PeriodFilter';
 
 ChartJS.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Tooltip, Legend);
 
@@ -30,11 +31,43 @@ type Props = {
 export default function HistoryChart({ history }: Props) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const chartRef = useRef<ChartJS | null>(null);
+  const [period, setPeriod] = useState<Period>('6months');
 
-  const labels = useMemo(() => history.map(h => dayjs(h.timestamp).format('DD/MM HH:mm')), [history]);
-  const vista = useMemo(() => history.map(h => h.priceVista ?? null), [history]);
-  const parce = useMemo(() => history.map(h => h.priceParcelado ?? null), [history]);
-  const orig = useMemo(() => history.map(h => h.priceOriginal ?? null), [history]);
+  // Filtra histórico baseado no período selecionado
+  const filteredHistory = useMemo(() => {
+    if (!history || history.length === 0) return [];
+
+    const now = Date.now();
+    let cutoffTime = now;
+
+    switch (period) {
+      case 'today':
+        cutoffTime = new Date().setHours(0, 0, 0, 0);
+        break;
+      case '3days':
+        cutoffTime = now - 3 * 24 * 60 * 60 * 1000;
+        break;
+      case '1week':
+        cutoffTime = now - 7 * 24 * 60 * 60 * 1000;
+        break;
+      case '1month':
+        cutoffTime = now - 30 * 24 * 60 * 60 * 1000;
+        break;
+      case '3months':
+        cutoffTime = now - 90 * 24 * 60 * 60 * 1000;
+        break;
+      case '6months':
+        cutoffTime = now - 180 * 24 * 60 * 60 * 1000;
+        break;
+    }
+
+    return history.filter(h => h.timestamp >= cutoffTime);
+  }, [history, period]);
+
+  const labels = useMemo(() => filteredHistory.map(h => dayjs(h.timestamp).format('DD/MM HH:mm')), [filteredHistory]);
+  const vista = useMemo(() => filteredHistory.map(h => h.priceVista ?? null), [filteredHistory]);
+  const parce = useMemo(() => filteredHistory.map(h => h.priceParcelado ?? null), [filteredHistory]);
+  const orig = useMemo(() => filteredHistory.map(h => h.priceOriginal ?? null), [filteredHistory]);
 
   const datasets = useMemo(() => {
     const result: Array<{
@@ -97,10 +130,18 @@ export default function HistoryChart({ history }: Props) {
 
   return (
     <div className="rounded-2xl border bg-white shadow-md p-5">
-      <h3 className="text-sm font-medium mb-3">Histórico</h3>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+        <h3 className="text-sm font-medium">Histórico de Preços</h3>
+        <PeriodFilter value={period} onChange={setPeriod} />
+      </div>
       <div className="rounded-xl bg-white p-2 h-80">
         <canvas ref={canvasRef} />
       </div>
+      {filteredHistory.length === 0 && (
+        <p className="text-sm text-gray-500 text-center mt-4">
+          Nenhum dado disponível para o período selecionado
+        </p>
+      )}
     </div>
   );
 }
