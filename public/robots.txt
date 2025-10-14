@@ -1,0 +1,19 @@
+# robots.txt para Radar de Ofertas
+# https://www.robotstxt.org/robotstxt.html
+
+User-agent: *
+Allow: /
+
+# Páginas importantes para indexação
+Allow: /changelog
+Allow: /privacidade
+Allow: /favoritos
+
+# Bloquear apenas APIs internas (não queremos que sejam indexadas)
+Disallow: /api/
+
+# Sitemap
+Sitemap: https://price-watcher-kappa.vercel.app/sitemap.xml
+
+# Crawl-delay para não sobrecarregar o servidor
+Crawl-delay: 1

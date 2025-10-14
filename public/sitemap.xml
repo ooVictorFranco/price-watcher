@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Página Principal -->
+  <url>
+    <loc>https://price-watcher-kappa.vercel.app/</loc>
+    <lastmod>2025-10-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- Página de Favoritos -->
+  <url>
+    <loc>https://price-watcher-kappa.vercel.app/favoritos</loc>
+    <lastmod>2025-10-14</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- Histórico de Atualizações (Changelog) -->
+  <url>
+    <loc>https://price-watcher-kappa.vercel.app/changelog</loc>
+    <lastmod>2025-10-14</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Política de Privacidade -->
+  <url>
+    <loc>https://price-watcher-kappa.vercel.app/privacidade</loc>
+    <lastmod>2025-10-14</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+</urlset>

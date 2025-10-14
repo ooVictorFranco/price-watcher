@@ -17,32 +17,132 @@ import AnimatedBackground from '@/components/AnimatedBackground';
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
 export const metadata: Metadata = {
-  title: 'Radar de Ofertas - Monitore Preços e Economize nas Compras',
-  description: 'Acompanhe a evolução de preços em tempo real com histórico completo. Sistema colaborativo que te ajuda a identificar as melhores ofertas e economizar dinheiro.',
-  keywords: 'monitor de preços, comparar preços, histórico de preços, ofertas, promoções, black friday, cyber monday, economia, radar de ofertas, melhor preço',
+  title: {
+    default: 'Radar de Ofertas - Monitore Preços e Economize nas Compras',
+    template: '%s | Radar de Ofertas',
+  },
+  description: 'Sistema colaborativo de monitoramento de preços com histórico ilimitado. Acompanhe a evolução de preços da KaBuM e Amazon, descubra se as ofertas são reais e economize dinheiro. Atualização automática diária.',
+  keywords: [
+    'monitor de preços',
+    'comparar preços',
+    'histórico de preços',
+    'ofertas',
+    'promoções',
+    'black friday',
+    'cyber monday',
+    'economia',
+    'radar de ofertas',
+    'melhor preço',
+    'kabum',
+    'amazon',
+    'price tracker',
+    'acompanhar preços',
+    'desconto',
+  ],
   authors: [{ name: 'Victor Franco', url: 'https://github.com/ooVictorFranco' }],
   creator: 'Victor Franco',
+  publisher: 'Victor Franco',
+  applicationName: 'Radar de Ofertas',
+  category: 'Shopping',
+  classification: 'Price Tracking & Comparison',
   openGraph: {
     type: 'website',
     locale: 'pt_BR',
+    url: 'https://price-watcher-kappa.vercel.app',
     title: 'Radar de Ofertas - Monitore Preços e Economize',
-    description: 'Histórico completo de preços, alertas inteligentes e sistema colaborativo para encontrar as melhores ofertas.',
+    description: 'Histórico completo de preços, atualização automática e sistema colaborativo para encontrar as melhores ofertas da KaBuM e Amazon.',
     siteName: 'Radar de Ofertas',
+    images: [
+      {
+        url: '/og-image.png',
+        width: 1200,
+        height: 630,
+        alt: 'Radar de Ofertas - Monitor de Preços',
+      },
+    ],
   },
   twitter: {
     card: 'summary_large_image',
     title: 'Radar de Ofertas - Monitore Preços',
-    description: 'Sistema colaborativo para encontrar as melhores ofertas com histórico completo de preços.',
+    description: 'Sistema colaborativo para encontrar as melhores ofertas com histórico completo de preços da KaBuM e Amazon.',
+    images: ['/og-image.png'],
   },
   robots: {
     index: true,
     follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
+  verification: {
+    // Adicione seus códigos de verificação aqui quando obtê-los
+    // google: 'seu-codigo-google-search-console',
+    // yandex: 'seu-codigo-yandex',
+    // bing: 'seu-codigo-bing',
+  },
+  alternates: {
+    canonical: 'https://price-watcher-kappa.vercel.app',
+  },
+  icons: {
+    icon: '/favicon.ico',
+    shortcut: '/favicon.ico',
+    apple: '/apple-touch-icon.png',
   },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR">
+      <head>
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#7c3aed" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Radar de Ofertas" />
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="mobile-web-app-capable" content="yes" />
+
+        {/* Structured Data - Schema.org */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              '@context': 'https://schema.org',
+              '@type': 'WebApplication',
+              name: 'Radar de Ofertas',
+              applicationCategory: 'UtilitiesApplication',
+              operatingSystem: 'Any',
+              offers: {
+                '@type': 'Offer',
+                price: '0',
+                priceCurrency: 'BRL',
+              },
+              description: 'Sistema colaborativo de monitoramento de preços com histórico ilimitado. Acompanhe ofertas da KaBuM e Amazon.',
+              url: 'https://price-watcher-kappa.vercel.app',
+              author: {
+                '@type': 'Person',
+                name: 'Victor Franco',
+                url: 'https://github.com/ooVictorFranco',
+              },
+              provider: {
+                '@type': 'Organization',
+                name: 'Radar de Ofertas',
+              },
+              browserRequirements: 'Requires JavaScript. Requires HTML5.',
+              softwareVersion: '0.1.0-beta.7',
+              aggregateRating: {
+                '@type': 'AggregateRating',
+                ratingValue: '5',
+                reviewCount: '1',
+              },
+            }),
+          }}
+        />
+      </head>
       <body className={`${inter.variable} font-sans text-gray-900`}>
         {/* Background Animado */}
         <AnimatedBackground />
