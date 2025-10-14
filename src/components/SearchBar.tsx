@@ -1,8 +1,9 @@
 // src/components/SearchBar.tsx
 'use client';
 
-import { useId } from 'react';
+import { useId, useState, useRef, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import ProductAutocomplete from './ProductAutocomplete';
 
 type Props = {
   value: string;
@@ -18,6 +19,52 @@ export default function SearchBar({
 }: Props) {
   const id = useId();
   const hasValue = value.trim().length > 0;
+  const [showAutocomplete, setShowAutocomplete] = useState(false);
+  const [isFocused, setIsFocused] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // Fecha autocomplete ao clicar fora
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowAutocomplete(false);
+        setIsFocused(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleSelect = (productId: string) => {
+    onChange(productId);
+    setShowAutocomplete(false);
+    setIsFocused(false);
+    // Aguarda um pouco para garantir que o valor foi atualizado
+    setTimeout(() => onMonitor(), 100);
+  };
+
+  const handleInputChange = (newValue: string) => {
+    onChange(newValue);
+    setShowAutocomplete(newValue.trim().length >= 2);
+  };
+
+  const handleFocus = () => {
+    setIsFocused(true);
+    if (value.trim().length >= 2) {
+      setShowAutocomplete(true);
+    }
+  };
+
+  const handleBlur = () => {
+    // Delay para permitir click no autocomplete
+    setTimeout(() => {
+      if (!containerRef.current?.contains(document.activeElement)) {
+        setIsFocused(false);
+        setShowAutocomplete(false);
+      }
+    }, 200);
+  };
 
   return (
     <motion.section
@@ -32,29 +79,47 @@ export default function SearchBar({
         role="search"
         aria-label="Buscar produto para monitorar"
       >
-        <div className="flex-1">
+        <div className="flex-1 relative" ref={containerRef}>
           <label htmlFor={id} className="sr-only">
-            Cole o ID, ASIN ou URL do produto
+            Busque pelo nome, ID ou cole a URL do produto
           </label>
           <input
             id={id}
             type="text"
-            className="w-full rounded-xl border-2 border-gray-200 p-3 outline-none
-              focus:border-blue-500 focus:ring-2 focus:ring-blue-200
+            className={`
+              w-full rounded-xl border-2 p-3 outline-none
               transition-colors duration-200
-              disabled:bg-gray-50 disabled:cursor-not-allowed"
-            placeholder={placeholder ?? 'Cole: ID KaBuM (ex.: 922662), ASIN Amazon (ex.: B0F7Z9F9SD) ou URL completa'}
+              disabled:bg-gray-50 disabled:cursor-not-allowed
+              ${
+                isFocused
+                  ? 'border-blue-500 ring-2 ring-blue-200'
+                  : 'border-gray-200'
+              }
+            `}
+            placeholder={placeholder ?? 'Busque pelo nome, ID (922662) ou cole a URL do produto'}
             value={value}
-            onChange={(e) => onChange(e.target.value)}
+            onChange={(e) => handleInputChange(e.target.value)}
+            onFocus={handleFocus}
+            onBlur={handleBlur}
             autoCapitalize="none"
             autoCorrect="off"
+            autoComplete="off"
             spellCheck={false}
             disabled={loadingMonitor}
             aria-describedby={`${id}-description`}
+            aria-autocomplete="list"
+            aria-controls={showAutocomplete ? `${id}-autocomplete` : undefined}
           />
           <p id={`${id}-description`} className="sr-only">
-            Cole um ID do KaBuM, ASIN da Amazon ou uma URL completa do produto que deseja monitorar
+            Digite o nome do produto para buscar no cache, ou cole um ID/URL para monitorar
           </p>
+
+          {/* Autocomplete */}
+          <ProductAutocomplete
+            query={value}
+            onSelect={handleSelect}
+            isVisible={showAutocomplete && isFocused}
+          />
         </div>
 
         <div className="flex gap-2">
