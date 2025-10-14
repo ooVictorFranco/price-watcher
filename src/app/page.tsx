@@ -25,7 +25,6 @@ import SkeletonCards from '@/components/SkeletonCards';
 import { toast } from '@/lib/toast';
 import { fetchProductWithCache, detectProvider } from '@/lib/product-fetch';
 import { getSessionId } from '@/lib/session';
-import { mergeHistoryWithDatabase } from '@/lib/price-history';
 
 export const dynamic = 'force-dynamic';
 
@@ -128,9 +127,18 @@ function PageContent() {
           }),
         });
 
-        // Busca histórico mesclado (banco + local)
-        const merged = await mergeHistoryWithDatabase(sessionId, idKey, provider, next, '6months');
-        setHistory(merged);
+        // Busca histórico mesclado via API (banco + local)
+        const historyResponse = await fetch(
+          `/api/history?sessionId=${sessionId}&productId=${encodeURIComponent(idKey)}&provider=${provider}&period=6months`
+        );
+
+        if (historyResponse.ok) {
+          const historyData = await historyResponse.json();
+          setHistory(historyData.history || next);
+        } else {
+          // Fallback para localStorage se API falhar
+          setHistory(next);
+        }
       } catch (dbError) {
         console.error('Erro ao salvar no banco, usando localStorage:', dbError);
         // Fallback para localStorage se o banco falhar

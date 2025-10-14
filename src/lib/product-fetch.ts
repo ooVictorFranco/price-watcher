@@ -73,6 +73,8 @@ async function scrapeProduct(
   productId: string,
   provider: 'kabum' | 'amazon'
 ): Promise<ProductData> {
+  console.log(`[SCRAPE] Starting scrape for productId="${productId}" provider="${provider}"`);
+
   let response: Response;
 
   if (provider === 'amazon') {
@@ -80,22 +82,28 @@ async function scrapeProduct(
 
     // ASIN ou URL
     if (/^[A-Z0-9]{10}$/i.test(productId)) {
+      console.log(`[SCRAPE] Amazon ASIN detected: ${productId}`);
       url.searchParams.set('asin', productId);
     } else {
+      console.log(`[SCRAPE] Amazon URL detected: ${productId}`);
       url.searchParams.set('url', productId);
     }
 
+    console.log(`[SCRAPE] Fetching: ${url.toString()}`);
     response = await fetch(url.toString(), { cache: 'no-store' });
   } else {
     const url = new URL(window.location.origin + '/api/scrape');
 
     // ID numérico ou URL
     if (/^\d+$/.test(productId)) {
+      console.log(`[SCRAPE] KaBuM ID detected: ${productId}`);
       url.searchParams.set('id', productId);
     } else {
+      console.log(`[SCRAPE] KaBuM URL detected: ${productId}`);
       url.searchParams.set('url', productId);
     }
 
+    console.log(`[SCRAPE] Fetching: ${url.toString()}`);
     response = await fetch(url.toString(), { cache: 'no-store' });
   }
 
