@@ -136,15 +136,15 @@ export default function PrivacidadePage() {
                 </li>
                 <li>
                   <strong>Atualização automática:</strong> Um cron job na Vercel atualiza automaticamente os preços
-                  de todos os produtos a cada 3 horas, mesmo quando você não está com o navegador aberto.
+                  de todos os produtos 1 vez por dia às 09:00, mesmo quando você não está com o navegador aberto.
                 </li>
               </ol>
 
               <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 mt-4 space-y-2">
-                <p className="font-semibold text-purple-900 mb-2">🚀 Cache Compartilhado (Novo!)</p>
+                <p className="font-semibold text-purple-900 mb-2">🚀 Cache Compartilhado com TTL de 60 minutos</p>
                 <p className="text-purple-800 leading-relaxed">
                   Para melhorar a experiência de todos os usuários e reduzir requisições desnecessárias às lojas,
-                  implementamos um <strong>sistema de cache compartilhado</strong>:
+                  implementamos um <strong>sistema de cache compartilhado inteligente</strong>:
                 </p>
                 <ul className="list-disc list-inside space-y-1 text-purple-800 ml-4">
                   <li>
@@ -152,11 +152,16 @@ export default function PrivacidadePage() {
                     os dados são salvos no banco de dados global
                   </li>
                   <li>
-                    <strong>Benefício coletivo:</strong> Se outro usuário buscar o mesmo produto em até 3 horas,
+                    <strong>Benefício coletivo:</strong> Se outro usuário buscar o mesmo produto em até 60 minutos,
                     os dados vêm do cache instantaneamente (sem scraping)
                   </li>
                   <li>
-                    <strong>Atualização inteligente:</strong> Após 3 horas, uma nova busca atualiza o cache para todos
+                    <strong>Atualização inteligente:</strong> Após 60 minutos, uma nova busca atualiza o cache para todos
+                    os usuários, garantindo preços sempre atualizados
+                  </li>
+                  <li>
+                    <strong>Cron diário:</strong> Às 09:00, todos os produtos favoritos são atualizados automaticamente
+                    pelo cron job da Vercel (plano Hobby permite 1x por dia)
                   </li>
                   <li>
                     <strong>Privacidade mantida:</strong> Apenas o ID do produto é compartilhado, não seus favoritos
@@ -164,9 +169,16 @@ export default function PrivacidadePage() {
                   </li>
                 </ul>
                 <p className="text-sm text-purple-700 mt-2">
-                  ℹ️ <strong>Exemplo:</strong> Se você pesquisar uma RTX 4090, e outro usuário buscar a mesma placa
-                  10 minutos depois, ele receberá os dados instantaneamente do cache. Quanto mais pessoas usam,
-                  mais rápido e eficiente o sistema fica para todos!
+                  ℹ️ <strong>Exemplo prático:</strong>
+                </p>
+                <ul className="list-disc list-inside space-y-1 text-purple-700 text-sm ml-4 mt-1">
+                  <li>10:00 - Usuário A busca uma RTX 4090 → Scraping + Salva cache</li>
+                  <li>10:30 - Usuário B busca a mesma RTX 4090 → Usa cache (instantâneo)</li>
+                  <li>10:59 - Usuário C busca → Usa cache (ainda válido)</li>
+                  <li>11:05 - Usuário D busca → Novo scraping (cache expirou) + Atualiza para todos</li>
+                </ul>
+                <p className="text-sm text-purple-700 mt-2">
+                  Quanto mais pessoas usam, mais rápido e eficiente o sistema fica para todos!
                 </p>
               </div>
 
@@ -234,8 +246,8 @@ export default function PrivacidadePage() {
                 (requer suporte a File System Access API).
               </li>
               <li>
-                <strong>Retenção de 90 dias:</strong> Por padrão, o histórico mantém apenas os últimos 90 dias
-                para evitar uso excessivo de espaço no navegador.
+                <strong>Retenção de 180 dias:</strong> O banco de dados mantém histórico de preços por 180 dias (6 meses).
+                Um cron job diário (02:00) remove automaticamente dados mais antigos que isso.
               </li>
             </ul>
           </section>

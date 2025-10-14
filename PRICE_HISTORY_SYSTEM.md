@@ -171,15 +171,37 @@ graph LR
 
 ### 1. Update Prices (09:00 diariamente)
 - **Path**: `/api/cron/update-prices`
-- **Schedule**: `0 9 * * *`
-- **Função**: Atualiza preços de produtos desatualizados
+- **Schedule**: `0 9 * * *` (1x por dia às 09:00)
+- **Função**: Atualiza preços de TODOS os produtos favoritos
+- **Filtro**: Produtos não atualizados nas últimas 24 horas
 - **Fonte**: `scheduled`
+- **Nota**: Plano Hobby da Vercel permite apenas execuções diárias
 
 ### 2. Cleanup Old Prices (02:00 diariamente)
 - **Path**: `/api/cron/cleanup-old-prices`
-- **Schedule**: `0 2 * * *`
+- **Schedule**: `0 2 * * *` (1x por dia às 02:00)
 - **Função**: Remove snapshots com mais de 180 dias
 - **Retenção**: Exatamente 180 dias de histórico
+
+## Cache Inteligente (TTL de 60 minutos)
+
+Além do cron diário, o sistema implementa um **cache colaborativo** entre usuários:
+
+### Como Funciona:
+
+```
+10:00 - Usuário A busca produto X → Scraping + Salva no cache
+10:30 - Usuário B busca produto X → Usa cache (ainda válido)
+10:59 - Usuário C busca produto X → Usa cache (ainda válido)
+11:05 - Usuário D busca produto X → Novo scraping (cache expirou após 60min)
+```
+
+### Benefícios:
+
+- ✅ Preços atualizados a cada hora (no máximo)
+- ✅ Reduz carga nos servidores das lojas
+- ✅ Melhora performance para todos os usuários
+- ✅ Economia de recursos (menos scraping desnecessário)
 
 ## Filtros de Período
 

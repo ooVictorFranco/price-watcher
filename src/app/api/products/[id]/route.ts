@@ -2,12 +2,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
 
-const CACHE_DURATION = 3 * 60 * 60 * 1000; // 3 horas em ms
+const CACHE_DURATION = 60 * 60 * 1000; // 60 minutos (1 hora) em ms
 
 /**
  * GET /api/products/:id
  * Busca produto no cache do banco de dados
- * Se não existir ou estiver desatualizado (>3h), retorna 404 para indicar que precisa fazer scraping
+ * Se não existir ou estiver desatualizado (>60min), retorna 404 para indicar que precisa fazer scraping
+ *
+ * Estratégia: Cache compartilhado entre usuários com TTL de 60 minutos
+ * - Usuário A pesquisa → scraping + salva no cache
+ * - Usuário B pesquisa (dentro de 60min) → usa cache do usuário A
+ * - Usuário C pesquisa (após 60min) → novo scraping + atualiza cache
  */
 export async function GET(
   request: NextRequest,
@@ -42,7 +47,7 @@ export async function GET(
       );
     }
 
-    // Verifica se o cache está válido (< 3 horas)
+    // Verifica se o cache está válido (< 60 minutos)
     const lastCheck = product.lastCheckedAt ? new Date(product.lastCheckedAt).getTime() : 0;
     const now = Date.now();
     const isStale = now - lastCheck > CACHE_DURATION;
