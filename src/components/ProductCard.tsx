@@ -6,61 +6,6 @@ import { brl, externalUrlFromId, timeAgo, getProviderName } from '@/lib/utils';
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 
-type PriceDisplayProps = {
-  label: string;
-  price: number | null;
-  arrow?: React.ReactNode;
-  variant?: 'default' | 'highlight' | 'muted';
-  installments?: { count: number; value: number } | null;
-};
-
-function PriceDisplay({ label, price, arrow, variant = 'default', installments }: PriceDisplayProps) {
-  if (!price) return null;
-
-  const styles = {
-    default: {
-      bg: 'bg-gray-50',
-      border: '',
-      labelColor: 'text-gray-600',
-      priceColor: 'text-gray-900',
-      priceSize: 'text-lg',
-    },
-    highlight: {
-      bg: 'bg-green-50',
-      border: 'border border-green-200',
-      labelColor: 'text-green-700',
-      priceColor: 'text-green-600',
-      priceSize: 'text-2xl',
-    },
-    muted: {
-      bg: 'bg-gray-50',
-      border: '',
-      labelColor: 'text-gray-500',
-      priceColor: 'text-gray-400',
-      priceSize: 'text-sm',
-    },
-  }[variant];
-
-  return (
-    <div className={`flex flex-col gap-1 px-3 py-2 rounded-lg ${styles.bg} ${styles.border}`}>
-      <div className="flex items-center justify-between">
-        <span className={`text-xs font-medium ${styles.labelColor}`}>{label}</span>
-        {arrow && <span className="ml-2">{arrow}</span>}
-      </div>
-      <div className="flex items-baseline justify-between gap-2">
-        <span className={`font-bold ${styles.priceColor} ${styles.priceSize} ${variant === 'muted' ? 'line-through' : ''}`}>
-          {brl(price)}
-        </span>
-      </div>
-      {installments && installments.count > 1 && (
-        <div className="text-[11px] text-gray-500">
-          {installments.count}x de {brl(installments.value)} sem juros
-        </div>
-      )}
-    </div>
-  );
-}
-
 type DiffArrowProps = {
   curr?: number | null;
   prev?: number | null;

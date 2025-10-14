@@ -52,8 +52,8 @@ export default function ChangelogPage() {
                 <h3 className="font-semibold text-lg text-gray-900 mb-2">🎯 Experiência do Usuário</h3>
                 <ul className="list-disc list-inside space-y-2 ml-2">
                   <li><strong>Visualização Individual:</strong> Agora é possível ver o gráfico de histórico mesmo selecionando apenas 1 produto</li>
-                  <li><strong>Botão Inteligente:</strong> O botão "Comparar" muda para "Ver histórico" quando há apenas 1 produto selecionado</li>
-                  <li><strong>Texto Simplificado:</strong> "À vista (PIX)" ao invés de "À vista (PIX/Boleto)" para maior clareza</li>
+                  <li><strong>Botão Inteligente:</strong> O botão &ldquo;Comparar&rdquo; muda para &ldquo;Ver histórico&rdquo; quando há apenas 1 produto selecionado</li>
+                  <li><strong>Texto Simplificado:</strong> &ldquo;À vista (PIX)&rdquo; ao invés de &ldquo;À vista (PIX/Boleto)&rdquo; para maior clareza</li>
                 </ul>
               </div>
 
