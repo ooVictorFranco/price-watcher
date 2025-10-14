@@ -140,7 +140,10 @@ function PageContent() {
         if (historyResponse.ok) {
           const historyData = await historyResponse.json();
           console.log('[PAGE] History from API:', historyData.history?.length || 0, 'items');
-          setHistory(historyData.history || next);
+          // Se a API retornou array vazio, usa localStorage
+          // Array vazio [] é truthy, então precisamos checar o length
+          const apiHistory = historyData.history || [];
+          setHistory(apiHistory.length > 0 ? apiHistory : next);
         } else {
           console.log('[PAGE] History API failed, using localStorage:', next.length, 'items');
           // Fallback para localStorage se API falhar
