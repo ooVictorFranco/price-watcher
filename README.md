@@ -33,11 +33,9 @@ O objetivo é trazer **transparência** e ajudar você a identificar se os desco
 - 📉 **3 Métricas**: À vista, parcelado ou preço original
 - 🎨 **Gráficos de Histórico do Grupo**: Visualize a evolução de preços de produtos agrupados ao longo do tempo
 
-#### 💾 Backup e Segurança de Dados
+#### 💾 Backup de Dados
 - 📤 **Exportar/Importar JSON**: Faça backup completo de todos os seus dados
 - 🔗 **Arquivo Vivo**: Sincronização automática com arquivo local (Chrome/Edge)
-- 🔄 **Modo Compatível**: Alertas para backup manual (Firefox/Safari)
-- 🗂️ **Backup Otimizado v2**: Sistema eficiente com retrocompatibilidade
 
 #### 🎨 UX/UI Moderna
 - 📱 **Totalmente Responsivo**: Interface otimizada para desktop, tablet e mobile
@@ -204,20 +202,11 @@ Compare múltiplos produtos individualmente (fora de grupos):
 4. Escolha a métrica (À vista, Parcelado ou Original)
 5. Visualize o gráfico unificado com todas as linhas
 
-### 5. Backup e Arquivo Vivo
+### 5. Backup de Dados
 
-**Exportar/Importar:**
 - Menu **Backup** → **Exportar JSON**: Salva todos os dados (favoritos, histórico, grupos)
 - Menu **Backup** → **Importar JSON**: Mescla dados importados com os existentes
-
-**Arquivo Vivo (Chrome/Edge):**
-- Menu **Backup** → **Vincular arquivo (nativo)**
-- Escolha um arquivo `.json` que será atualizado automaticamente a cada mudança
-- Requer suporte a File System Access API
-
-**Modo Compatível (Firefox/Safari):**
-- Menu **Backup** → **Ativar modo compatível**
-- Receba lembretes visuais para salvar quando houver alterações não exportadas
+- Menu **Backup** → **Vincular arquivo (nativo)**: Sincronização automática (Chrome/Edge)
 
 ## 🏗️ Estrutura do Projeto
 
@@ -382,33 +371,9 @@ Este projeto está sob a licença **MIT**. Veja o arquivo [LICENSE](LICENSE) par
 
 ## 📊 Status do Projeto
 
-🚀 **Versão Atual**: v0.1.0-beta.3
+🚀 **Em desenvolvimento ativo** - Novas funcionalidades sendo adicionadas regularmente!
 
-### Changelog v0.1.0-beta.3 (Atual)
-- ✅ **Backend com PostgreSQL**: Banco de dados Neon para armazenamento confiável
-- ✅ **Atualização Automática**: Cron jobs da Vercel atualizam preços a cada 3 horas (mesmo com navegador fechado)
-- ✅ **Sincronização na Nuvem**: Dados sincronizados entre múltiplos dispositivos
-- ✅ **Migração Automática**: Dados do localStorage migrados automaticamente para o banco
-- ✅ **Prisma ORM**: Interface type-safe com o banco de dados
-- ✅ **Histórico Ilimitado**: Sem limite de tempo para manter histórico de preços
-- ✅ **Documentação Completa**: Guias de setup do banco de dados (DATABASE_SETUP.md)
-- ✅ **Política de Privacidade Atualizada**: Informações sobre armazenamento em nuvem
-
-### Changelog v0.1.0-beta.2
-- ✅ **SEO Otimizado**: Meta tags completas focadas em Black Friday e Cyber Monday
-- ✅ **Política de Privacidade**: Página completa explicando coleta de dados e transparência
-- ✅ **Footer Novo**: Links para GitHub, política de privacidade e seção de contribuições
-- ✅ **Textos Aprimorados**: Toda aplicação com foco em identificar falsos descontos
-- ✅ **README Completo**: Documentação profissional com badges e guias detalhados
-
-### Changelog v0.1.0-beta.1
-- ✅ Suporte para KaBuM! e Amazon
-- ✅ Sistema de grupos de produtos unificados
-- ✅ Gerenciamento completo de grupos (adicionar, remover, mover, renomear)
-- ✅ Favoritos ilimitados (limite de 25 removido)
-- ✅ Backup otimizado v2
-- ✅ Melhorias de UX/UI e acessibilidade
-- ✅ Animações sutis com Framer Motion
+Para ver o histórico completo de atualizações, visite nossa [página de changelog](/changelog).
 
 ## 🙏 Agradecimentos
 

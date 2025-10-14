@@ -53,13 +53,35 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <header className="bg-white/80 backdrop-blur border-b sticky top-0 z-[200]">
           <nav className="mx-auto max-w-6xl px-6 h-14 flex items-center gap-3">
-            <Link href="/" className="font-semibold transition-transform hover:scale-[1.02]">
+            <Link href="/" className="font-semibold text-lg transition-transform hover:scale-[1.02]">
               Price Watcher
             </Link>
 
-            <div className="ml-auto flex items-center gap-1 text-sm">
-              <Link href="/" className="px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors">Monitorar</Link>
-              <Link href="/favoritos" className="px-3 py-1 rounded-lg hover:bg-gray-100 transition-colors">Favoritos & Comparar</Link>
+            {/* Desktop Navigation */}
+            <div className="ml-auto hidden md:flex items-center gap-1 text-sm">
+              <Link href="/" className="px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                Monitorar
+              </Link>
+              <Link href="/favoritos" className="px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                Favoritos
+              </Link>
+              <Link href="/changelog" className="px-3 py-2 rounded-lg hover:bg-gray-100 transition-colors">
+                Novidades
+              </Link>
+              <BackupMenu />
+            </div>
+
+            {/* Mobile Navigation */}
+            <div className="ml-auto flex md:hidden items-center gap-1 text-sm">
+              <Link href="/" className="px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors" title="Monitorar">
+                🔍
+              </Link>
+              <Link href="/favoritos" className="px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors" title="Favoritos">
+                ⭐
+              </Link>
+              <Link href="/changelog" className="px-2 py-2 rounded-lg hover:bg-gray-100 transition-colors" title="Novidades">
+                📝
+              </Link>
               <BackupMenu />
             </div>
           </nav>

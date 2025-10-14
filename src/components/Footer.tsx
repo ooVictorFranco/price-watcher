@@ -27,6 +27,14 @@ export default function Footer() {
             <ul className="space-y-2">
               <li>
                 <Link
+                  href="/changelog"
+                  className="text-sm text-gray-600 hover:text-blue-600 transition"
+                >
+                  Histórico de Atualizações
+                </Link>
+              </li>
+              <li>
+                <Link
                   href="/privacidade"
                   className="text-sm text-gray-600 hover:text-blue-600 transition"
                 >
