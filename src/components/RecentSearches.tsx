@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import Image from 'next/image';
 
@@ -20,7 +20,9 @@ type Props = {
 export default function RecentSearches({ onProductClick }: Props) {
   const [products, setProducts] = useState<RecentProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const [currentIndex, setCurrentIndex] = useState(0);
   const prefersReduced = useReducedMotion();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchRecentProducts();
@@ -32,6 +34,17 @@ export default function RecentSearches({ onProductClick }: Props) {
 
     return () => clearInterval(interval);
   }, []);
+
+  // Loop automático do carrossel
+  useEffect(() => {
+    if (prefersReduced || products.length === 0) return;
+
+    const interval = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % products.length);
+    }, 5000); // Avança automaticamente a cada 5 segundos
+
+    return () => clearInterval(interval);
+  }, [products.length, prefersReduced]);
 
   const fetchRecentProducts = async () => {
     try {
@@ -46,6 +59,18 @@ export default function RecentSearches({ onProductClick }: Props) {
       setLoading(false);
     }
   };
+
+  const handleNext = () => {
+    setCurrentIndex((prev) => (prev + 1) % products.length);
+  };
+
+  const handlePrev = () => {
+    setCurrentIndex((prev) => (prev - 1 + products.length) % products.length);
+  };
+
+  // Calcula o offset baseado no índice atual
+  const cardWidth = 176; // 160px + 16px gap
+  const offset = -currentIndex * cardWidth;
 
   if (loading) {
     return (
@@ -78,39 +103,63 @@ export default function RecentSearches({ onProductClick }: Props) {
         Veja o que outros usuários estão pesquisando em tempo real
       </p>
 
-      {/* Carrossel infinito com animação */}
-      <div className="relative overflow-hidden">
-        {/* Gradiente esquerdo */}
-        <div className="absolute left-0 top-0 bottom-0 w-12 bg-gradient-to-r from-gray-50 to-transparent z-10 pointer-events-none" />
+      {/* Carrossel com controles de navegação */}
+      <div className="relative">
+        {/* Botão Anterior */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-200 rounded-full p-3 shadow-lg transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          aria-label="Produto anterior"
+        >
+          <svg
+            className="w-5 h-5 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M15 19l-7-7 7-7"
+            />
+          </svg>
+        </button>
 
-        {/* Gradiente direito */}
-        <div className="absolute right-0 top-0 bottom-0 w-12 bg-gradient-to-l from-gray-50 to-transparent z-10 pointer-events-none" />
+        {/* Botão Próximo */}
+        <button
+          onClick={handleNext}
+          className="absolute right-2 top-1/2 -translate-y-1/2 z-20 bg-white/90 hover:bg-white backdrop-blur-sm border border-gray-200 rounded-full p-3 shadow-lg transition-all hover:scale-110 focus:outline-none focus:ring-2 focus:ring-violet-500"
+          aria-label="Próximo produto"
+        >
+          <svg
+            className="w-5 h-5 text-gray-700"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M9 5l7 7-7 7"
+            />
+          </svg>
+        </button>
 
         {/* Container do carrossel */}
-        <motion.div
-          className="flex gap-4 py-4"
-          animate={
-            prefersReduced
-              ? {}
-              : {
-                  x: [0, -1000],
-                }
-          }
-          transition={
-            prefersReduced
-              ? {}
-              : {
-                  x: {
-                    repeat: Infinity,
-                    repeatType: 'loop',
-                    duration: 30,
-                    ease: 'linear',
-                  },
-                }
-          }
-        >
-          {/* Duplica os produtos para criar efeito infinito */}
-          {[...products, ...products].map((product, index) => (
+        <div className="overflow-hidden px-4" ref={containerRef}>
+          <motion.div
+            className="flex gap-4 py-4"
+            animate={{ x: offset }}
+            transition={{
+              type: 'spring',
+              stiffness: 300,
+              damping: 30,
+            }}
+          >
+            {/* Triplica os produtos para criar efeito infinito suave */}
+            {[...products, ...products, ...products].map((product, index) => (
             <motion.button
               key={`${product.id}-${index}`}
               onClick={() => onProductClick(product.productId)}
@@ -158,11 +207,28 @@ export default function RecentSearches({ onProductClick }: Props) {
               </div>
             </motion.button>
           ))}
-        </motion.div>
+          </motion.div>
+        </div>
+
+        {/* Indicadores de posição */}
+        <div className="flex justify-center gap-2 mt-4">
+          {products.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentIndex(index)}
+              className={`h-2 rounded-full transition-all focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                index === currentIndex
+                  ? 'w-8 bg-violet-600'
+                  : 'w-2 bg-gray-300 hover:bg-gray-400'
+              }`}
+              aria-label={`Ir para produto ${index + 1}`}
+            />
+          ))}
+        </div>
       </div>
 
-      <p className="text-xs text-gray-500 text-center">
-        Clique em um produto para ver o histórico de preços
+      <p className="text-xs text-gray-500 text-center mt-4">
+        Clique em um produto para ver o histórico de preços • Avança automaticamente a cada 5s
       </p>
     </section>
   );
