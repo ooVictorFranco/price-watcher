@@ -82,20 +82,20 @@ export async function GET(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    console.log('[CRON] Starting price update job...');
+    console.log('[CRON] Starting daily price update job...');
 
     // Busca todos os produtos que precisam ser atualizados
-    // (produtos não atualizados nas últimas 3 horas)
-    const threeHoursAgo = new Date(Date.now() - 3 * 60 * 60 * 1000);
+    // (produtos não atualizados nas últimas 24 horas)
+    const twentyFourHoursAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
 
     const products = await prisma.product.findMany({
       where: {
         OR: [
           { lastCheckedAt: null },
-          { lastCheckedAt: { lt: threeHoursAgo } },
+          { lastCheckedAt: { lt: twentyFourHoursAgo } },
         ],
       },
-      take: 50, // Limita a 50 produtos por execução para evitar timeout
+      // Sem limite - processa todos os produtos em uma única execução diária
     });
 
     console.log(`[CRON] Found ${products.length} products to update`);
