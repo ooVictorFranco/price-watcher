@@ -257,15 +257,34 @@ price-watcher/
 
 ## 🔒 Privacidade e Segurança
 
+### 📊 Analytics e Melhoria Contínua
+
+O Price Watcher utiliza ferramentas de analytics focadas **exclusivamente** na melhoria da experiência do usuário:
+
+**Ferramentas utilizadas:**
+- ✅ **Vercel Analytics**: Monitora desempenho, velocidade de carregamento e Core Web Vitals
+- ✅ **Microsoft Clarity**: Mapas de calor e gravações de sessão anônimas para entender interações
+
+**Por que usamos?**
+- 🐛 Identificar bugs e comportamentos inesperados
+- ⚡ Otimizar tempos de carregamento e responsividade
+- 🎨 Aprimorar UX identificando onde usuários encontram dificuldades
+- 📈 Priorizar recursos mais utilizados
+
+**Garantias de privacidade:**
+- 🔒 Todos os dados são **anônimos e agregados**
+- 🚫 **Sem coleta de dados pessoais** identificáveis
+- 🎯 Foco exclusivo em **melhorar a ferramenta**
+
 ### ✅ O que NÃO coletamos
 
 O Price Watcher **NÃO** coleta, armazena ou transmite **NENHUM** dos seguintes dados:
 - ❌ Dados pessoais identificáveis (nome, CPF, e-mail, telefone)
-- ❌ Dados de navegação ou comportamento
-- ❌ Endereço IP ou localização geográfica
-- ❌ Cookies de rastreamento ou analytics de terceiros
+- ❌ Endereço IP completo ou localização geográfica precisa
 - ❌ Histórico de compras ou preferências de navegação
 - ❌ Informações de pagamento ou cartão de crédito
+- ❌ Senhas ou credenciais de login
+- ❌ Dados de formulários ou campos de entrada sensíveis
 
 ### 📦 Como seus dados são armazenados
 
@@ -294,7 +313,7 @@ O Price Watcher **NÃO** coleta, armazena ou transmite **NENHUM** dos seguintes 
 - 📖 Código 100% open-source - audite você mesmo!
 - 🔍 Hospedagem: Vercel (LGPD/GDPR compliant)
 - 🗄️ Banco: Neon PostgreSQL (serverless, seguro)
-- 🚫 Sem telemetria ou analytics de terceiros
+- 📊 Analytics anônimos: Vercel Analytics e Microsoft Clarity (focados em UX)
 - ✅ Conformidade com LGPD (Lei Geral de Proteção de Dados)
 
 Para mais detalhes, leia nossa [Política de Privacidade](src/app/privacidade/page.tsx).

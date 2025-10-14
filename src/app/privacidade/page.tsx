@@ -108,24 +108,108 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">3. Dados que NÃO coletamos</h2>
+            <h2 className="text-xl font-semibold text-gray-900">3. Ferramentas de Analytics e Melhoria de Experiência</h2>
+            <div className="bg-indigo-50 border border-indigo-200 rounded-lg p-4 space-y-3">
+              <p className="text-indigo-900 font-medium">
+                📊 O Radar de Ofertas utiliza ferramentas de analytics focadas exclusivamente na melhoria da experiência do usuário:
+              </p>
+
+              <div className="space-y-3">
+                <div>
+                  <p className="font-semibold text-indigo-900 mb-2">Vercel Analytics</p>
+                  <ul className="list-disc list-inside space-y-1 text-indigo-800 ml-4">
+                    <li>
+                      <strong>Finalidade:</strong> Monitorar desempenho, velocidade de carregamento e métricas vitais (Core Web Vitals)
+                    </li>
+                    <li>
+                      <strong>Dados coletados:</strong> Tempo de carregamento de páginas, navegador, país/região (sem identificação pessoal)
+                    </li>
+                    <li>
+                      <strong>Anonimização:</strong> Todos os dados são agregados e anônimos
+                    </li>
+                    <li>
+                      <strong>Documentação:</strong>{' '}
+                      <a
+                        href="https://vercel.com/docs/analytics/privacy-policy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:underline"
+                      >
+                        Vercel Analytics Privacy
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="font-semibold text-indigo-900 mb-2">Microsoft Clarity</p>
+                  <ul className="list-disc list-inside space-y-1 text-indigo-800 ml-4">
+                    <li>
+                      <strong>Finalidade:</strong> Entender como usuários interagem com a interface para identificar melhorias de UX
+                    </li>
+                    <li>
+                      <strong>Dados coletados:</strong> Mapas de calor, gravações de sessão (anônimas), cliques, rolagem
+                    </li>
+                    <li>
+                      <strong>Anonimização:</strong> IPs mascarados, sem coleta de dados pessoais ou senhas
+                    </li>
+                    <li>
+                      <strong>Documentação:</strong>{' '}
+                      <a
+                        href="https://clarity.microsoft.com/privacy"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-indigo-600 hover:underline"
+                      >
+                        Microsoft Clarity Privacy
+                      </a>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="bg-white/50 rounded-lg p-3 mt-3 border border-indigo-200">
+                <p className="font-semibold text-indigo-900 mb-2">🎯 Por que usamos essas ferramentas?</p>
+                <ul className="list-disc list-inside space-y-1 text-indigo-800 ml-4 text-sm">
+                  <li>
+                    <strong>Identificar bugs:</strong> Detectar comportamentos inesperados ou erros que usuários encontram
+                  </li>
+                  <li>
+                    <strong>Melhorar desempenho:</strong> Otimizar tempos de carregamento e responsividade
+                  </li>
+                  <li>
+                    <strong>Aprimorar UX:</strong> Entender como usuários navegam e onde encontram dificuldades
+                  </li>
+                  <li>
+                    <strong>Priorizar recursos:</strong> Identificar quais funcionalidades são mais utilizadas
+                  </li>
+                </ul>
+                <p className="text-sm text-indigo-700 italic mt-2">
+                  💡 Nenhuma dessas ferramentas coleta dados pessoais identificáveis. O foco é exclusivamente em melhorar a ferramenta.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="space-y-4">
+            <h2 className="text-xl font-semibold text-gray-900">4. Dados que NÃO coletamos</h2>
             <div className="bg-green-50 border border-green-200 rounded-lg p-4 space-y-2">
               <p className="text-green-900 font-medium">
                 ✅ O Radar de Ofertas NÃO coleta, armazena ou transmite NENHUM dos seguintes dados:
               </p>
               <ul className="list-disc list-inside space-y-1 text-green-800 ml-4">
                 <li>Dados pessoais (nome, CPF, e-mail, telefone)</li>
-                <li>Dados de navegação ou comportamento</li>
-                <li>Endereço IP ou localização geográfica</li>
-                <li>Cookies de rastreamento ou analytics</li>
+                <li>Endereço IP completo ou localização geográfica precisa</li>
                 <li>Histórico de compras ou preferências de navegação</li>
                 <li>Informações de pagamento ou cartão de crédito</li>
+                <li>Senhas ou credenciais de login</li>
+                <li>Dados de formulários ou campos de entrada sensíveis</li>
               </ul>
             </div>
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">3. Armazenamento de dados</h2>
+            <h2 className="text-xl font-semibold text-gray-900">5. Armazenamento de dados</h2>
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
               <p className="text-blue-900 font-medium">
@@ -187,7 +271,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">4. Como funciona o monitoramento de preços</h2>
+            <h2 className="text-xl font-semibold text-gray-900">6. Como funciona o monitoramento de preços</h2>
             <div className="space-y-3">
               <p className="text-gray-700 leading-relaxed">
                 O Radar de Ofertas utiliza técnicas de web scraping para coletar informações públicas de preços
@@ -274,7 +358,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">5. Infraestrutura e hospedagem</h2>
+            <h2 className="text-xl font-semibold text-gray-900">7. Infraestrutura e hospedagem</h2>
             <p className="text-gray-700 leading-relaxed">
               O Radar de Ofertas é hospedado na <strong>Vercel</strong> (plataforma de hospedagem)
               e utiliza o banco de dados <strong>Neon PostgreSQL</strong> (serverless) para armazenamento.
@@ -292,7 +376,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">6. Conformidade com lojas online</h2>
+            <h2 className="text-xl font-semibold text-gray-900">8. Conformidade com lojas online</h2>
             <p className="text-gray-700 leading-relaxed">
               O Radar de Ofertas acessa apenas informações públicas disponíveis nas páginas de produtos das lojas.
               Não fazemos login em contas, não acessamos áreas restritas e respeitamos os robots.txt das lojas.
@@ -305,7 +389,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">7. Backup e exportação de dados</h2>
+            <h2 className="text-xl font-semibold text-gray-900">9. Backup e exportação de dados</h2>
             <p className="text-gray-700 leading-relaxed">
               Você tem controle total sobre seus dados:
             </p>
@@ -329,7 +413,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">8. Tecnologias utilizadas</h2>
+            <h2 className="text-xl font-semibold text-gray-900">10. Tecnologias utilizadas</h2>
             <p className="text-gray-700 leading-relaxed">
               O Radar de Ofertas é construído com tecnologias web modernas:
             </p>
@@ -346,7 +430,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">9. Seus direitos</h2>
+            <h2 className="text-xl font-semibold text-gray-900">11. Seus direitos</h2>
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
               <ul className="list-disc list-inside space-y-2 text-gray-700 ml-2">
                 <li>Você pode deletar todos os seus dados a qualquer momento limpando o cache do navegador</li>
@@ -359,7 +443,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">10. Alterações nesta política</h2>
+            <h2 className="text-xl font-semibold text-gray-900">12. Alterações nesta política</h2>
             <p className="text-gray-700 leading-relaxed">
               Como este é um projeto open-source em evolução, esta política de privacidade pode ser atualizada.
               Mudanças significativas serão comunicadas através do repositório GitHub. A data da última atualização
@@ -368,7 +452,7 @@ export default function PrivacidadePage() {
           </section>
 
           <section className="space-y-4">
-            <h2 className="text-xl font-semibold text-gray-900">11. Contato e contribuições</h2>
+            <h2 className="text-xl font-semibold text-gray-900">13. Contato e contribuições</h2>
             <p className="text-gray-700 leading-relaxed">
               Este projeto é mantido pela comunidade. Se você tiver dúvidas, sugestões ou quiser contribuir:
             </p>
@@ -396,10 +480,10 @@ export default function PrivacidadePage() {
 
           <footer className="mt-8 pt-6 border-t">
             <p className="text-sm text-gray-600">
-              <strong>Resumo:</strong> O Radar de Ofertas não coleta dados pessoais identificáveis, não usa analytics
-              de terceiros e é 100% transparente com código aberto. Seus dados são armazenados de forma segura
-              em banco de dados PostgreSQL (Neon) usando apenas um ID anônimo para associação. Você tem controle
-              total sobre seus dados e pode exportá-los ou deletá-los a qualquer momento.
+              <strong>Resumo:</strong> O Radar de Ofertas não coleta dados pessoais identificáveis, utiliza analytics
+              anônimos focados exclusivamente na melhoria de experiência e é 100% transparente com código aberto.
+              Seus dados são armazenados de forma segura em banco de dados PostgreSQL (Neon) usando apenas um ID
+              anônimo para associação. Você tem controle total sobre seus dados e pode exportá-los ou deletá-los a qualquer momento.
             </p>
             <div className="mt-4">
               <Link

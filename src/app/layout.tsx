@@ -13,6 +13,8 @@ import DataMigration from '@/components/DataMigration';
 import AutoSync from '@/components/AutoSync';
 import MobileMenu from '@/components/MobileMenu';
 import AnimatedBackground from '@/components/AnimatedBackground';
+import { Analytics } from '@vercel/analytics/react';
+import MicrosoftClarity from '@/components/Analytics';
 
 const inter = Inter({ subsets: ['latin'], variable: '--font-sans' });
 
@@ -154,6 +156,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <BackgroundRefresher />
         <LiveFileSync />
         <CompatLivePill />
+        <MicrosoftClarity />
 
         <header className="bg-white/70 backdrop-blur-md border-b border-white/20 sticky top-0 z-[200] shadow-sm">
           <nav className="mx-auto max-w-6xl px-6 h-16 flex items-center gap-3">
@@ -183,6 +186,9 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         {/* Footer atualizado */}
         <Footer />
+
+        {/* Analytics */}
+        <Analytics />
       </body>
     </html>
   );
