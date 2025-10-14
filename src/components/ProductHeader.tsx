@@ -12,7 +12,6 @@ type Props = {
   discountPct: number | null;
   onRefresh: () => void;
   onFavorite?: () => void;
-  onClear?: () => void;
   isFav?: boolean;
   loading?: boolean;
 };
@@ -22,7 +21,6 @@ export default function ProductHeader({
   discountPct,
   onRefresh,
   onFavorite,
-  onClear,
   isFav,
   loading,
 }: Props) {
@@ -96,17 +94,6 @@ export default function ProductHeader({
               aria-pressed={isFav}
             >
               {isFav ? '★ Favorito' : '☆ Favoritar'}
-            </motion.button>
-          )}
-          {onClear && (
-            <motion.button
-              onClick={onClear}
-              className="border border-gray-200 bg-white/40 hover:bg-white/60 hover:border-gray-300 rounded-xl px-4 py-2 text-sm font-medium transition-all focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
-              whileHover={{ scale: prefersReduced ? 1 : 1.02 }}
-              whileTap={{ scale: prefersReduced ? 1 : 0.98 }}
-              aria-label="Limpar pesquisa atual"
-            >
-              Limpar
             </motion.button>
           )}
           <motion.button

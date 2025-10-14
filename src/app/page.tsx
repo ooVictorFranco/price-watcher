@@ -21,6 +21,7 @@ import PriceCards from '@/components/PriceCards';
 import HistoryChart from '@/components/HistoryChart';
 import EmptyState from '@/components/EmptyState';
 import SkeletonCards from '@/components/SkeletonCards';
+import RecentSearches from '@/components/RecentSearches';
 import { toast } from '@/lib/toast';
 import { fetchProductWithCache, detectProvider } from '@/lib/product-fetch';
 import { getSessionId } from '@/lib/session';
@@ -68,6 +69,9 @@ function PageContent() {
   const doFetch = async (raw: string) => {
     console.log('[PAGE] doFetch called with raw:', raw);
     setLoadingMonitor(true);
+    // Limpa o produto anterior ao iniciar nova busca
+    setProduct(null);
+    setHistory([]);
     try {
       const parsed = parseIdOrUrl(raw);
       const idKey = parsed.idOrUrl;
@@ -232,7 +236,15 @@ function PageContent() {
           placeholder="Cole o ID (ex.: 922662 ou B0F7Z9F9SD) ou URL do produto"
         />
 
-        {!product && !loadingMonitor && <EmptyState />}
+        {!product && !loadingMonitor && (
+          <>
+            <EmptyState />
+            <RecentSearches onProductClick={(productId) => {
+              setInput(productId);
+              startMonitoring(productId);
+            }} />
+          </>
+        )}
         {loadingMonitor && <SkeletonCards />}
 
         {product && (
@@ -243,7 +255,6 @@ function PageContent() {
               discountPct={discount}
               onRefresh={() => doFetch(product.idOrUrl)}
               onFavorite={handleToggleFavorite}
-              onClear={clearCurrent}
               isFav={!!isFav}
               loading={loadingMonitor}
             />
