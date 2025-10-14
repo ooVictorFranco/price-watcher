@@ -21,6 +21,7 @@ import FavoritesList from '@/components/FavoritesList';
 import ComparePanel from '@/components/ComparePanel';
 import CompareChart, { makeCompareSeries } from '@/components/CompareChart';
 import GroupManagementModal from '@/components/GroupManagementModal';
+import RecentSearches from '@/components/RecentSearches';
 import { useRouter } from 'next/navigation';
 import { toast } from '@/lib/toast';
 import { fetchProductWithCache, detectProvider } from '@/lib/product-fetch';
@@ -380,6 +381,15 @@ export default function FavoritosPage() {
             onRenameGroup={handleRenameGroup}
             onDeleteGroup={handleDeleteGroup}
           />
+
+          {/* Exibe produtos recentes quando não há favoritos */}
+          {favorites.length === 0 && (
+            <div className="mt-8">
+              <RecentSearches onProductClick={(productId) => {
+                router.push(`/?id=${productId}`);
+              }} />
+            </div>
+          )}
 
           <ComparePanel
             selected={compareSelected}

@@ -24,6 +24,13 @@ export default function RecentSearches({ onProductClick }: Props) {
 
   useEffect(() => {
     fetchRecentProducts();
+
+    // Atualiza os produtos a cada 30 segundos
+    const interval = setInterval(() => {
+      fetchRecentProducts();
+    }, 30000); // 30 segundos
+
+    return () => clearInterval(interval);
   }, []);
 
   const fetchRecentProducts = async () => {
